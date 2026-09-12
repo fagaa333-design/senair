@@ -1,5 +1,4 @@
 const params = new URLSearchParams(window.location.search);
-const apiBase = window.location.port === "3000" ? "" : "http://localhost:3000";
 const origin = params.get("origin") || "";
 const destination = params.get("destination") || "";
 const departure = params.get("departure") || "";
@@ -50,7 +49,7 @@ async function loadFlights() {
 	renderSummary();
 	const query = new URLSearchParams({ origin, destination, date: departure });
 	try {
-		const response = await fetch(`${apiBase}/api/flights?${query.toString()}`);
+		const response = await fetch(`/api/flights?${query.toString()}`);
 		if (!response.ok) throw new Error("No se pudo consultar la API");
 		const data = await response.json();
 		flights = data.flights || [];
