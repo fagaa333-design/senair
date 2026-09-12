@@ -1,0 +1,11 @@
+@media (max-width: 650px) {
+  .newsletter-card form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .newsletter-card input,
+  .newsletter-card .primary-button {
+    width: 100%;
+  }
+}
