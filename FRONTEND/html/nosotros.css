@@ -23,14 +23,14 @@
   box-shadow:8px 8px 22px rgba(2,12,26,.45), -8px -8px 22px rgba(23,80,140,.28);
 }
 
-.profileimage{
+.profileimage img{
   display:grid;
   place-items:center;
-  width:100px;
-  height:100px;
+  width:max-content;
+  height:120px;
   background-color:transparent;
   border:none;
-  border-radius:5em;
+  border-radius:5px;
 }
 
 .pfp{
