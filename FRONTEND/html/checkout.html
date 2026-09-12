@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Selecciona tu asiento y completa tu reserva en SENAIR." />
+  <title>SENAIR | Completar reserva</title>
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link rel="stylesheet" href="checkout.css" />
+  <script src="checkout.js" defer></script>
+</head>
+<body>
+  <header class="checkout-header"><a href="vuelos.html" class="brand"><img src="logo.png" alt="" />SENAIR</a><a href="vuelos.html" class="back-link">Volver a vuelos</a></header>
+  <main class="checkout-shell">
+    <section class="checkout-intro"><span>Completa tu viaje</span><h1>Elige tu asiento y confirma tu reserva.</h1><p>Tu asiento estará reservado mientras completas este paso.</p></section>
+    <div class="checkout-layout">
+      <section class="checkout-step" aria-labelledby="seatTitle">
+        <div class="step-heading"><span>1</span><div><h2 id="seatTitle">Selecciona tu asiento</h2><p>Escoge un asiento disponible para continuar.</p></div></div>
+        <div class="seat-legend" aria-label="Referencia de asientos"><span><i class="seat available"></i>Disponible</span><span><i class="seat selected"></i>Seleccionado</span><span><i class="seat occupied"></i>Ocupado</span></div>
+        <div class="aircraft" aria-label="Mapa de asientos del avión"><div class="aircraft-nose"></div><div class="seat-labels"><span>A</span><span>B</span><span>C</span><b></b><span>D</span><span>E</span><span>F</span></div><div class="seat-map" id="seatMap"></div></div>
+      </section>
+      <aside class="trip-summary" aria-labelledby="summaryTitle"><span class="summary-kicker">Tu vuelo</span><h2 id="summaryTitle">Cargando vuelo...</h2><div class="route" id="route"></div><dl><div><dt>Salida</dt><dd id="departureTime">--:--</dd></div><div><dt>Llegada</dt><dd id="arrivalTime">--:--</dd></div><div><dt>Asiento</dt><dd id="selectedSeat">Sin seleccionar</dd></div></dl><div class="price-row"><span>Total a pagar</span><strong id="totalPrice">$0</strong></div></aside>
+    </div>
+    <section class="checkout-step payment-step" aria-labelledby="paymentTitle"><div class="step-heading"><span>2</span><div><h2 id="paymentTitle">Pago</h2><p>Completa los datos para confirmar tu reserva.</p></div></div><form id="paymentForm"><div class="form-grid"><label>Nombre del titular<input name="name" autocomplete="cc-name" required /></label><label>Número de tarjeta<input name="card" inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" maxlength="19" required /></label><label>Vencimiento<input name="expiry" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" maxlength="5" required /></label><label>CVC<input name="cvc" inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4" required /></label></div><p class="payment-note">Pago de demostración. No se realiza ningún cobro ni se almacenan datos de tarjeta.</p><button class="pay-button" type="submit" disabled>Selecciona un asiento para continuar</button></form></section>
+    <section class="confirmation" id="confirmation" hidden><span>Reserva confirmada</span><h2>Tu viaje está listo.</h2><p id="confirmationText"></p><a href="viajes.html">Ver mis viajes</a></section>
+  </main>
+</body>
+</html>
