@@ -84,7 +84,8 @@ app.use((request, response, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(FRONTEND_ROOT, { index: "html/index.html" }));
+app.get("/", (request, response) => response.redirect("/html/index.html"));
+app.use(express.static(FRONTEND_ROOT, { index: false }));
 
 app.get("/api/flights", async (request, response) => {
   const origin = String(request.query.origin || "").trim();
