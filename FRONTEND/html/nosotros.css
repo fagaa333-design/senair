@@ -73,8 +73,7 @@
 }
 
 .social-link{color:#fff;transition:color .3s ease}
-.social-link[data-network="github"]:hover{color:var(--coral)}
-.social-link[data-network="instagram"]:hover{color:var(--sky)}
+.social-link[data-network="instagram"]:hover{color:red}
 .social-link[data-network="facebook"]:hover{color:var(--blue)}
 .social-link[data-network="twitter"]:hover{color:#7db8ef}
 
