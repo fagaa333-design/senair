@@ -45,6 +45,19 @@ if (!selectedFlight) {
 document.getElementById("paymentForm").addEventListener("submit", (event) => {
   event.preventDefault();
   if (!selectedSeat) return;
+  const reservations = JSON.parse(window.localStorage.getItem("senairReservations") || "[]");
+  const reservation = {
+    id: `${selectedFlight.id}-${selectedSeat}-${Date.now()}`,
+    origin: selectedFlight.origin,
+    destination: selectedFlight.destination,
+    departureDate: selectedFlight.departure_date,
+    departureTime: selectedFlight.departure_time,
+    arrivalTime: selectedFlight.arrival_time,
+    seat: selectedSeat,
+    price: selectedFlight.price,
+    airline: selectedFlight.airline,
+  };
+  window.localStorage.setItem("senairReservations", JSON.stringify([...reservations, reservation]));
   document.getElementById("confirmationText").textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento ${selectedSeat}. Te enviaremos los detalles al correo de tu cuenta.`;
   document.getElementById("confirmation").hidden = false;
   event.currentTarget.closest(".payment-step").hidden = true;

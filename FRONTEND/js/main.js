@@ -1,6 +1,8 @@
 (() => {
 const modal = document.getElementById("modal");
 
+document.querySelectorAll('[data-modal="manage"]').forEach((button) => button.remove());
+
 const authStorageKey = "senairAuthenticated";
 window.localStorage.removeItem(authStorageKey);
 const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";

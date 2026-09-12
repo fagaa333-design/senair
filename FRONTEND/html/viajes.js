@@ -3,6 +3,9 @@ const tripsGrid = document.getElementById("tripsGrid");
 const emptyState = document.getElementById("tripsEmpty");
 const countLabel = document.getElementById("tripsCount");
 const searchInput = document.getElementById("tripsSearch");
+const reservationsGrid = document.getElementById("reservationsGrid");
+const reservationsEmpty = document.getElementById("reservationsEmpty");
+const reservationsCount = document.getElementById("reservationsCount");
 
 function getFavorites() {
   try {
@@ -15,6 +18,28 @@ function getFavorites() {
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
+}
+
+function getReservations() {
+  try {
+    const reservations = JSON.parse(window.localStorage.getItem("senairReservations") || "[]");
+    return Array.isArray(reservations) ? reservations : [];
+  } catch {
+    return [];
+  }
+}
+
+function renderReservations() {
+  const reservations = getReservations();
+  reservationsCount.textContent = `${reservations.length} reserva${reservations.length === 1 ? "" : "s"}`;
+  reservationsGrid.replaceChildren();
+  reservationsEmpty.hidden = reservations.length > 0;
+  reservations.forEach((reservation) => {
+    const card = document.createElement("article");
+    card.className = "reservation-card";
+    card.innerHTML = `<div><span class="reservation-status">Confirmado</span><h3>${escapeHtml(reservation.origin)} <b>→</b> ${escapeHtml(reservation.destination)}</h3><p>${escapeHtml(reservation.departureDate)} · ${escapeHtml(reservation.departureTime)} - ${escapeHtml(reservation.arrivalTime)}</p></div><dl><div><dt>Asiento</dt><dd>${escapeHtml(reservation.seat)}</dd></div><div><dt>Reserva</dt><dd>${escapeHtml(reservation.id.slice(-6).toUpperCase())}</dd></div></dl>`;
+    reservationsGrid.append(card);
+  });
 }
 
 function renderTrips() {
@@ -41,4 +66,5 @@ function renderTrips() {
 }
 
 searchInput.addEventListener("input", renderTrips);
+renderReservations();
 renderTrips();
