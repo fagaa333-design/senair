@@ -2,7 +2,8 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-const sqlite3 = require("sqlite3");
+const { pathToFileURL } = require("url");
+const { createClient } = require("@libsql/client");
 const bcrypt = require("bcryptjs");
 
 const PORT = Number.parseInt(process.env.PORT || "3000", 10);
@@ -11,29 +12,10 @@ const DB_FILE = path.resolve(__dirname, "../database/senair.db");
 const app = express();
 
 fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
-const db = new sqlite3.Database(DB_FILE);
-
-db.run(`CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  email TEXT UNIQUE NOT NULL,
-  password TEXT NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)`);
-
-db.run(`CREATE TABLE IF NOT EXISTS flights (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  origin TEXT NOT NULL,
-  destination TEXT NOT NULL,
-  departure_date TEXT NOT NULL,
-  departure_time TEXT NOT NULL,
-  arrival_time TEXT NOT NULL,
-  price INTEGER NOT NULL CHECK (price >= 0),
-  airline TEXT NOT NULL DEFAULT 'SENAIR',
-  stops INTEGER NOT NULL DEFAULT 0,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE (origin, destination, departure_date, departure_time)
-)`);
+const db = createClient({
+  url: process.env.TURSO_DATABASE_URL || pathToFileURL(DB_FILE).href,
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
 
 const demoFlights = [
   ["Bogotá (BOG)", "Medellín (MDE)", "2026-09-12", "06:30", "07:25", 159000, "SENAIR", 0],
@@ -44,22 +26,46 @@ const demoFlights = [
   ["Cali (CLO)", "Cartagena (CTG)", "2026-09-12", "11:30", "14:05", 249000, "SENAIR", 1],
 ];
 
-function createRouteFlights(origin, destination, date, callback) {
+async function initializeDatabase() {
+  await db.batch([
+    `CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS flights (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      origin TEXT NOT NULL,
+      destination TEXT NOT NULL,
+      departure_date TEXT NOT NULL,
+      departure_time TEXT NOT NULL,
+      arrival_time TEXT NOT NULL,
+      price INTEGER NOT NULL CHECK (price >= 0),
+      airline TEXT NOT NULL DEFAULT 'SENAIR',
+      stops INTEGER NOT NULL DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (origin, destination, departure_date, departure_time)
+    )`,
+    ...demoFlights.map((flight) => ({
+      sql: "INSERT OR IGNORE INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      args: flight,
+    })),
+  ], "write");
+}
+
+async function createRouteFlights(origin, destination, date) {
   const schedules = [
     ["06:30", "07:25", 219000, 0],
     ["12:45", "13:40", 159000, 0],
     ["18:20", "19:15", 189000, 0],
   ];
-  const statement = db.prepare("INSERT OR IGNORE INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-  schedules.forEach(([departureTime, arrivalTime, price, stops]) => {
-    statement.run([origin, destination, date, departureTime, arrivalTime, price, "SENAIR", stops]);
-  });
-  statement.finalize(callback);
+  await db.batch(schedules.map(([departureTime, arrivalTime, price, stops]) => ({
+    sql: "INSERT OR IGNORE INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    args: [origin, destination, date, departureTime, arrivalTime, price, "SENAIR", stops],
+  })), "write");
 }
-
-const seedStatement = db.prepare("INSERT OR IGNORE INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-demoFlights.forEach((flight) => seedStatement.run(flight));
-seedStatement.finalize();
 
 app.use((request, response, next) => {
   response.setHeader(
@@ -80,7 +86,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(FRONTEND_ROOT, { index: "html/index.html" }));
 
-app.get("/api/flights", (request, response) => {
+app.get("/api/flights", async (request, response) => {
   const origin = String(request.query.origin || "").trim();
   const destination = String(request.query.destination || "").trim();
   const date = String(request.query.date || "").trim();
@@ -101,23 +107,22 @@ app.get("/api/flights", (request, response) => {
   }
 
   const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
-  db.all(`SELECT id, origin, destination, departure_date, departure_time, arrival_time, price, airline, stops FROM flights ${where} ORDER BY departure_date, departure_time`, values, (error, flights) => {
-    if (error) return response.status(500).json({ success: false, message: "No se pudieron consultar los vuelos." });
+  try {
+    const result = await db.execute({ sql: `SELECT id, origin, destination, departure_date, departure_time, arrival_time, price, airline, stops FROM flights ${where} ORDER BY departure_date, departure_time`, args: values });
+    const flights = result.rows.map((row) => ({ ...row }));
     if (flights.length || !origin || !destination || !date || origin === destination || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return response.json({ success: true, flights });
     }
 
-    createRouteFlights(origin, destination, date, (creationError) => {
-      if (creationError) return response.status(500).json({ success: false, message: "No se pudo crear la ruta solicitada." });
-      db.all("SELECT id, origin, destination, departure_date, departure_time, arrival_time, price, airline, stops FROM flights WHERE origin = ? AND destination = ? AND departure_date = ? ORDER BY departure_time", [origin, destination, date], (queryError, createdFlights) => {
-        if (queryError) return response.status(500).json({ success: false, message: "No se pudo consultar la ruta creada." });
-        return response.json({ success: true, flights: createdFlights, created: true });
-      });
-    });
-  });
+    await createRouteFlights(origin, destination, date);
+    const createdResult = await db.execute({ sql: "SELECT id, origin, destination, departure_date, departure_time, arrival_time, price, airline, stops FROM flights WHERE origin = ? AND destination = ? AND departure_date = ? ORDER BY departure_time", args: [origin, destination, date] });
+    return response.json({ success: true, flights: createdResult.rows.map((row) => ({ ...row })), created: true });
+  } catch {
+    return response.status(500).json({ success: false, message: "No se pudieron consultar los vuelos." });
+  }
 });
 
-app.post("/api/flights", (request, response) => {
+app.post("/api/flights", async (request, response) => {
   const flight = {
     origin: String(request.body.origin || "").trim(),
     destination: String(request.body.destination || "").trim(),
@@ -133,15 +138,16 @@ app.post("/api/flights", (request, response) => {
     return response.status(400).json({ success: false, message: "Revisa los datos del vuelo." });
   }
 
-  db.run(
-    "INSERT INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    [flight.origin, flight.destination, flight.departureDate, flight.departureTime, flight.arrivalTime, flight.price, flight.airline, flight.stops],
-    function handleFlightInsert(error) {
-      if (error && error.code === "SQLITE_CONSTRAINT") return response.status(409).json({ success: false, message: "Ese vuelo ya existe para esa fecha y hora." });
-      if (error) return response.status(500).json({ success: false, message: "No se pudo guardar el vuelo." });
-      return response.status(201).json({ success: true, id: this.lastID, message: "Vuelo guardado." });
-    }
-  );
+  try {
+    const result = await db.execute({
+      sql: "INSERT INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      args: [flight.origin, flight.destination, flight.departureDate, flight.departureTime, flight.arrivalTime, flight.price, flight.airline, flight.stops],
+    });
+    return response.status(201).json({ success: true, id: Number(result.lastInsertRowid), message: "Vuelo guardado." });
+  } catch (error) {
+    if (error.code === "SQLITE_CONSTRAINT") return response.status(409).json({ success: false, message: "Ese vuelo ya existe para esa fecha y hora." });
+    return response.status(500).json({ success: false, message: "No se pudo guardar el vuelo." });
+  }
 });
 
 app.post("/register", async (request, response) => {
@@ -155,31 +161,23 @@ app.post("/register", async (request, response) => {
 
   try {
     const passwordHash = await bcrypt.hash(password, 10);
-    db.run(
-      "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
-      [name, email, passwordHash],
-      function handleInsert(error) {
-        if (error) {
-          if (error.code === "SQLITE_CONSTRAINT") {
-            return response.status(409).json({ success: false, message: "El correo ya está registrado." });
-          }
-          return response.status(500).json({ success: false, message: "No se pudo crear el usuario." });
-        }
-        return response.status(201).json({
-          success: true,
-          name,
-          email,
-          message: "Registro completado.",
-          redirect: "/html/index.html",
-        });
-      }
-    );
-  } catch {
+    await db.execute({ sql: "INSERT INTO users (name, email, password) VALUES (?, ?, ?)", args: [name, email, passwordHash] });
+    return response.status(201).json({
+      success: true,
+      name,
+      email,
+      message: "Registro completado.",
+      redirect: "/html/index.html",
+    });
+  } catch (error) {
+    if (error.code === "SQLITE_CONSTRAINT") {
+      return response.status(409).json({ success: false, message: "El correo ya está registrado." });
+    }
     return response.status(500).json({ success: false, message: "Error interno del servidor." });
   }
 });
 
-app.post("/login", (request, response) => {
+app.post("/login", async (request, response) => {
   const email = String(request.body.email || "").trim().toLowerCase();
   const password = String(request.body.password || "");
 
@@ -187,17 +185,25 @@ app.post("/login", (request, response) => {
     return response.status(400).json({ success: false, message: "Email y contraseña requeridos." });
   }
 
-  db.get("SELECT id, name, email, password FROM users WHERE email = ?", [email], async (error, user) => {
-    if (error) return response.status(500).json({ success: false, message: "Error de base de datos." });
+  try {
+    const result = await db.execute({ sql: "SELECT id, name, email, password FROM users WHERE email = ?", args: [email] });
+    const user = result.rows[0];
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return response.status(401).json({ success: false, message: "Credenciales inválidas." });
     }
     return response.json({ success: true, name: user.name, email: user.email, redirect: "/html/index.html" });
-  });
+  } catch {
+    return response.status(500).json({ success: false, message: "Error de base de datos." });
+  }
 });
 
 app.use((request, response) => response.status(404).send("Recurso no encontrado"));
 
-app.listen(PORT, () => {
-  console.log(`SENAIR disponible en http://localhost:${PORT}`);
-});
+initializeDatabase()
+  .then(() => app.listen(PORT, () => {
+    console.log(`SENAIR disponible en http://localhost:${PORT}`);
+  }))
+  .catch((error) => {
+    console.error("No se pudo inicializar la base de datos.", error);
+    process.exit(1);
+  });

@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: senair
+    runtime: node
+    rootDir: BACKEND
+    buildCommand: npm ci
+    startCommand: node server.js
+    autoDeploy: true
+    envVars:
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
