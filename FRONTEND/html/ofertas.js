@@ -23,14 +23,6 @@ filterButtons.forEach((button) => {
   });
 });
 
-document.querySelectorAll(".save-offer").forEach((button) => {
-  button.addEventListener("click", () => {
-    const saved = button.getAttribute("aria-pressed") === "true";
-    button.setAttribute("aria-pressed", String(!saved));
-    button.textContent = saved ? "♡" : "♥";
-  });
-});
-
 document.getElementById("offerNewsletter").addEventListener("submit", (event) => {
   event.preventDefault();
   document.getElementById("formMessage").textContent = "Listo. Te enviaremos las próximas rutas y ofertas.";
