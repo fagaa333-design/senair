@@ -2,6 +2,7 @@ const params = new URLSearchParams(window.location.search);
 const origin = params.get("origin") || "";
 const destination = params.get("destination") || "";
 const departure = params.get("departure") || "";
+const passengers = Math.max(1, Number(params.get("passengers") || 1));
 const resultsContainer = document.getElementById("flightResults");
 const loadingState = document.getElementById("loadingState");
 const emptyState = document.getElementById("emptyState");
@@ -40,7 +41,7 @@ function renderFlights() {
 
 	resultsContainer.querySelectorAll(".choose-flight").forEach((button, index) => {
 		button.addEventListener("click", () => {
-			window.sessionStorage.setItem("senairSelectedFlight", JSON.stringify(visibleFlights[index]));
+			window.sessionStorage.setItem("senairSelectedFlight", JSON.stringify({ ...visibleFlights[index], passengers }));
 			window.location.href = "checkout.html";
 		});
 	});

@@ -312,8 +312,9 @@ document.getElementById("flightForm").addEventListener("submit", (event) => {
     const destination = document.getElementById("destination").value.trim();
     const departure = document.getElementById("departure").value;
     const returnDate = document.getElementById("return").value;
+    const passengers = String(document.getElementById("passengers").value.match(/\d+/)?.[0] || "1");
     const tripType = document.querySelector(".search-tab.active")?.dataset.trip || "roundtrip";
-    const query = new URLSearchParams({ origin, destination, departure, trip: tripType });
+    const query = new URLSearchParams({ origin, destination, departure, passengers, trip: tripType });
     if (returnDate) query.set("return", returnDate);
     window.location.href = `vuelos.html?${query.toString()}`;
 });

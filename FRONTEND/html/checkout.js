@@ -2,7 +2,8 @@ const selectedFlight = JSON.parse(window.sessionStorage.getItem("senairSelectedF
 const seatMap = document.getElementById("seatMap");
 const payButton = document.querySelector(".pay-button");
 const currency = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
-let selectedSeat = "";
+const passengerCount = Math.max(1, Number(selectedFlight?.passengers || 1));
+const selectedSeats = [];
 
 if (!selectedFlight) {
   window.location.replace("vuelos.html");
@@ -11,7 +12,9 @@ if (!selectedFlight) {
   document.getElementById("route").textContent = `${selectedFlight.origin}  -  ${selectedFlight.destination}`;
   document.getElementById("departureTime").textContent = selectedFlight.departure_time;
   document.getElementById("arrivalTime").textContent = selectedFlight.arrival_time;
-  document.getElementById("totalPrice").textContent = currency.format(selectedFlight.price);
+  document.getElementById("passengerCount").textContent = passengerCount;
+  document.getElementById("seatInstruction").textContent = `Escoge ${passengerCount} asiento${passengerCount === 1 ? "" : "s"} disponible${passengerCount === 1 ? "" : "s"} para continuar.`;
+  document.getElementById("totalPrice").textContent = currency.format(selectedFlight.price * passengerCount);
 
   const occupiedSeats = new Set(["1B", "2C", "3A", "3F", "4D", "5E", "6B"]);
   for (let row = 1; row <= 6; row += 1) {
@@ -30,12 +33,18 @@ if (!selectedFlight) {
       button.disabled = occupiedSeats.has(seat);
       if (button.disabled) button.classList.add("occupied");
       button.addEventListener("click", () => {
-        document.querySelector(".seat-button.selected")?.classList.remove("selected");
-        button.classList.add("selected");
-        selectedSeat = seat;
-        document.getElementById("selectedSeat").textContent = seat;
-        payButton.disabled = false;
-        payButton.textContent = `Pagar ${currency.format(selectedFlight.price)}`;
+        const existingIndex = selectedSeats.indexOf(seat);
+        if (existingIndex >= 0) {
+          selectedSeats.splice(existingIndex, 1);
+          button.classList.remove("selected");
+        } else if (selectedSeats.length < passengerCount) {
+          selectedSeats.push(seat);
+          button.classList.add("selected");
+        }
+        document.getElementById("selectedSeat").textContent = selectedSeats.length ? selectedSeats.join(", ") : "Sin seleccionar";
+        const seatsComplete = selectedSeats.length === passengerCount;
+        payButton.disabled = !seatsComplete;
+        payButton.textContent = seatsComplete ? `Pagar ${currency.format(selectedFlight.price * passengerCount)}` : `Selecciona ${passengerCount - selectedSeats.length} asiento${passengerCount - selectedSeats.length === 1 ? "" : "s"} más`;
       });
       seatMap.append(button);
     });
@@ -44,21 +53,21 @@ if (!selectedFlight) {
 
 document.getElementById("paymentForm").addEventListener("submit", (event) => {
   event.preventDefault();
-  if (!selectedSeat) return;
+  if (selectedSeats.length !== passengerCount) return;
   const reservations = JSON.parse(window.localStorage.getItem("senairReservations") || "[]");
   const reservation = {
-    id: `${selectedFlight.id}-${selectedSeat}-${Date.now()}`,
+    id: `${selectedFlight.id}-${selectedSeats.join("")}-${Date.now()}`,
     origin: selectedFlight.origin,
     destination: selectedFlight.destination,
     departureDate: selectedFlight.departure_date,
     departureTime: selectedFlight.departure_time,
     arrivalTime: selectedFlight.arrival_time,
-    seat: selectedSeat,
-    price: selectedFlight.price,
+    seat: selectedSeats,
+    price: selectedFlight.price * passengerCount,
     airline: selectedFlight.airline,
   };
   window.localStorage.setItem("senairReservations", JSON.stringify([...reservations, reservation]));
-  document.getElementById("confirmationText").textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento ${selectedSeat}. Te enviaremos los detalles al correo de tu cuenta.`;
+  document.getElementById("confirmationText").textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")}. Te enviaremos los detalles al correo de tu cuenta.`;
   document.getElementById("confirmation").hidden = false;
   event.currentTarget.closest(".payment-step").hidden = true;
   window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
