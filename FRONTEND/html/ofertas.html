@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="../js/auth-early.js"></script>
+    <link rel="stylesheet" href="auth-early.css" />
+    <meta name="description" content="Descubre ofertas de vuelos y experiencias con SENAIR." />
+    <title>SENAIR | Ofertas</title>
+    <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="stylesheet" href="ofertas.css" />
+    <link rel="stylesheet" href="ofertas-ajustes.css" />
+    <link rel="stylesheet" href="header-fixes.css" />
+    <link rel="stylesheet" href="auth-nav.css" />
+    <link rel="stylesheet" href="auth-nav-fix.css" />
+    <link rel="stylesheet" href="header-index.css" />
+    <link rel="stylesheet" href="hamburger-style.css" />
+    <link rel="stylesheet" href="header-shared.css" />
+    <script src="ofertas.js" defer></script>
+    <script src="../js/main.js" defer></script>
+  </head>
+  <body>
+    <div class="topbar"><div class="container topbar-content"><span>Viaja con tranquilidad. Atención 24/7.</span><div class="topbar-links"><a href="index.html#ayuda">Ayuda</a></div></div></div>
+    <header><div class="container navbar">
+      <a href="index.html" class="logo" aria-label="Inicio de SENAIR"><img class="logo-imagen" src="logo.png" alt="">SENAIR</a>
+      <nav aria-label="Navegación principal"><a href="vuelos.html">Vuelos</a><a href="destinos.html">Destinos</a><a href="ofertas.html" aria-current="page">Ofertas</a><a href="contacto.html">Contacto</a></nav>
+      <button class="hamburger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button>
+      <div class="nav-actions"><button class="btn btn-outline" type="button" data-modal="manage" data-auth-required hidden>Gestionar reserva</button><a href="login.html" class="Btn login-link"><div class="sign"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div><div class="text">Iniciar Sesión</div></a><div class="account-menu" data-account-menu hidden><button class="account-trigger" type="button" aria-expanded="false" aria-controls="accountDropdown"><span class="account-avatar" aria-hidden="true">U</span><span class="account-trigger-name">Usuario</span></button><div class="account-dropdown" id="accountDropdown" hidden><div class="account-summary"><span class="account-avatar account-avatar-large" aria-hidden="true">U</span><div><strong class="account-name">Usuario</strong><small class="account-email"></small></div></div><a href="viajes.html">Mis viajes</a><a href="#ajustes">Ajustes</a><button type="button" data-logout>Cerrar sesión</button></div></div></div>
+      <nav id="mobileNav" class="mobile-nav" aria-hidden="true"><a href="vuelos.html">Vuelos</a><a href="destinos.html">Destinos</a><a href="ofertas.html" aria-current="page">Ofertas</a><a href="contacto.html">Contacto</a><a href="login.html" class="mobile-login-link">Iniciar sesión</a><button type="button" class="mobile-logout-link" data-logout hidden>Cerrar sesión</button></nav>
+    </div></header>
+
+    <main>
+      <section class="offers-hero">
+        <div class="page-shell hero-layout">
+          <div class="hero-copy">
+            <span class="eyebrow">Elige tu próxima historia</span>
+            <h1>Ofertas que te llevan más lejos.</h1>
+            <p>Rutas especiales, precios que inspiran y experiencias listas para despegar desde Colombia.</p>
+            <a class="primary-button" href="#explore">Explorar ofertas <span aria-hidden="true">↓</span></a>
+          </div>
+          <div class="hero-ticket" aria-label="Oferta destacada a Cartagena">
+            <div class="ticket-top"><span>SENAIR / DESTINO DESTACADO</span><strong>01</strong></div>
+            <div class="ticket-route"><span>BOG</span><i></i><span>CTG</span></div>
+            <div class="ticket-place"><strong>Cartagena</strong><span>Desde $189.000 COP</span></div>
+            <div class="ticket-meta"><span>Ida y vuelta</span><span>Equipaje incluido</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="offer-tools" id="explore">
+        <div class="page-shell">
+          <div class="section-intro">
+            <div><span class="eyebrow blue">Selecciona tu plan</span><h2>Encuentra una oferta hecha para ti</h2></div>
+            <p id="resultCount">12 ofertas disponibles</p>
+          </div>
+          <div class="filter-bar" role="group" aria-label="Filtrar ofertas">
+            <button class="filter-button active" type="button" data-filter="all">Todas</button>
+            <button class="filter-button" type="button" data-filter="playa">Playa</button>
+            <button class="filter-button" type="button" data-filter="ciudad">Ciudad</button>
+            <button class="filter-button" type="button" data-filter="naturaleza">Naturaleza</button>
+            <button class="filter-button" type="button" data-filter="internacional">Internacional</button>
+          </div>
+
+          <div class="offers-grid" id="offersGrid">
+            <article class="offer-card featured" data-category="playa">
+              <div class="offer-image cartagena"><span class="offer-tag">Más elegida</span><button class="save-offer" type="button" aria-label="Guardar oferta de Cartagena" aria-pressed="false">♡</button></div>
+              <div class="offer-content"><div class="offer-kicker"><span>Caribe colombiano</span><span>Vuelo directo</span></div><h3>Cartagena</h3><p>Historia, playas y calles llenas de color.</p><div class="offer-footer"><strong>Desde <del>$229.000</del><b>$189.000</b> <small>COP</small></strong><a href="index.html#vuelos">Ver vuelo <span>→</span></a></div></div>
+            </article>
+            <article class="offer-card" data-category="naturaleza">
+              <div class="offer-image eje"><span class="offer-tag">Escapada</span><button class="save-offer" type="button" aria-label="Guardar oferta de Medellín" aria-pressed="false">♡</button></div>
+              <div class="offer-content"><div class="offer-kicker"><span>Montaña y café</span><span>Fin de semana</span></div><h3>Medellín</h3><p>La ciudad de la eterna primavera te espera.</p><div class="offer-footer"><strong>Desde <del>$199.000</del><b>$159.000</b> <small>COP</small></strong><a href="index.html#vuelos">Ver vuelo <span>→</span></a></div></div>
+            </article>
+            <article class="offer-card" data-category="ciudad">
+              <div class="offer-image bogota"><span class="offer-tag">Cultura</span><button class="save-offer" type="button" aria-label="Guardar oferta de Bogotá" aria-pressed="false">♡</button></div>
+              <div class="offer-content"><div class="offer-kicker"><span>Capital colombiana</span><span>Todo el año</span></div><h3>Bogotá</h3><p>Museos, sabores y una ciudad por descubrir.</p><div class="offer-footer"><strong>Desde <del>$189.000</del><b>$149.000</b> <small>COP</small></strong><a href="index.html#vuelos">Ver vuelo <span>→</span></a></div></div>
+            </article>
+            <article class="offer-card" data-category="playa">
+              <div class="offer-image santa"><span class="offer-tag">Sol y mar</span><button class="save-offer" type="button" aria-label="Guardar oferta de Santa Marta" aria-pressed="false">♡</button></div>
+              <div class="offer-content"><div class="offer-kicker"><span>Caribe natural</span><span>Vuelo directo</span></div><h3>Santa Marta</h3><p>Naturaleza junto al mar y días sin prisa.</p><div class="offer-footer"><strong>Desde <del>$249.000</del><b>$199.000</b> <small>COP</small></strong><a href="index.html#vuelos">Ver vuelo <span>→</span></a></div></div>
+            </article>
+            <article class="offer-card" data-category="internacional">
+              <div class="offer-image paris"><span class="offer-tag">Internacional</span><button class="save-offer" type="button" aria-label="Guardar oferta de París" aria-pressed="false">♡</button></div>
+              <div class="offer-content"><div class="offer-kicker"><span>Europa</span><span>Con conexión</span></div><h3>París</h3><p>Una escapada para mirar el mundo distinto.</p><div class="offer-footer"><strong>Desde <del>$5.899.000</del><b>$5.199.000</b> <small>COP</small></strong><a href="index.html#vuelos">Ver vuelo <span>→</span></a></div></div>
+            </article>
+            <article class="offer-card" data-category="internacional">
+              <div class="offer-image tokyo"><span class="offer-tag">Internacional</span><button class="save-offer" type="button" aria-label="Guardar oferta de Tokio" aria-pressed="false">♡</button></div>
+              <div class="offer-content"><div class="offer-kicker"><span>Asia</span><span>Con conexión</span></div><h3>Tokio</h3><p>Tradición, energía y una nueva perspectiva.</p><div class="offer-footer"><strong>Desde <del>$7.099.000</del><b>$6.399.000</b> <small>COP</small></strong><a href="index.html#vuelos">Ver vuelo <span>→</span></a></div></div>
+            </article>
+            <article class="offer-card" data-category="playa">
+              <div class="offer-image san-andres"><span class="offer-tag">Mar de siete colores</span><button class="save-offer" type="button" aria-label="Guardar oferta de San Andrés" aria-pressed="false">♡</button></div>
+              <div class="offer-content"><div class="offer-kicker"><span>Isla colombiana</span><span>Vuelo directo</span></div><h3>San Andrés</h3><p>El mar de siete colores te espera.</p><div class="offer-footer"><strong>Desde <del>$329.000</del><b>$279.000</b> <small>COP</small></strong><a href="index.html#vuelos">Ver vuelo <span>→</span></a></div></div>
+            </article>
+            <article class="offer-card" data-category="naturaleza">
+              <div class="offer-image cali"><span class="offer-tag">Sabor local</span><button class="save-offer" type="button" aria-label="Guardar oferta de Cali" aria-pressed="false">♡</button></div>
+              <div class="offer-content"><div class="offer-kicker"><span>Pacífico colombiano</span><span>Todo el año</span></div><h3>Cali</h3><p>Ritmo, sabor y noches que se quedan contigo.</p><div class="offer-footer"><strong>Desde <del>$219.000</del><b>$169.000</b> <small>COP</small></strong><a href="index.html#vuelos">Ver vuelo <span>→</span></a></div></div>
+            </article>
+            <article class="offer-card" data-category="internacional">
+              <div class="offer-image barcelona"><span class="offer-tag">Mediterráneo</span><button class="save-offer" type="button" aria-label="Guardar oferta de Barcelona" aria-pressed="false">♡</button></div>
+              <div class="offer-content"><div class="offer-kicker"><span>España</span><span>Con conexión</span></div><h3>Barcelona</h3><p>Arquitectura, mar y una ciudad para caminar.</p><div class="offer-footer"><strong>Desde <del>$4.999.000</del><b>$4.399.000</b> <small>COP</small></strong><a href="index.html#vuelos">Ver vuelo <span>→</span></a></div></div>
+            </article>
+              <article class="offer-card" data-category="playa">
+                <div class="offer-image miami"><span class="offer-tag">Sol y ciudad</span><button class="save-offer" type="button" aria-label="Guardar oferta de Miami" aria-pressed="false">♡</button></div>
+                <div class="offer-content"><div class="offer-kicker"><span>Estados Unidos</span><span>Con conexión</span></div><h3>Miami</h3><p>Playas, música y una energía imposible de ignorar.</p><div class="offer-footer"><strong>Desde <del>$3.999.000</del><b>$3.399.000</b> <small>COP</small></strong><a href="index.html#vuelos">Ver vuelo <span>→</span></a></div></div>
+              </article>
+              <article class="offer-card" data-category="naturaleza">
+                <div class="offer-image lima"><span class="offer-tag">Sabor y cultura</span><button class="save-offer" type="button" aria-label="Guardar oferta de Lima" aria-pressed="false">♡</button></div>
+                <div class="offer-content"><div class="offer-kicker"><span>Perú</span><span>Con conexión</span></div><h3>Lima</h3><p>Una mesa increíble entre océano, historia y ciudad.</p><div class="offer-footer"><strong>Desde <del>$1.899.000</del><b>$1.499.000</b> <small>COP</small></strong><a href="index.html#vuelos">Ver vuelo <span>→</span></a></div></div>
+              </article>
+              <article class="offer-card" data-category="ciudad">
+                <div class="offer-image buenos-aires"><span class="offer-tag">Río de la Plata</span><button class="save-offer" type="button" aria-label="Guardar oferta de Buenos Aires" aria-pressed="false">♡</button></div>
+                <div class="offer-content"><div class="offer-kicker"><span>Argentina</span><span>Con conexión</span></div><h3>Buenos Aires</h3><p>Tango, arquitectura y una ciudad que nunca duerme.</p><div class="offer-footer"><strong>Desde <del>$2.899.000</del><b>$2.299.000</b> <small>COP</small></strong><a href="index.html#vuelos">Ver vuelo <span>→</span></a></div></div>
+              </article>
+          </div>
+          <p class="empty-state" id="emptyState" hidden>No encontramos ofertas con ese filtro.</p>
+        </div>
+      </section>
+
+      <section class="comfort-strip">
+        <div class="page-shell comfort-layout">
+          <div><span class="eyebrow blue">Viaja como quieres</span><h2>Una buena oferta también se siente en el camino.</h2><p>Elige tu ruta, guarda tus favoritas y deja que SENAIR se encargue de acercarte a lo que importa.</p></div>
+          <img src="../assets/images/ofer.jpg" alt="Avión volando sobre una autopista" />
+        </div>
+      </section>
+
+      <section class="newsletter-section">
+        <div class="page-shell newsletter-card"><div><h2>Las mejores ofertas llegan a tu correo.</h2></div><form id="offerNewsletter"><label class="sr-only" for="offerEmail">Tu correo electrónico</label><input id="offerEmail" type="email" placeholder="Tu correo electrónico" required /><button class="primary-button" type="submit">Suscribirme</button></form><p class="form-message" id="formMessage" role="status"></p></div>
+      </section>
+      <a class="login-home-button internal-home-button" href="index.html" aria-label="Volver al inicio">
+        <span class="login-home-icon" aria-hidden="true">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="25" height="25">
+            <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z" fill="currentColor"></path>
+            <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z" fill="currentColor"></path>
+          </svg>
+        </span>
+        <span>Volver al inicio</span>
+      </a>
+    </main>
+
+    <footer class="site-footer"><div class="page-shell footer-grid"><div><a class="brand footer-brand" href="index.html">SENAIR</a><p>Conectando destinos, impulsando oportunidades.</p></div><div><h3>SENAIR</h3><a href="index.html#nosotros">Sobre nosotros</a><a href="index.html#experiencia">Tu viaje</a></div><div><h3>Ayuda</h3><a href="index.html#ayuda">Preguntas frecuentes</a><a href="index.html#ayuda">Contáctanos</a></div><div><h3>Legal</h3><a href="#">Privacidad</a><a href="#">Accesibilidad</a></div></div><div class="page-shell copyright"><span>© 2026 SENAIR. Todos los derechos reservados.</span><span>Colombia · COP · Español</span></div></footer>
+  </body>
+</html>

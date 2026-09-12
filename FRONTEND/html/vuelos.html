@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<script src="../js/auth-early.js"></script>
+		<link rel="stylesheet" href="auth-early.css" />
+		<meta name="description" content="Consulta vuelos disponibles con SENAIR." />
+		<title>SENAIR | Vuelos</title>
+		<link rel="icon" type="image/png" href="logo.png" />
+		<link rel="stylesheet" href="../css/vuelos/vuelos.css" />
+		<link rel="stylesheet" href="header-fixes.css" />
+		<link rel="stylesheet" href="auth-nav.css" />
+		<link rel="stylesheet" href="auth-nav-fix.css" />
+		<link rel="stylesheet" href="header-index.css" />
+		<link rel="stylesheet" href="hamburger-style.css" />
+		<link rel="stylesheet" href="header-shared.css" />
+		<script src="../js/vuelos.js" defer></script>
+		<script src="../js/main.js" defer></script>
+	</head>
+	<body>
+		<div class="topbar"><div class="container topbar-content"><span>Viaja con tranquilidad. Atención 24/7.</span><div class="topbar-links"><a href="index.html#ayuda">Ayuda</a></div></div></div>
+		<header><div class="container navbar">
+			<a href="index.html" class="logo" aria-label="Inicio de SENAIR"><img class="logo-imagen" src="logo.png" alt="">SENAIR</a>
+			<nav aria-label="Navegación principal"><a href="vuelos.html" aria-current="page">Vuelos</a><a href="destinos.html">Destinos</a><a href="ofertas.html">Ofertas</a><a href="contacto.html">Contacto</a></nav>
+			<button class="hamburger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button>
+			<div class="nav-actions"><button class="btn btn-outline" type="button" data-modal="manage" data-auth-required hidden>Gestionar reserva</button><a href="login.html" class="Btn login-link"><div class="sign"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div><div class="text">Iniciar Sesión</div></a><div class="account-menu" data-account-menu hidden><button class="account-trigger" type="button" aria-expanded="false" aria-controls="accountDropdown"><span class="account-avatar" aria-hidden="true">U</span><span class="account-trigger-name">Usuario</span></button><div class="account-dropdown" id="accountDropdown" hidden><div class="account-summary"><span class="account-avatar account-avatar-large" aria-hidden="true">U</span><div><strong class="account-name">Usuario</strong><small class="account-email"></small></div></div><a href="viajes.html">Mis viajes</a><a href="#ajustes">Ajustes</a><button type="button" data-logout>Cerrar sesión</button></div></div></div>
+			<nav id="mobileNav" class="mobile-nav" aria-hidden="true"><a href="vuelos.html" aria-current="page">Vuelos</a><a href="destinos.html">Destinos</a><a href="ofertas.html">Ofertas</a><a href="contacto.html">Contacto</a><a href="login.html" class="mobile-login-link">Iniciar sesión</a><button type="button" class="mobile-logout-link" data-logout hidden>Cerrar sesión</button></nav>
+		</div></header>
+
+		<main>
+			<section class="results-hero">
+				<div class="page-shell">
+					<span class="eyebrow">Encuentra tu próxima ruta</span>
+					<h1>Vuelos disponibles</h1>
+					<p>Compara horarios, precios y conexiones para elegir cómo quieres llegar.</p>
+				</div>
+			</section>
+			<section class="results-section">
+				<div class="page-shell">
+					<div class="search-summary" id="searchSummary" aria-live="polite"><span class="summary-route">Consultando tu ruta...</span><span class="summary-date"></span><a href="index.html#vuelos">Editar búsqueda</a></div>
+					<div class="results-heading"><div><span class="eyebrow blue">Opciones para ti</span><h2 id="resultsTitle">Vuelos encontrados</h2></div><span id="resultCount" class="result-count">Buscando...</span></div>
+					<div class="results-layout">
+						<aside class="filters-panel" aria-label="Filtros de vuelos"><strong>Ver resultados</strong><button class="sort-button active" type="button" data-sort="time">Todas las opciones</button><button class="sort-button" type="button" data-sort="price">Precio más bajo</button><div class="filter-note"><span aria-hidden="true">✦</span><p>Los precios mostrados son por pasajero e incluyen impuestos.</p></div></aside>
+						<div class="flight-results" id="flightResults"><div class="loading-state" id="loadingState"><span class="spinner" aria-hidden="true"></span><strong>Buscando las mejores opciones...</strong><span>Estamos consultando la ruta seleccionada.</span></div></div>
+					</div>
+					<div class="empty-state" id="emptyState" hidden><strong>No encontramos vuelos para esta búsqueda.</strong><span>Prueba otra fecha o cambia el origen y destino.</span><a class="dark-button" href="index.html#vuelos">Nueva búsqueda</a></div>
+				</div>
+			</section>
+			<a class="login-home-button internal-home-button" href="index.html" aria-label="Volver al inicio">
+				<span class="login-home-icon" aria-hidden="true">
+					<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="25" height="25">
+						<path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z" fill="currentColor"></path>
+						<path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z" fill="currentColor"></path>
+					</svg>
+				</span>
+				<span>Volver al inicio</span>
+			</a>
+		</main>
+		<footer class="site-footer"><div class="page-shell footer-grid"><div><a class="brand footer-brand" href="index.html">SENAIR</a><p>Conectando destinos, impulsando oportunidades.</p></div><div><h3>SENAIR</h3><a href="index.html#nosotros">Sobre nosotros</a><a href="destinos.html">Destinos</a></div><div><h3>Ayuda</h3><a href="index.html#ayuda">Preguntas frecuentes</a><a href="index.html#ayuda">Contáctanos</a></div><div><h3>Legal</h3><a href="#">Privacidad</a><a href="#">Accesibilidad</a></div></div><div class="page-shell copyright"><span>© 2026 SENAIR. Todos los derechos reservados.</span><span>Colombia · COP · Español</span></div></footer>
+	</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="description" content="SENAIR - Login" />
+		<link rel="icon" type="image/png" href="logo.png" />
+		<title>SENAIR | Iniciar sesión</title>
+		<link rel="stylesheet" href="estilo.css" />
+		<script src="../js/main.js?v=20260911" defer></script>
+	</head>
+	<body>
+
+		<header>
+			<div class="container navbar">
+				<a href="index.html" class="logo" aria-label="Inicio de SENAIR">
+					<img class="logo-imagen" src="logo.png" alt="">
+					SENAIR
+				</a>
+
+				<nav aria-label="Navegación principal">
+					<a href="index.html#vuelos">Vuelos</a>
+					<a href="destinos.html">Destinos</a>
+					<a href="ofertas.html">Ofertas</a>
+					<a href="contacto.html">Contacto</a>
+							<a href="viajes.html">Mis viajes</a>
+				</nav>
+
+				<button class="hamburger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav">
+					<span class="hamburger-box"><span class="hamburger-inner"></span></span>
+				</button>
+
+				<div class="nav-actions">
+					<button class="btn btn-outline" type="button" data-modal="manage" data-auth-required hidden>Gestionar reserva</button>
+					<div class="account-menu" data-account-menu hidden>
+						<button class="account-trigger" type="button" aria-expanded="false" aria-controls="accountDropdown">
+							<span class="account-avatar" aria-hidden="true">U</span>
+							<span class="account-trigger-name">Usuario</span>
+						</button>
+						<div class="account-dropdown" id="accountDropdown" hidden>
+							<div class="account-summary">
+								<span class="account-avatar account-avatar-large" aria-hidden="true">U</span>
+								<div><strong class="account-name">Usuario</strong><small class="account-email"></small></div>
+							</div>
+							<a href="viajes.html">Mis viajes</a>
+							<a href="index.html#ajustes">Ajustes</a>
+							<button type="button" data-logout>Cerrar sesión</button>
+						</div>
+					</div>
+
+					<a href="index.html" class="Btn login-header-back">
+						<div class="sign">
+							<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="white">
+								<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+							</svg>
+						</div>
+						<div class="text">Volver</div>
+					</a>
+				</div>
+
+				<nav id="mobileNav" class="mobile-nav" aria-hidden="true">
+					<a href="index.html#vuelos">Vuelos</a>
+					<a href="destinos.html">Destinos</a>
+					<a href="ofertas.html">Ofertas</a>
+					<a href="contacto.html">Contacto</a>
+					<a href="viajes.html">Mis viajes</a>
+					<a href="login.html" class="mobile-login-link">Iniciar sesión</a>
+					<button type="button" class="mobile-logout-link" data-logout hidden>Cerrar sesión</button>
+				</nav>
+			</div>
+		</header>
+
+		<main>
+			<section class="login-section">
+				<div class="login-layout">
+					<div class="login-copy">
+						<span class="login-kicker">Tu viaje empieza aquí</span>
+						<h1>Todo SENAIR,<br><strong>más cerca de ti.</strong></h1>
+						<p>Inicia sesión para guardar tus rutas, consultar tus reservas y volver a tus destinos favoritos en segundos.</p>
+					</div>
+				<div class="login-card-wrapper">
+					
+					<div class="wrapper">
+						<div class="card-switch">
+							<label class="switch">
+								 <input type="checkbox" class="toggle">
+								 <span class="slider"></span>
+								 <span class="card-side"><span class="side-label side-label-login">Iniciar Sesión</span><span class="side-label side-label-register">Registrarse</span></span>
+								 <div class="flip-card__inner">
+										<div class="flip-card__front">
+										 <div class="heading">Iniciar Sesión</div>
+											 <form class="form" action="../../api/login.php" method="post" autocomplete="off">
+													<input class="input" name="email" placeholder="Correo Electrónico" type="email" autocomplete="username" required>
+													<input class="input" name="password" placeholder="Contraseña" type="password" autocomplete="current-password" required>
+																							<span class="forgot-password"><a href="#passwordRecovery" data-recovery-trigger>¿Olvidaste tu contraseña?</a></span>
+														<input value="Iniciar Sesión" type="submit" class="login-button" />
+											 </form>
+																			 <div class="google-login-button" data-google-login>
+																				 <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+																						 <path d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" fill="#FFC107"></path>
+																						 <path d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" fill="#FF3D00"></path>
+																						 <path d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" fill="#4CAF50"></path>
+																						 <path d="M43.611,20.083H42V20H24v8h11.303c-.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" fill="#1976D2"></path>
+																					 </svg>
+																				 Continuar con Google
+																				 </div>
+											 <div class="social-account-container">
+												<span class="title">O Inicia Sesión con</span>
+												<div class="social-accounts">
+													<button class="social-button google" type="button">
+														<svg viewBox="0 0 488 512" height="1em" xmlns="http://www.w3.org/2000/svg" class="svg">
+															<path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
+														</svg>
+													</button>
+													<button class="social-button apple" type="button">
+														<svg viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg" class="svg">
+															<path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"></path>
+														</svg>
+													</button>
+													<button class="social-button twitter" type="button">
+														<svg viewBox="0 0 512 512" height="1em" xmlns="http://www.w3.org/2000/svg" class="svg">
+															<path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"></path>
+														</svg>
+													</button>
+												</div>
+											</div>
+											<span class="agreement"><a href="#">Aprende el acuerdo de licencia de usuario</a></span>
+										</div>
+										<div class="flip-card__back">
+										 <div class="heading">Registrarse</div>
+											 <form class="form" action="../../api/register.php" method="post" autocomplete="off">
+													<input class="input" placeholder="Nombre" name="name" type="text" autocomplete="name" required>
+													<input class="input" name="email" placeholder="Correo Electrónico" type="email" autocomplete="email" required>
+													<input class="input" name="password" placeholder="Contraseña" type="password" autocomplete="new-password" required>
+														<input value="Registrarse" type="submit" class="login-button" />
+											 </form>
+																			 <div class="google-login-button" data-google-login>
+																				 <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+																						 <path d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" fill="#FFC107"></path>
+																						 <path d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" fill="#FF3D00"></path>
+																						 <path d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" fill="#4CAF50"></path>
+																						 <path d="M43.611,20.083H42V20H24v8h11.303c-.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" fill="#1976D2"></path>
+																					 </svg>
+																				 Continuar con Google
+																				 </div>
+											 <div class="social-account-container">
+												<span class="title">O Regístrate con</span>
+												<div class="social-accounts">
+													<button class="social-button google" type="button">
+														<svg viewBox="0 0 488 512" height="1em" xmlns="http://www.w3.org/2000/svg" class="svg">
+															<path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
+														</svg>
+													</button>
+													<button class="social-button apple" type="button">
+														<svg viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg" class="svg">
+															<path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"></path>
+														</svg>
+													</button>
+													<button class="social-button twitter" type="button">
+														<svg viewBox="0 0 512 512" height="1em" xmlns="http://www.w3.org/2000/svg" class="svg">
+															<path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"></path>
+														</svg>
+													</button>
+												</div>
+											</div>
+											<span class="agreement"><a href="#">Aprende el acuerdo de licencia de usuario</a></span>
+										</div>
+								 </div>
+							</label>
+						</div>   
+					</div>
+				</div>
+					<div class="login-benefits" aria-label="Beneficios de tu cuenta SENAIR">
+						<div><span class="benefit-icon">01</span><span><strong>Gestiona tus viajes</strong><small>Ten tus reservas siempre a mano.</small></span></div>
+						<div><span class="benefit-icon">02</span><span><strong>Guarda tus destinos</strong><small>Encuentra inspiración cuando quieras.</small></span></div>
+						<div><span class="benefit-icon">03</span><span><strong>Viaja con respaldo</strong><small>Tu información protegida en SENAIR.</small></span></div>
+					</div>
+				</div>
+				<a class="login-home-button" href="index.html" aria-label="Volver al inicio">
+					<span class="login-home-icon" aria-hidden="true">
+						<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="25" height="25">
+							<path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z" fill="currentColor"></path>
+							<path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z" fill="currentColor"></path>
+						</svg>
+					</span>
+					<span>Volver al inicio</span>
+				</a>
+			</section>
+		</main>
+
+		<div class="recovery-modal" id="passwordRecovery" aria-hidden="true">
+			<div class="recovery-dialog" role="dialog" aria-modal="true" aria-labelledby="recoveryTitle">
+				<button class="recovery-close" type="button" data-recovery-close aria-label="Cerrar recuperación">×</button>
+				<span class="login-kicker">Recupera el acceso</span>
+				<h2 id="recoveryTitle">¿No recuerdas tu contraseña?</h2>
+				<p>Escribe el correo de tu cuenta y te indicaremos el siguiente paso para recuperar el acceso.</p>
+				<form id="recoveryForm">
+					<label for="recoveryEmail">Correo electrónico</label>
+					<input id="recoveryEmail" name="email" type="email" autocomplete="email" placeholder="tu@correo.com" required />
+					<button class="recovery-submit" type="submit">Solicitar recuperación</button>
+				</form>
+				<p class="recovery-message" id="recoveryMessage" role="status"></p>
+			</div>
+		</div>
+
+		<footer>
+			<div class="container">
+				<div class="copyright">© <span id="currentYear">2026</span> SENAIR.</div>
+			</div>
+		</footer>
+	</body>
+</html>

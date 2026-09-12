@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="auth-early.js"></script>
+    <link rel="stylesheet" href="auth-early.css" />
+    <meta name="description"
+    content="SENAIR, sistema de gestión de vuelos y reservas."/>
+    <link rel="icon" type="image/png" href="logo.png" />
+    <title>SENAIR | Conectando destinos</title>
+    <!-- Defensa adicional si el archivo se abre sin el servidor de BACKEND. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: https://images.unsplash.com; media-src 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net">
+    <link rel="stylesheet" href="estilo.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.0.1/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js@11.0.1/public/assets/scripts/choices.min.js" defer></script>
+    <script src="../js/main.js" defer></script>
+  </head>
+
+  <body>
+    <div class="loading-screen" id="loadingScreen" role="status" aria-label="Cargando SENAIR">
+      <video class="loading-video" id="loadingVideo" autoplay muted playsinline preload="auto">
+        <source src="../assets/videos/carga%20air%20white.mp4" type="video/mp4" />
+      </video>
+      <span class="sr-only">Cargando SENAIR</span>
+    </div>
+
+    <div class="topbar">
+      <div class="container topbar-content">
+        <span>Viaja con tranquilidad. Atención 24/7.</span>
+        <div class="topbar-links">
+          <a href="#ayuda">Ayuda</a>
+        </div>
+      </div>
+    </div>
+
+    <header>
+      <div class="container navbar">
+        <a href="index.html" class="logo" aria-label="Inicio de SENAIR">
+          <img class="logo-imagen" src="logo.png" alt="">
+          SENAIR
+        </a>
+
+        <nav aria-label="Navegación principal">
+          <a href="vuelos.html">Vuelos</a>
+          <a href="destinos.html">Destinos</a>
+          <a href="ofertas.html">Ofertas</a>
+          <a href="contacto.html">Contacto</a>
+        </nav>
+
+        <button class="hamburger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav">
+          <span class="hamburger-box"><span class="hamburger-inner"></span></span>
+        </button>
+
+        <div class="nav-actions">
+          <button class="btn btn-outline" type="button" data-modal="manage" data-auth-required hidden>
+            Gestionar reserva
+          </button>
+          <a href="login.html" class="Btn login-link">
+            <div class="sign">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="white">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            </div>
+            <div class="text">Iniciar Sesión</div>
+          </a>
+          <div class="account-menu" data-account-menu hidden>
+            <button class="account-trigger" type="button" aria-expanded="false" aria-controls="accountDropdown">
+              <span class="account-avatar" aria-hidden="true">U</span>
+              <span class="account-trigger-name">Usuario</span>
+            </button>
+            <div class="account-dropdown" id="accountDropdown" hidden>
+              <div class="account-summary">
+                <span class="account-avatar account-avatar-large" aria-hidden="true">U</span>
+                <div><strong class="account-name">Usuario</strong><small class="account-email"></small></div>
+              </div>
+              <a href="viajes.html">Mis viajes</a>
+              <a href="#ajustes">Ajustes</a>
+              <button type="button" data-logout>Cerrar sesión</button>
+            </div>
+          </div>
+        </div>
+
+        <nav id="mobileNav" class="mobile-nav" aria-hidden="true">
+          <a href="vuelos.html">Vuelos</a>
+          <a href="destinos.html">Destinos</a>
+          <a href="ofertas.html">Ofertas</a>
+          <a href="contacto.html">Contacto</a>
+          <a href="login.html" class="mobile-login-link">Iniciar sesión</a>
+          <button type="button" class="mobile-logout-link" data-logout hidden>Cerrar sesión</button>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="vuelos">
+        <div class="container">
+          <div class="hero-content">
+            <span class="eyebrow">Una nueva forma de volar</span>
+            <h1>El mundo comienza donde termina la pista.</h1>
+            <p>
+              Conecta con tus destinos favoritos disfrutando de una experiencia
+              sencilla, cómoda y pensada para ti.
+            </p>
+            <a id="vrofe" class="btn btn-light" href="ofertas.html">
+              Ver Ofertas
+            </a>
+          </div>
+
+          <div class="search-panel" id="flightSearch">
+            <div class="search-options">
+              <div class="search-tabs" role="tablist" aria-label="Tipo de viaje">
+              <button class="search-tab active" type="button" role="tab" aria-selected="true" data-trip="roundtrip">
+                Ida y vuelta
+              </button>
+              <button class="search-tab" type="button" role="tab" aria-selected="false" data-trip="oneway">
+                Solo ida
+              </button>
+              </div>
+            </div>
+
+            <form class="search-grid" id="flightForm">
+              <div class="route-group">
+                <div class="field route-field">
+                  <label for="origin"><svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4Z"/></svg>Origen</label>
+                  <select id="origin" name="origin" required>
+                  </select>
+                </div>
+
+                <button class="swap-route" id="swapRoute" type="button" aria-label="Intercambiar origen y destino" title="Intercambiar origen y destino">
+                  <span aria-hidden="true">↔</span>
+                </button>
+
+                <div class="field route-field">
+                  <label for="destination"><svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4Z"/></svg>Destino</label>
+                  <select id="destination" name="destination" required>
+                    <option value="" selected disabled></option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="date-group">
+                <div class="field date-field">
+                  <label for="departure"><svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18M8 15h.01M12 15h.01M16 15h.01"/></svg>Salida</label>
+                  <button class="date-trigger" id="departureTrigger" type="button" aria-expanded="false" aria-controls="calendarOverlay">
+                    <span>Selecciona una fecha</span>
+                  </button>
+                  <input class="date-input" id="departure" name="departure" required type="date" tabindex="-1" aria-hidden="true" />
+                </div>
+
+                <div class="field date-field" id="returnField">
+                  <label for="return"><svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18M8 15h.01M12 15h.01M16 15h.01"/></svg>Regreso</label>
+                  <button class="date-trigger" id="returnTrigger" type="button" aria-expanded="false" aria-controls="calendarOverlay">
+                    <span>Selecciona una fecha</span>
+                  </button>
+                  <input class="date-input" id="return" name="return" required type="date" tabindex="-1" aria-hidden="true" />
+                </div>
+              </div>
+
+              <div class="calendar-overlay" id="calendarOverlay" aria-hidden="true">
+                <div class="calendar-menu" role="dialog" aria-modal="true" aria-labelledby="calendarTitle">
+                  <div class="calendar-header">
+                    <div><span class="calendar-kicker">Elige tu fecha</span><h2 id="calendarTitle">Salida</h2></div>
+                    <button class="calendar-close" id="calendarClose" type="button" aria-label="Cerrar calendario">×</button>
+                  </div>
+                  <div class="calendar-navigation">
+                    <button id="calendarPrevious" type="button" aria-label="Mes anterior">‹</button>
+                    <strong id="calendarMonth"></strong>
+                    <button id="calendarNext" type="button" aria-label="Mes siguiente">›</button>
+                  </div>
+                  <div class="calendar-weekdays" aria-hidden="true"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+                  <div class="calendar-days" id="calendarDays"></div>
+                </div>
+              </div>
+
+              <div class="field passengers-field">
+                <button class="passengers-trigger" id="passengersTrigger" type="button" aria-expanded="false" aria-controls="passengerMenu">
+                  <span class="passengers-label"><svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="3"/><path d="M3 21v-2a6 6 0 0 1 12 0v2M16 11a3 3 0 1 0-1.5-5.6M17 15a5 5 0 0 1 4 4v2"/></svg><span>Pasajeros</span></span>
+                  <strong id="passengerSummary">1</strong>
+                  <span class="passengers-chevron" aria-hidden="true">⌄</span>
+                </button>
+                <input type="hidden" id="passengers" name="passengers" value="1 adulto" />
+
+                <div class="passenger-overlay" id="passengerOverlay" aria-hidden="true">
+                <div class="passenger-menu" id="passengerMenu">
+                  <h2>¿Quiénes vuelan?</h2>
+                  <div class="passenger-row" data-passenger="adults" data-min="1">
+                    <div><strong>Adultos</strong><small>Desde 15 años</small></div>
+                    <div class="passenger-counter"><button type="button" class="counter-button" data-action="decrease" aria-label="Disminuir adultos">−</button><output>1</output><button type="button" class="counter-button" data-action="increase" aria-label="Aumentar adultos">+</button></div>
+                  </div>
+                  <div class="passenger-row" data-passenger="young" data-min="0">
+                    <div><strong>Jóvenes</strong><small>De 12 a 14 años</small></div>
+                    <div class="passenger-counter"><button type="button" class="counter-button" data-action="decrease" aria-label="Disminuir jóvenes">−</button><output>0</output><button type="button" class="counter-button" data-action="increase" aria-label="Aumentar jóvenes">+</button></div>
+                  </div>
+                  <div class="passenger-row" data-passenger="children" data-min="0">
+                    <div><strong>Niños</strong><small>De 2 a 11 años</small></div>
+                    <div class="passenger-counter"><button type="button" class="counter-button" data-action="decrease" aria-label="Disminuir niños">−</button><output>0</output><button type="button" class="counter-button" data-action="increase" aria-label="Aumentar niños">+</button></div>
+                  </div>
+                  <div class="passenger-row" data-passenger="babies" data-min="0">
+                    <div><strong>Bebés</strong><small>Menores de 2 años (1 por adulto)</small></div>
+                    <div class="passenger-counter"><button type="button" class="counter-button" data-action="decrease" aria-label="Disminuir bebés">−</button><output>0</output><button type="button" class="counter-button" data-action="increase" aria-label="Aumentar bebés">+</button></div>
+                  </div>
+                  <div class="passenger-notice">ⓘ <span>Conoce la política para <u>jóvenes</u>.</span></div>
+                  <button class="passenger-confirm" id="passengerConfirm" type="button">Confirmar</button>
+                </div>
+                </div>
+              </div>
+
+              <button id="bbbbb" class="button" type="submit" aria-label="Buscar vuelos">
+                <div class="button-outer">
+                  <div class="button-inner">
+                    <span>Buscar</span>
+                  </div>
+                </div>
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <div class="container quick-links" role="region" aria-label="Prepárate para viajar">
+        <div class="quick-links-track">
+          <a href="#checkin" class="quick-link-card">
+            <div class="quick-link-icon">
+              <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <g transform="translate(15, 15)">
+                  <rect x="0" y="8" width="50" height="30" rx="3" fill="#C41E3A"/>
+                  <circle cx="8" cy="14" r="1.5" fill="white"/>
+                  <rect x="28" y="10" width="20" height="18" rx="1" fill="none" stroke="white" stroke-width="1"/>
+                  <line x1="10" y1="25" x2="40" y2="25" stroke="white" stroke-width="0.5"/>
+                  <text x="5" y="34" font-size="3" fill="white" font-weight="bold">SENAIR</text>
+                  <circle cx="35" cy="30" r="2" fill="none" stroke="#C41E3A" stroke-width="1"/>
+                  <path d="M38 28 L42 32" stroke="#C41E3A" stroke-width="1"/>
+                </g>
+              </svg>
+            </div>
+            <h3>Check-in</h3>
+            <p>Obtén tu pase de abordar online</p>
+          </a>
+
+          <a href="#equipaje" class="quick-link-card">
+            <div class="quick-link-icon">
+              <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <g transform="translate(15, 20)">
+                  <rect x="8" y="8" width="34" height="28" rx="2" fill="none" stroke="#C41E3A" stroke-width="2"/>
+                  <rect x="10" y="6" width="30" height="4" rx="1" fill="#C41E3A"/>
+                  <line x1="18" y1="14" x2="18" y2="32" stroke="#C41E3A" stroke-width="1"/>
+                  <line x1="32" y1="14" x2="32" y2="32" stroke="#C41E3A" stroke-width="1"/>
+                  <circle cx="15" cy="25" r="2" fill="#C41E3A"/>
+                  <circle cx="35" cy="25" r="2" fill="#C41E3A"/>
+                </g>
+              </svg>
+            </div>
+            <h3>Equipaje</h3>
+            <p>Consulta nuestras condiciones</p>
+          </a>
+
+          <a href="#estado" class="quick-link-card">
+            <div class="quick-link-icon">
+              <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <g transform="translate(18, 18)">
+                  <circle cx="20" cy="20" r="18" fill="none" stroke="#C41E3A" stroke-width="2"/>
+                  <line x1="20" y1="6" x2="20" y2="14" stroke="#C41E3A" stroke-width="1.5"/>
+                  <line x1="20" y1="20" x2="20" y2="26" stroke="#C41E3A" stroke-width="2"/>
+                  <line x1="26" y1="20" x2="32" y2="20" stroke="#C41E3A" stroke-width="1.5"/>
+                  <circle cx="20" cy="20" r="3" fill="#C41E3A"/>
+                </g>
+              </svg>
+            </div>
+            <h3>Estado del vuelo</h3>
+            <p>Información en tiempo real</p>
+          </a>
+
+          <a href="#ayuda" class="quick-link-card">
+            <div class="quick-link-icon">
+              <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <g transform="translate(25, 15)">
+                  <circle cx="15" cy="15" r="14" fill="none" stroke="#C41E3A" stroke-width="2"/>
+                  <text x="10" y="20" font-size="20" font-weight="bold" fill="#C41E3A">?</text>
+                </g>
+              </svg>
+            </div>
+            <h3>Centro de ayuda</h3>
+            <p>Estamos aquí para ayudarte</p>
+          </a>
+
+          <a href="#checkin" class="quick-link-card">
+            <div class="quick-link-icon">
+              <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <g transform="translate(15, 15)">
+                  <rect x="0" y="8" width="50" height="30" rx="3" fill="#C41E3A"/>
+                  <circle cx="8" cy="14" r="1.5" fill="white"/>
+                  <rect x="28" y="10" width="20" height="18" rx="1" fill="none" stroke="white" stroke-width="1"/>
+                  <line x1="10" y1="25" x2="40" y2="25" stroke="white" stroke-width="0.5"/>
+                  <text x="5" y="34" font-size="3" fill="white" font-weight="bold">SENAIR</text>
+                  <circle cx="35" cy="30" r="2" fill="none" stroke="#C41E3A" stroke-width="1"/>
+                  <path d="M38 28 L42 32" stroke="#C41E3A" stroke-width="1"/>
+                </g>
+              </svg>
+            </div>
+            <h3>Check-in</h3>
+            <p>Obtén tu pase de abordar online</p>
+          </a>
+
+          <a href="#equipaje" class="quick-link-card">
+            <div class="quick-link-icon">
+              <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <g transform="translate(15, 20)">
+                  <rect x="8" y="8" width="34" height="28" rx="2" fill="none" stroke="#C41E3A" stroke-width="2"/>
+                  <rect x="10" y="6" width="30" height="4" rx="1" fill="#C41E3A"/>
+                  <line x1="18" y1="14" x2="18" y2="32" stroke="#C41E3A" stroke-width="1"/>
+                  <line x1="32" y1="14" x2="32" y2="32" stroke="#C41E3A" stroke-width="1"/>
+                  <circle cx="15" cy="25" r="2" fill="#C41E3A"/>
+                  <circle cx="35" cy="25" r="2" fill="#C41E3A"/>
+                </g>
+              </svg>
+            </div>
+            <h3>Equipaje</h3>
+            <p>Consulta nuestras condiciones</p>
+          </a>
+
+          <a href="#estado" class="quick-link-card">
+            <div class="quick-link-icon">
+              <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <g transform="translate(18, 18)">
+                  <circle cx="20" cy="20" r="18" fill="none" stroke="#C41E3A" stroke-width="2"/>
+                  <line x1="20" y1="6" x2="20" y2="14" stroke="#C41E3A" stroke-width="1.5"/>
+                  <line x1="20" y1="20" x2="20" y2="26" stroke="#C41E3A" stroke-width="2"/>
+                  <line x1="26" y1="20" x2="32" y2="20" stroke="#C41E3A" stroke-width="1.5"/>
+                  <circle cx="20" cy="20" r="3" fill="#C41E3A"/>
+                </g>
+              </svg>
+            </div>
+            <h3>Estado del vuelo</h3>
+            <p>Información en tiempo real</p>
+          </a>
+
+          <a href="#ayuda" class="quick-link-card">
+            <div class="quick-link-icon">
+              <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <g transform="translate(25, 15)">
+                  <circle cx="15" cy="15" r="14" fill="none" stroke="#C41E3A" stroke-width="2"/>
+                  <text x="10" y="20" font-size="20" font-weight="bold" fill="#C41E3A">?</text>
+                </g>
+              </svg>
+            </div>
+            <h3>Centro de ayuda</h3>
+            <p>Estamos aquí para ayudarte</p>
+          </a>
+        </div>
+      </div>
+
+      <section class="destinations" id="destinos">
+        <div class="container">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow eyebrow-blue">Descubre Colombia</span>
+              <h2>¿A dónde quieres ir?</h2>
+            </div>
+            <p>Escapadas urbanas, playas inolvidables y experiencias que recordarás siempre.</p>
+          </div>
+
+          <div class="destination-grid">
+            <article class="destination destination-cartagena">
+              <div class="destination-info">
+                <h3>Cartagena</h3>
+                <p>Historia, mar y color</p>
+                <strong>Vuelos desde $189.000 COP</strong>
+              </div>
+            </article>
+
+            <article class="destination destination-medellin">
+              <div class="destination-info">
+                <h3>Medellín</h3>
+                <p>La ciudad de la eterna primavera</p>
+                <strong>Vuelos desde $159.000 COP</strong>
+              </div>
+            </article>
+
+            <article class="destination destination-bogota">
+              <div class="destination-info">
+                <h3>Bogotá</h3>
+                <p>Una capital por descubrir</p>
+                <strong>Vuelos desde $149.000 COP</strong>
+              </div>
+            </article>
+
+            <article class="destination destination-santamarta">
+              <div class="destination-info">
+                <h3>Santa Marta</h3>
+                <p>Naturaleza junto al Caribe</p>
+                <strong>Vuelos desde $199.000 COP</strong>
+              </div>
+            </article>
+
+            <article class="destination destination-cali">
+              <div class="destination-info">
+                <h3>Cali</h3>
+                <p>Ritmo y sabor del Pacífico</p>
+                <strong>Vuelos desde $169.000 COP</strong>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="ofertas">
+        <div class="container">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow eyebrow-blue">Explora el mundo</span>
+              <h2>Destinos internacionales</h2>
+            </div>
+          </div>
+
+          <div class="destinations-cards-grid">
+            <!-- Paris Card -->
+            <div class="card international-card">
+              <div class="img international-card-image paris-image">
+                <div class="save">
+                  <svg class="svg" width="683" height="683" viewBox="0 0 683 683" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0_993_25)">
+                      <mask id="mask0_993_25" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="683" height="683">
+                        <path d="M0 -0.00012207H682.667V682.667H0V-0.00012207Z" fill="white"></path>
+                      </mask>
+                      <g mask="url(#mask0_993_25)">
+                        <path d="M148.535 19.9999C137.179 19.9999 126.256 24.5092 118.223 32.5532C110.188 40.5866 105.689 51.4799 105.689 62.8439V633.382C105.689 649.556 118.757 662.667 134.931 662.667H135.039C143.715 662.667 151.961 659.218 158.067 653.09C186.451 624.728 270.212 540.966 304.809 506.434C314.449 496.741 327.623 491.289 341.335 491.289C355.045 491.289 368.22 496.741 377.859 506.434C412.563 541.074 496.752 625.242 524.816 653.348C530.813 659.314 538.845 662.667 547.308 662.667C563.697 662.667 576.979 649.395 576.979 633.019V62.8439C576.979 51.4799 572.48 40.5866 564.447 32.5532C556.412 24.5092 545.489 19.9999 534.133 19.9999H148.535Z" stroke="#CED8DE" stroke-width="40" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </g>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_993_25">
+                        <rect width="682.667" height="682.667" fill="white"></rect>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </div>
+                <div style="font-size: 3em; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0;">🗼</div>
+              </div>
+
+              <div class="text">
+                <p class="h3">París</p>
+                <p class="p">Desde $5.199.000 COP</p>
+
+                <a class="icon-box" href="ofertas.html" aria-label="Ver ofertas de París">
+                  <svg version="1.1" class="svg" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512.001 512.001" style="enable-background:new 0 0 512.001 512.001;" xml:space="preserve">
+                    <g>
+                      <path style="fill:#3D6687;" d="M165,68.715l-26.327-26.327l37.363-37.363c3.739-3.739,9.801-3.739,13.54,0l12.786,12.786c3.739,3.739,3.739,9.801,0,13.54L165,68.715z"></path>
+                      <path style="fill:#3D6687;" d="M234.998,101.725l-26.327-26.327l37.363-37.363c3.739-3.739,9.801-3.739,13.54,0l12.786,12.786c3.739,3.739,3.739,9.801,0,13.54L234.998,101.725z"></path>
+                      <path style="fill:#3D6687;" d="M445.507,349.222l26.327,26.327l37.363-37.363c3.739-3.739,3.739-9.801,0-13.54l-12.787-12.787c-3.739-3.739-9.801-3.739-13.54,0L445.507,349.222z"></path>
+                      <path style="fill:#3D6687;" d="M408.054,279.224l26.327,26.327l37.363-37.363c3.739-3.739,3.739-9.801,0-13.54l-12.786-12.786c-3.739-3.739-9.801-3.739-13.54,0L408.054,279.224z"></path>
+                    </g>
+                  </svg>
+                  <p class="span">Ver Ofertas</p>
+                </a>
+              </div>
+            </div>
+
+            <!-- Barcelona Card -->
+            <div class="card international-card">
+              <div class="img international-card-image barcelona-image">
+                <div class="save">
+                  <svg class="svg" width="683" height="683" viewBox="0 0 683 683" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0_993_25)">
+                      <mask id="mask0_993_26" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="683" height="683">
+                        <path d="M0 -0.00012207H682.667V682.667H0V-0.00012207Z" fill="white"></path>
+                      </mask>
+                      <g mask="url(#mask0_993_26)">
+                        <path d="M148.535 19.9999C137.179 19.9999 126.256 24.5092 118.223 32.5532C110.188 40.5866 105.689 51.4799 105.689 62.8439V633.382C105.689 649.556 118.757 662.667 134.931 662.667H135.039C143.715 662.667 151.961 659.218 158.067 653.09C186.451 624.728 270.212 540.966 304.809 506.434C314.449 496.741 327.623 491.289 341.335 491.289C355.045 491.289 368.22 496.741 377.859 506.434C412.563 541.074 496.752 625.242 524.816 653.348C530.813 659.314 538.845 662.667 547.308 662.667C563.697 662.667 576.979 649.395 576.979 633.019V62.8439C576.979 51.4799 572.48 40.5866 564.447 32.5532C556.412 24.5092 545.489 19.9999 534.133 19.9999H148.535Z" stroke="#CED8DE" stroke-width="40" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </g>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_993_26">
+                        <rect width="682.667" height="682.667" fill="white"></rect>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </div>
+                <div style="font-size: 3em; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0;">🏛️</div>
+              </div>
+
+              <div class="text">
+                <p class="h3">Barcelona</p>
+                <p class="p">Desde $3.799.000 COP</p>
+
+                <a class="icon-box" href="ofertas.html" aria-label="Ver ofertas de Barcelona">
+                  <svg version="1.1" class="svg" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512.001 512.001" style="enable-background:new 0 0 512.001 512.001;" xml:space="preserve">
+                    <g>
+                      <path style="fill:#3D6687;" d="M165,68.715l-26.327-26.327l37.363-37.363c3.739-3.739,9.801-3.739,13.54,0l12.786,12.786c3.739,3.739,3.739,9.801,0,13.54L165,68.715z"></path>
+                      <path style="fill:#3D6687;" d="M234.998,101.725l-26.327-26.327l37.363-37.363c3.739-3.739,9.801-3.739,13.54,0l12.786,12.786c3.739,3.739,3.739,9.801,0,13.54L234.998,101.725z"></path>
+                      <path style="fill:#3D6687;" d="M445.507,349.222l26.327,26.327l37.363-37.363c3.739-3.739,3.739-9.801,0-13.54l-12.787-12.787c-3.739-3.739-9.801-3.739-13.54,0L445.507,349.222z"></path>
+                      <path style="fill:#3D6687;" d="M408.054,279.224l26.327,26.327l37.363-37.363c3.739-3.739,3.739-9.801,0-13.54l-12.786-12.786c-3.739-3.739-9.801-3.739-13.54,0L408.054,279.224z"></path>
+                    </g>
+                  </svg>
+                  <p class="span">Ver Ofertas</p>
+                </a>
+              </div>
+            </div>
+
+            <!-- Egipto Card -->
+            <div class="card international-card">
+              <div class="img international-card-image egypt-image">
+                <div class="save">
+                  <svg class="svg" width="683" height="683" viewBox="0 0 683 683" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0_993_25)">
+                      <mask id="mask0_993_27" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="683" height="683">
+                        <path d="M0 -0.00012207H682.667V682.667H0V-0.00012207Z" fill="white"></path>
+                      </mask>
+                      <g mask="url(#mask0_993_27)">
+                        <path d="M148.535 19.9999C137.179 19.9999 126.256 24.5092 118.223 32.5532C110.188 40.5866 105.689 51.4799 105.689 62.8439V633.382C105.689 649.556 118.757 662.667 134.931 662.667H135.039C143.715 662.667 151.961 659.218 158.067 653.09C186.451 624.728 270.212 540.966 304.809 506.434C314.449 496.741 327.623 491.289 341.335 491.289C355.045 491.289 368.22 496.741 377.859 506.434C412.563 541.074 496.752 625.242 524.816 653.348C530.813 659.314 538.845 662.667 547.308 662.667C563.697 662.667 576.979 649.395 576.979 633.019V62.8439C576.979 51.4799 572.48 40.5866 564.447 32.5532C556.412 24.5092 545.489 19.9999 534.133 19.9999H148.535Z" stroke="#CED8DE" stroke-width="40" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </g>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_993_27">
+                        <rect width="682.667" height="682.667" fill="white"></rect>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </div>
+                <div style="font-size: 3em; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0;">🔺</div>
+              </div>
+
+              <div class="text">
+                <p class="h3">Egipto</p>
+                <p class="p">Desde $3.199.000 COP</p>
+
+                <a class="icon-box" href="ofertas.html" aria-label="Ver ofertas de Egipto">
+                  <svg version="1.1" class="svg" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512.001 512.001" style="enable-background:new 0 0 512.001 512.001;" xml:space="preserve">
+                    <g>
+                      <path style="fill:#3D6687;" d="M165,68.715l-26.327-26.327l37.363-37.363c3.739-3.739,9.801-3.739,13.54,0l12.786,12.786c3.739,3.739,3.739,9.801,0,13.54L165,68.715z"></path>
+                      <path style="fill:#3D6687;" d="M234.998,101.725l-26.327-26.327l37.363-37.363c3.739-3.739,9.801-3.739,13.54,0l12.786,12.786c3.739,3.739,3.739,9.801,0,13.54L234.998,101.725z"></path>
+                      <path style="fill:#3D6687;" d="M445.507,349.222l26.327,26.327l37.363-37.363c3.739-3.739,3.739-9.801,0-13.54l-12.787-12.787c-3.739-3.739-9.801-3.739-13.54,0L445.507,349.222z"></path>
+                      <path style="fill:#3D6687;" d="M408.054,279.224l26.327,26.327l37.363-37.363c3.739-3.739,3.739-9.801,0-13.54l-12.786-12.786c-3.739-3.739-9.801-3.739-13.54,0L408.054,279.224z"></path>
+                    </g>
+                  </svg>
+                  <p class="span">Ver Ofertas</p>
+                </a>
+              </div>
+            </div>
+
+            <!-- Tokio Card -->
+            <div class="card international-card">
+              <div class="img international-card-image tokyo-image">
+                <div class="save">
+                  <svg class="svg" width="683" height="683" viewBox="0 0 683 683" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0_993_25)">
+                      <mask id="mask0_993_28" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="683" height="683">
+                        <path d="M0 -0.00012207H682.667V682.667H0V-0.00012207Z" fill="white"></path>
+                      </mask>
+                      <g mask="url(#mask0_993_28)">
+                        <path d="M148.535 19.9999C137.179 19.9999 126.256 24.5092 118.223 32.5532C110.188 40.5866 105.689 51.4799 105.689 62.8439V633.382C105.689 649.556 118.757 662.667 134.931 662.667H135.039C143.715 662.667 151.961 659.218 158.067 653.09C186.451 624.728 270.212 540.966 304.809 506.434C314.449 496.741 327.623 491.289 341.335 491.289C355.045 491.289 368.22 496.741 377.859 506.434C412.563 541.074 496.752 625.242 524.816 653.348C530.813 659.314 538.845 662.667 547.308 662.667C563.697 662.667 576.979 649.395 576.979 633.019V62.8439C576.979 51.4799 572.48 40.5866 564.447 32.5532C556.412 24.5092 545.489 19.9999 534.133 19.9999H148.535Z" stroke="#CED8DE" stroke-width="40" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </g>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_993_28">
+                        <rect width="682.667" height="682.667" fill="white"></rect>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </div>
+                <div style="font-size: 3em; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0;">⛩️</div>
+              </div>
+
+              <div class="text">
+                <p class="h3">Tokio</p>
+                <p class="p">Desde $6.399.000 COP</p>
+
+                <a class="icon-box" href="ofertas.html" aria-label="Ver ofertas de Tokio">
+                  <svg version="1.1" class="svg" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512.001 512.001" style="enable-background:new 0 0 512.001 512.001;" xml:space="preserve">
+                    <g>
+                      <path style="fill:#3D6687;" d="M165,68.715l-26.327-26.327l37.363-37.363c3.739-3.739,9.801-3.739,13.54,0l12.786,12.786c3.739,3.739,3.739,9.801,0,13.54L165,68.715z"></path>
+                      <path style="fill:#3D6687;" d="M234.998,101.725l-26.327-26.327l37.363-37.363c3.739-3.739,9.801-3.739,13.54,0l12.786,12.786c3.739,3.739,3.739,9.801,0,13.54L234.998,101.725z"></path>
+                      <path style="fill:#3D6687;" d="M445.507,349.222l26.327,26.327l37.363-37.363c3.739-3.739,3.739-9.801,0-13.54l-12.787-12.787c-3.739-3.739-9.801-3.739-13.54,0L445.507,349.222z"></path>
+                      <path style="fill:#3D6687;" d="M408.054,279.224l26.327,26.327l37.363-37.363c3.739-3.739,3.739-9.801,0-13.54l-12.786-12.786c-3.739-3.739-9.801-3.739-13.54,0L408.054,279.224z"></path>
+                    </g>
+                  </svg>
+                  <p class="span">Ver Ofertas</p>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="inspiration-section" id="inspiracion">
+        <div class="container">
+          <div class="section-heading inspiration-heading">
+            <div>
+              <span class="eyebrow eyebrow-blue">Ideas para tu próxima escapada</span>
+              <h2>Inspírate para tu próximo viaje</h2>
+            </div>
+            <p>Historias, sabores y paisajes colombianos que ya están esperando por ti.</p>
+          </div>
+
+          <div class="inspiration-grid">
+            <article class="inspiration-card inspiration-cartagena">
+              <div class="inspiration-card-image"></div>
+              <div class="inspiration-card-content">
+                <span>01 / Caribe</span>
+                <h3>Cartagena</h3>
+                <p>Historia, playas y calles llenas de color.</p>
+              </div>
+            </article>
+
+            <article class="inspiration-card inspiration-eje">
+              <div class="inspiration-card-image"></div>
+              <div class="inspiration-card-content">
+                <span>02 / Montaña</span>
+                <h3>Eje Cafetero</h3>
+                <p>Naturaleza, café y paisajes increíbles.</p>
+              </div>
+            </article>
+
+            <article class="inspiration-card inspiration-san-andres">
+              <div class="inspiration-card-image"></div>
+              <div class="inspiration-card-content">
+                <span>03 / Isla</span>
+                <h3>San Andrés</h3>
+                <p>El mar de siete colores te espera.</p>
+              </div>
+            </article>
+          </div>
+
+          <a class="inspiration-cta" href="destinos.html">Descubrir destinos <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section class="travel-experience" id="experiencia">
+        <div class="container travel-experience-layout">
+          <div class="travel-experience-copy">
+            <span class="eyebrow eyebrow-blue">Viaja a tu ritmo</span>
+            <h2>Tu viaje, a tu manera</h2>
+            <p>Todo empieza con una ruta y se convierte en una experiencia hecha para ti.</p>
+
+            <div class="benefit-list">
+              <article class="benefit-item">
+                <span class="benefit-icon" aria-hidden="true">▣</span>
+                <div><h3>Comodidad</h3><p>Espacios pensados para que disfrutes cada momento del viaje.</p></div>
+              </article>
+              <article class="benefit-item">
+                <span class="benefit-icon" aria-hidden="true">✦</span>
+                <div><h3>Experiencia sencilla</h3><p>Todo lo que necesitas, en un solo lugar.</p></div>
+              </article>
+              <article class="benefit-item">
+                <span class="benefit-icon" aria-hidden="true">♥</span>
+                <div><h3>Siempre contigo</h3><p>Estamos disponibles cuando nos necesites.</p></div>
+              </article>
+            </div>
+          </div>
+          <img class="travel-experience-image" src="../assets/images/comodidad.jpg" alt="Avión listo para despegar" />
+        </div>
+      </section>
+
+      <section class="newsletter">
+        <div class="container newsletter-box">
+          <div>
+            <h2>Mantente al día de las novedades</h2>
+            <p>Recibe ofertas exclusivas, novedades y consejos para tu próximo viaje.</p>
+          </div>
+
+          <form class="newsletter-form" id="newsletterForm">
+            <label class="sr-only" for="newsletterEmail">Tu correo electrónico</label>
+            <input id="newsletterEmail" type="email" required placeholder="Tu correo electrónico" />
+            <button class="btn btn-primary" type="submit">Suscribirme</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer id="ayuda">
+      <div class="container">
+        <div class="footer-grid">
+          <div id="nosotros">
+            <a href="index.html" class="logo">
+              SENAIR
+            </a>
+            <p>Conectando destinos, impulsando oportunidades.</p>
+          </div>
+
+          <div>
+            <h4>SENAIR</h4>
+            <ul>
+              <li><a href="#">Sobre nosotros</a></li>
+              <li><a href="#">Trabaja con nosotros</a></li>
+              <li><a href="#">Sostenibilidad</a></li>
+              <li><a href="#">Prensa</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4>Ayuda</h4>
+            <ul>
+              <li><a href="#">Preguntas frecuentes</a></li>
+              <li><a href="#">Equipaje</a></li>
+              <li><a href="#">Documentación</a></li>
+              <li><a href="#">Contáctanos</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="terminos.html">Términos y condiciones</a></li>
+              <li><a href="privacidad.html">Política de privacidad</a></li>
+              <li><a href="#">Cookies</a></li>
+              <li><a href="#">Accesibilidad</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="copyright">
+          <span>© <span id="currentYear">2026</span> SENAIR. Todos los derechos reservados.</span>
+          <span>Colombia · COP · Español</span>
+        </div>
+      </div>
+    </footer>
+
+    <div class="modal" id="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-card">
+        <h2 id="modalTitle">Gestiona tu viaje</h2>
+        <p id="modalText">Introduce tus datos para continuar.</p>
+
+        <div class="field" id="modalField">
+          <label for="modalInput">Código de reserva o correo electrónico</label>
+          <input id="modalInput" placeholder="Ejemplo: AB12CD" />
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-outline" type="button" id="closeModal">Cerrar</button>
+          <button class="btn btn-primary" type="button" id="modalAction">Continuar</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

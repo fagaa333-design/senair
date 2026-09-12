@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="../js/auth-early.js"></script>
+    <link rel="stylesheet" href="auth-early.css" />
+    <meta name="description" content="Explora destinos de SENAIR y encuentra tu próxima ruta." />
+    <title>SENAIR | Destinos</title>
+    <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="stylesheet" href="destinos.css" />
+    <link rel="stylesheet" href="destinos-cards.css" />
+    <link rel="stylesheet" href="destinos-search.css" />
+    <link rel="stylesheet" href="header-fixes.css" />
+    <link rel="stylesheet" href="auth-nav.css" />
+    <link rel="stylesheet" href="auth-nav-fix.css" />
+    <link rel="stylesheet" href="header-index.css" />
+    <link rel="stylesheet" href="hamburger-style.css" />
+    <link rel="stylesheet" href="header-shared.css" />
+    <link rel="stylesheet" href="page-loading.css" />
+    <script src="page-loading.js" defer></script>
+    <script src="destinos.js" defer></script>
+    <script src="../js/main.js" defer></script>
+  </head>
+  <body>
+    <div class="loading-screen" id="loadingScreen" role="status" aria-label="Cargando SENAIR">
+      <video class="loading-video" id="loadingVideo" autoplay muted playsinline preload="auto">
+        <source src="../assets/videos/carga%20air%20white.mp4" type="video/mp4" />
+      </video>
+      <span class="sr-only">Cargando SENAIR</span>
+    </div>
+    <div class="topbar"><div class="container topbar-content"><span>Viaja con tranquilidad. Atención 24/7.</span><div class="topbar-links"><a href="index.html#ayuda">Ayuda</a></div></div></div>
+    <header><div class="container navbar">
+      <a href="index.html" class="logo" aria-label="Inicio de SENAIR"><img class="logo-imagen" src="logo.png" alt="">SENAIR</a>
+      <nav aria-label="Navegación principal"><a href="vuelos.html">Vuelos</a><a href="destinos.html" aria-current="page">Destinos</a><a href="ofertas.html">Ofertas</a><a href="contacto.html">Contacto</a></nav>
+      <button class="hamburger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button>
+      <div class="nav-actions"><button class="btn btn-outline" type="button" data-modal="manage" data-auth-required hidden>Gestionar reserva</button><a href="login.html" class="Btn login-link"><div class="sign"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div><div class="text">Iniciar Sesión</div></a><div class="account-menu" data-account-menu hidden><button class="account-trigger" type="button" aria-expanded="false" aria-controls="accountDropdown"><span class="account-avatar" aria-hidden="true">U</span><span class="account-trigger-name">Usuario</span></button><div class="account-dropdown" id="accountDropdown" hidden><div class="account-summary"><span class="account-avatar account-avatar-large" aria-hidden="true">U</span><div><strong class="account-name">Usuario</strong><small class="account-email"></small></div></div><a href="viajes.html">Mis viajes</a><a href="#ajustes">Ajustes</a><button type="button" data-logout>Cerrar sesión</button></div></div></div>
+      <nav id="mobileNav" class="mobile-nav" aria-hidden="true"><a href="vuelos.html">Vuelos</a><a href="destinos.html" aria-current="page">Destinos</a><a href="ofertas.html">Ofertas</a><a href="contacto.html">Contacto</a><a href="login.html" class="mobile-login-link">Iniciar sesión</a><button type="button" class="mobile-logout-link" data-logout hidden>Cerrar sesión</button></nav>
+    </div></header>
+
+    <main>
+      <section class="destinations-hero">
+        <div class="page-shell hero-layout">
+          <div class="hero-copy">
+            <span class="eyebrow">Tu próxima historia empieza aquí</span>
+            <h1>Hay un lugar esperando por ti.</h1>
+            <p>Descubre rutas llenas de sabor, naturaleza y nuevas perspectivas. Elige un destino y deja que SENAIR te acerque.</p>
+            <a class="primary-button" href="#explore">Explorar destinos <span aria-hidden="true">↓</span></a>
+          </div>
+          <div class="hero-route" aria-label="Ruta destacada Bogotá a Cartagena">
+            <span class="route-label">RUTA DESTACADA · COLOMBIA</span>
+            <div class="route-line"><strong>BOG</strong><i></i><strong>CTG</strong></div>
+            <div class="route-footer"><span>Bogotá</span><span>Cartagena</span></div>
+            <div class="route-price">Desde <strong>$189.000</strong> COP</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="explore-section" id="explore">
+        <div class="page-shell">
+          <div class="section-heading">
+            <div><span class="eyebrow blue">Elige tu próximo destino</span><h2>Viajes para cada forma de explorar</h2></div>
+            <p id="resultCount" aria-live="polite">6 destinos disponibles</p>
+          </div>
+          <div class="destination-tools">
+            <label class="search-field"><span aria-hidden="true">⌕</span><input id="destinationSearch" type="search" placeholder="Busca una ciudad o experiencia" autocomplete="off" /></label>
+            <div class="filter-list" role="group" aria-label="Filtrar destinos">
+              <button class="filter-button active" type="button" data-filter="all">Todos</button>
+              <button class="filter-button" type="button" data-filter="playa">Playa</button>
+              <button class="filter-button" type="button" data-filter="ciudad">Ciudad</button>
+              <button class="filter-button" type="button" data-filter="naturaleza">Naturaleza</button>
+              <button class="filter-button" type="button" data-filter="internacional">Internacional</button>
+            </div>
+          </div>
+          <div class="destination-grid" id="destinationGrid">
+            <article class="destination-card featured" data-category="playa" data-name="cartagena caribe playa historia">
+              <div class="destination-image image-cartagena"><span class="card-tag">Favorito del mes</span><button class="save-button" type="button" aria-label="Guardar Cartagena" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Caribe colombiano</span><span>Vuelo directo</span></div><h3>Cartagena</h3><p>Calles con historia, mar turquesa y noches que se quedan contigo.</p><div class="card-footer"><strong>Desde $189.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="ciudad" data-name="medellin ciudad cultura primavera">
+              <div class="destination-image image-medellin"><button class="save-button" type="button" aria-label="Guardar Medellín" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Antioquia</span><span>Todo el año</span></div><h3>Medellín</h3><p>Arte, montañas y una energía creativa que transforma cada visita.</p><div class="card-footer"><strong>Desde $159.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="ciudad" data-name="bogota ciudad cultura sabana">
+              <div class="destination-image image-bogota"><button class="save-button" type="button" aria-label="Guardar Bogotá" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Capital colombiana</span><span>Conexiones</span></div><h3>Bogotá</h3><p>Museos, sabores y barrios que cuentan el pulso de Colombia.</p><div class="card-footer"><strong>Desde $149.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="naturaleza" data-name="santa marta naturaleza playa tayrona">
+              <div class="destination-image image-santa-marta"><button class="save-button" type="button" aria-label="Guardar Santa Marta" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Caribe natural</span><span>Vuelo directo</span></div><h3>Santa Marta</h3><p>Sierra, selva y mar en una misma aventura frente al Caribe.</p><div class="card-footer"><strong>Desde $199.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="naturaleza" data-name="cali naturaleza cultura pacifico">
+              <div class="destination-image image-cali"><button class="save-button" type="button" aria-label="Guardar Cali" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Valle del Cauca</span><span>Ritmo local</span></div><h3>Cali</h3><p>Salsa, cocina del Pacífico y atardeceres que invitan a quedarse.</p><div class="card-footer"><strong>Desde $169.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="playa" data-name="san andres playa isla caribe">
+              <div class="destination-image image-san-andres"><button class="save-button" type="button" aria-label="Guardar San Andrés" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Isla colombiana</span><span>Escapada</span></div><h3>San Andrés</h3><p>El mar de siete colores y una pausa que se siente como vacaciones.</p><div class="card-footer"><strong>Desde $229.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="internacional" data-name="paris europa cultura francia">
+              <div class="destination-image image-paris"><button class="save-button" type="button" aria-label="Guardar París" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Europa</span><span>Con conexión</span></div><h3>París</h3><p>Una escapada para mirar el mundo distinto.</p><div class="card-footer"><strong>Desde $5.199.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="internacional" data-name="tokio asia japon cultura">
+              <div class="destination-image image-tokyo"><button class="save-button" type="button" aria-label="Guardar Tokio" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Asia</span><span>Con conexión</span></div><h3>Tokio</h3><p>Tradición, energía y una nueva perspectiva.</p><div class="card-footer"><strong>Desde $6.399.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="internacional" data-name="barcelona espana mediterraneo ciudad">
+              <div class="destination-image image-barcelona"><button class="save-button" type="button" aria-label="Guardar Barcelona" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>España</span><span>Con conexión</span></div><h3>Barcelona</h3><p>Arquitectura, mar y una ciudad para caminar.</p><div class="card-footer"><strong>Desde $4.399.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="internacional" data-name="madrid espana europa cultura">
+              <div class="destination-image image-madrid"><button class="save-button" type="button" aria-label="Guardar Madrid" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Europa</span><span>Con conexión</span></div><h3>Madrid</h3><p>Arte, plazas y noches llenas de vida.</p><div class="card-footer"><strong>Desde $4.099.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="internacional" data-name="londres reino unido europa historia">
+              <div class="destination-image image-londres"><button class="save-button" type="button" aria-label="Guardar Londres" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Reino Unido</span><span>Con conexión</span></div><h3>Londres</h3><p>Historia, diseño y rincones para descubrir.</p><div class="card-footer"><strong>Desde $4.799.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="internacional" data-name="roma italia historia cultura">
+              <div class="destination-image image-roma"><button class="save-button" type="button" aria-label="Guardar Roma" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Italia</span><span>Con conexión</span></div><h3>Roma</h3><p>Arte, historia y sabores que cruzan los siglos.</p><div class="card-footer"><strong>Desde $4.599.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="playa" data-name="miami playa estados unidos ciudad">
+              <div class="destination-image image-miami"><button class="save-button" type="button" aria-label="Guardar Miami" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Estados Unidos</span><span>Con conexión</span></div><h3>Miami</h3><p>Playas, música y una energía imposible de ignorar.</p><div class="card-footer"><strong>Desde $3.399.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="naturaleza" data-name="lima peru gastronomia cultura">
+              <div class="destination-image image-lima"><button class="save-button" type="button" aria-label="Guardar Lima" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Perú</span><span>Con conexión</span></div><h3>Lima</h3><p>Una mesa increíble entre océano, historia y ciudad.</p><div class="card-footer"><strong>Desde $1.499.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="ciudad" data-name="buenos aires argentina tango ciudad">
+              <div class="destination-image image-buenos-aires"><button class="save-button" type="button" aria-label="Guardar Buenos Aires" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Argentina</span><span>Con conexión</span></div><h3>Buenos Aires</h3><p>Tango, arquitectura y una ciudad que nunca duerme.</p><div class="card-footer"><strong>Desde $2.299.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="naturaleza" data-name="quito ecuador naturaleza montana">
+              <div class="destination-image image-quito"><button class="save-button" type="button" aria-label="Guardar Quito" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Ecuador</span><span>Con conexión</span></div><h3>Quito</h3><p>Montañas, historia y una ciudad entre las nubes.</p><div class="card-footer"><strong>Desde $1.899.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="ciudad" data-name="santiago chile montana ciudad">
+              <div class="destination-image image-santiago"><button class="save-button" type="button" aria-label="Guardar Santiago" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Chile</span><span>Con conexión</span></div><h3>Santiago</h3><p>Una ciudad moderna al pie de la cordillera.</p><div class="card-footer"><strong>Desde $2.199.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+            <article class="destination-card" data-category="ciudad" data-name="nueva york estados unidos ciudad cultura">
+              <div class="destination-image image-new-york"><button class="save-button" type="button" aria-label="Guardar Nueva York" aria-pressed="false">♡</button></div>
+              <div class="destination-content"><div class="card-meta"><span>Estados Unidos</span><span>Con conexión</span></div><h3>Nueva York</h3><p>Rascacielos, cultura y planes para cada momento.</p><div class="card-footer"><strong>Desde $3.899.000 <small>COP</small></strong><a href="index.html#vuelos">Ver vuelos <span aria-hidden="true">→</span></a></div></div>
+            </article>
+          </div>
+          <div class="empty-state" id="emptyState" hidden><strong>No encontramos ese destino.</strong><span>Prueba otra ciudad o cambia el filtro.</span></div>
+        </div>
+      </section>
+
+      <section class="planning-section">
+        <div class="page-shell planning-layout">
+          <div class="planning-copy"><span class="eyebrow blue">Planifica sin complicarte</span><h2>Tu viaje empieza mucho antes de despegar.</h2><p>Encuentra el vuelo que se ajusta a tu ritmo, revisa tus opciones y prepárate para disfrutar el camino.</p><a class="dark-button" href="index.html#vuelos">Buscar un vuelo <span aria-hidden="true">→</span></a></div>
+          <div class="planning-list"><div><span class="step-number">01</span><strong>Elige una ruta</strong><p>Compara horarios y encuentra la conexión ideal.</p></div><div><span class="step-number">02</span><strong>Prepara tu experiencia</strong><p>Agrega equipaje y servicios a tu medida.</p></div><div><span class="step-number">03</span><strong>Disfruta el destino</strong><p>Nosotros nos encargamos del camino.</p></div></div>
+        </div>
+      </section>
+      <a class="login-home-button internal-home-button" href="index.html" aria-label="Volver al inicio">
+        <span class="login-home-icon" aria-hidden="true">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="25" height="25">
+            <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z" fill="currentColor"></path>
+            <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z" fill="currentColor"></path>
+          </svg>
+        </span>
+        <span>Volver al inicio</span>
+      </a>
+    </main>
+
+    <footer class="site-footer"><div class="page-shell footer-grid"><div><a class="brand footer-brand" href="index.html">SENAIR</a><p>Conectando destinos, impulsando oportunidades.</p></div><div><h3>SENAIR</h3><a href="index.html#nosotros">Sobre nosotros</a><a href="index.html#experiencia">Tu viaje</a></div><div><h3>Ayuda</h3><a href="index.html#ayuda">Preguntas frecuentes</a><a href="index.html#ayuda">Contáctanos</a></div><div><h3>Legal</h3><a href="#">Privacidad</a><a href="#">Accesibilidad</a></div></div><div class="page-shell copyright"><span>© 2026 SENAIR. Todos los derechos reservados.</span><span>Colombia · COP · Español</span></div></footer>
+  </body>
+</html>

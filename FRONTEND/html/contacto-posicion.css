@@ -1,0 +1,4 @@
+.contact-hero{align-items:center}
+.desktop-nav a{position:relative;display:block;color:inherit;transition:color .12s ease}.desktop-nav a::after{position:absolute;right:0;bottom:16px;left:0;height:2px;background:var(--blue);content:"";transform:scaleX(0);transform-origin:center;transition:transform .12s ease;pointer-events:none}.desktop-nav a:hover::after,.desktop-nav a:focus-visible::after,.desktop-nav .active::after{transform:scaleX(1)}
+.site-header{backdrop-filter:none}.header-actions .manage-link{transition:color .15s ease,background-color .15s ease,border-color .15s ease}.header-actions .manage-link:hover,.header-actions .manage-link:focus-visible{transform:none}
+@media (max-width:760px){.contact-hero{display:block}.contact-hero p{margin-top:16px}}

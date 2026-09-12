@@ -1,0 +1,21 @@
+SENAIR - Proyecto portable
+==========================
+
+El proyecto incluye:
+- FRONTEND: paginas, estilos, scripts e imagenes.
+- BACKEND: servidor Node.js y API de vuelos.
+- database\senair.db: base de datos SQLite con usuarios y vuelos.
+- database\senair.sql: esquema de respaldo.
+
+Para usarlo en otro computador:
+
+1. Instala Node.js LTS desde https://nodejs.org/
+2. Abre la carpeta SENAIR desde el USB.
+3. Ejecuta instalar-dependencias.bat una sola vez.
+4. Ejecuta iniciar-senair.bat.
+5. La pagina se abrira en http://localhost:3000/html/index.html
+
+No es obligatorio instalar XAMPP para esta version. Node.js sirve las paginas y la API en el mismo puerto.
+La base de datos senair.db debe permanecer dentro de la carpeta database.
+
+Si copias el proyecto a otra ubicacion, conserva toda la estructura de carpetas.
