@@ -36,8 +36,9 @@ function renderReservations() {
   reservationsEmpty.hidden = reservations.length > 0;
   reservations.forEach((reservation) => {
     const card = document.createElement("article");
+    const seats = Array.isArray(reservation.seat) ? reservation.seat.join(", ") : reservation.seat;
     card.className = "reservation-card";
-    card.innerHTML = `<div><span class="reservation-status">Confirmado</span><h3>${escapeHtml(reservation.origin)} <b>→</b> ${escapeHtml(reservation.destination)}</h3><p>${escapeHtml(reservation.departureDate)} · ${escapeHtml(reservation.departureTime)} - ${escapeHtml(reservation.arrivalTime)}</p></div><dl><div><dt>Asiento</dt><dd>${escapeHtml(reservation.seat)}</dd></div><div><dt>Reserva</dt><dd>${escapeHtml(reservation.id.slice(-6).toUpperCase())}</dd></div></dl>`;
+    card.innerHTML = `<div><span class="reservation-status">Confirmado</span><h3>${escapeHtml(reservation.origin)} <b>→</b> ${escapeHtml(reservation.destination)}</h3><p>${escapeHtml(reservation.departureDate)} · ${escapeHtml(reservation.departureTime)} - ${escapeHtml(reservation.arrivalTime)}</p></div><dl><div><dt>${Array.isArray(reservation.seat) ? "Asientos" : "Asiento"}</dt><dd>${escapeHtml(seats)}</dd></div><div><dt>Reserva</dt><dd>${escapeHtml(reservation.id.slice(-6).toUpperCase())}</dd></div></dl>`;
     reservationsGrid.append(card);
   });
 }

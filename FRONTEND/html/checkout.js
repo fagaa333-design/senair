@@ -5,6 +5,29 @@ const currency = new Intl.NumberFormat("es-CO", { style: "currency", currency: "
 const passengerCount = Math.max(1, Number(selectedFlight?.passengers || 1));
 const selectedSeats = [];
 
+const nameInput = document.querySelector('[name="name"]');
+const cardInput = document.querySelector('[name="card"]');
+const expiryInput = document.querySelector('[name="expiry"]');
+const cvcInput = document.querySelector('[name="cvc"]');
+
+nameInput.addEventListener("input", () => {
+  nameInput.value = nameInput.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g, "");
+});
+
+cardInput.addEventListener("input", () => {
+  const digits = cardInput.value.replace(/\D/g, "").slice(0, 16);
+  cardInput.value = digits.replace(/(.{4})/g, "$1 ").trim();
+});
+
+expiryInput.addEventListener("input", () => {
+  const digits = expiryInput.value.replace(/\D/g, "").slice(0, 4);
+  expiryInput.value = digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+});
+
+cvcInput.addEventListener("input", () => {
+  cvcInput.value = cvcInput.value.replace(/\D/g, "").slice(0, 4);
+});
+
 if (!selectedFlight) {
   window.location.replace("vuelos.html");
 } else {
