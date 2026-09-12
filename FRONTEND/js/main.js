@@ -88,18 +88,19 @@ document.addEventListener("click", (event) => {
     });
 });
 
-const loginForm = document.querySelector('form[action$="/login.php"]');
-const registerForm = document.querySelector('form[action$="/register.php"]');
+const loginForm = document.querySelector('form[action="/login"]');
+const registerForm = document.querySelector('form[action="/register"]');
 
 async function submitAuthForm(form, isRegistration) {
     try {
         const endpoint = window.location.protocol === "file:"
-            ? `http://localhost/SENAIR/api/${isRegistration ? "register" : "login"}.php`
+            ? `http://localhost:3000/${isRegistration ? "register" : "login"}`
             : form.action;
+        const formData = new FormData(form);
         const response = await fetch(endpoint, {
             method: "POST",
-            body: new FormData(form),
-            headers: { Accept: "application/json" },
+            body: JSON.stringify(Object.fromEntries(formData.entries())),
+            headers: { Accept: "application/json", "Content-Type": "application/json" },
         });
         const result = await response.json();
 
@@ -108,7 +109,6 @@ async function submitAuthForm(form, isRegistration) {
             return;
         }
 
-        const formData = new FormData(form);
         const name = isRegistration ? formData.get("name") : (result.name || formData.get("email"));
         window.sessionStorage.setItem(authStorageKey, "true");
         window.sessionStorage.setItem("senairUserName", String(name || "Usuario"));
