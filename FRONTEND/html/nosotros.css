@@ -9,48 +9,79 @@
 .team-heading{margin-bottom:30px}
 .team-heading h2{margin-top:6px;color:var(--navy);font-size:30px}
 
-.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:26px;justify-items:center}
+.team-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+  gap:26px;
+  justify-items:center;
+  max-width:1080px;
+  margin:0 auto;
+}
 
 .card{
   display:flex;
   flex-direction:column;
   align-items:center;
   width:100%;
-  max-width:230px;
-  padding:24px 16px;
+  max-width:260px;
+  padding:26px 20px;
   background-color:var(--navy);
   border-radius:2em;
   box-shadow:8px 8px 22px rgba(2,12,26,.45), -8px -8px 22px rgba(23,80,140,.28);
+  box-sizing:border-box;
+  transition:transform .25s ease, box-shadow .25s ease;
+}
+
+.card:hover{
+  transform:translateY(-4px);
+  box-shadow:8px 12px 26px rgba(2,12,26,.55), -8px -8px 26px rgba(23,80,140,.32);
+}
+
+.profileimage{
+  width:110px;
+  height:110px;
+  border-radius:50%;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background-color:rgba(255,255,255,.08);
+  border:3px solid rgba(255,255,255,.2);
+  flex-shrink:0;
+  box-sizing:border-box;
 }
 
 .profileimage img{
-  display:grid;
-  place-items:center;
-  width:max-content;
-  height:120px;
-  background-color:transparent;
-  border:none;
-  border-radius:5px;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+  border-radius:50%;
 }
 
 .pfp{
   width:100%;
-  border-radius:35em;
+  height:100%;
+  border-radius:50%;
   fill:#eaf3ff;
+  display:block;
 }
 
 .Name{
-  margin-top:14px;
+  margin-top:16px;
   color:#fff;
   font-family:"Trebuchet MS",Arial,sans-serif;
   font-size:19px;
+  font-weight:700;
   text-align:center;
+  word-break:break-word;
 }
 
 .Name p{margin:0}
 
 .ficha{
-  margin:2px 0 0;
+  margin:4px 0 0;
   color:#9fc0e6;
   font-size:12px;
   font-weight:700;
@@ -63,25 +94,34 @@
   align-items:center;
   justify-content:center;
   gap:16px;
-  width:90%;
-  margin-top:16px;
-  padding:12px;
+  width:100%;
+  max-width:200px;
+  margin-top:18px;
+  padding:10px 14px;
   color:#fff;
   background-color:#051f3d;
   border-radius:3em;
   box-shadow:3px 3px 12px rgba(0,0,0,.4), -3px -3px 12px rgba(23,80,140,.22);
+  box-sizing:border-box;
 }
 
-.social-link{color:#fff;transition:color .3s ease}
+.social-link{color:#fff;transition:color .3s ease;display:flex;align-items:center;justify-content:center}
 .social-link[data-network="github"]:hover{color:var(--coral)}
 .social-link[data-network="instagram"]:hover{color:red}
 .social-link[data-network="facebook"]:hover{color:var(--blue)}
 .social-link[data-network="twitter"]:hover{color:#7db8ef}
 
 @media (max-width:850px){
-  .about-grid{grid-template-columns:1fr}
+  .about-grid{grid-template-columns:1fr;gap:16px;margin:28px 0 44px}
+  .team-heading h2{font-size:26px}
 }
 
-@media (max-width:560px){
-  .team-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+@media (max-width:580px){
+  .team-grid{
+    grid-template-columns:1fr;
+    gap:22px;
+  }
+  .card{
+    max-width:280px;
+  }
 }
