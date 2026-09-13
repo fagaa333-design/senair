@@ -29,8 +29,29 @@ function getReservations() {
   }
 }
 
-function renderReservations() {
-  const reservations = getReservations();
+async function renderReservations() {
+  let reservations = getReservations();
+
+  try {
+    const response = await fetch("/api/reservations", { credentials: "include" });
+    if (response.ok) {
+      const data = await response.json();
+      reservations = (data.reservations || []).map((r) => ({
+        id: String(r.id),
+        origin: r.origin,
+        destination: r.destination,
+        departureDate: r.departure_date,
+        departureTime: r.departure_time,
+        arrivalTime: r.arrival_time,
+        seat: r.seat,
+        price: r.price,
+        airline: r.airline,
+      }));
+    }
+  } catch {
+    // Network error or not authenticated — use localStorage data
+  }
+
   reservationsCount.textContent = `${reservations.length} reserva${reservations.length === 1 ? "" : "s"}`;
   reservationsGrid.replaceChildren();
   reservationsEmpty.hidden = reservations.length > 0;
@@ -38,7 +59,7 @@ function renderReservations() {
     const card = document.createElement("article");
     const seats = Array.isArray(reservation.seat) ? reservation.seat.join(", ") : reservation.seat;
     card.className = "reservation-card";
-    card.innerHTML = `<div><span class="reservation-status">Confirmado</span><h3>${escapeHtml(reservation.origin)} <b>→</b> ${escapeHtml(reservation.destination)}</h3><p>${escapeHtml(reservation.departureDate)} · ${escapeHtml(reservation.departureTime)} - ${escapeHtml(reservation.arrivalTime)}</p></div><dl><div><dt>${Array.isArray(reservation.seat) ? "Asientos" : "Asiento"}</dt><dd>${escapeHtml(seats)}</dd></div><div><dt>Reserva</dt><dd>${escapeHtml(reservation.id.slice(-6).toUpperCase())}</dd></div></dl>`;
+    card.innerHTML = `<div><span class="reservation-status">Confirmado</span><h3>${escapeHtml(reservation.origin)} <b>→</b> ${escapeHtml(reservation.destination)}</h3><p>${escapeHtml(reservation.departureDate)} · ${escapeHtml(reservation.departureTime)} - ${escapeHtml(reservation.arrivalTime)}</p></div><dl><div><dt>${Array.isArray(reservation.seat) ? "Asientos" : "Asiento"}</dt><dd>${escapeHtml(seats)}</dd></div><div><dt>Reserva</dt><dd>${escapeHtml(String(reservation.id).slice(-6).toUpperCase())}</dd></div></dl>`;
     reservationsGrid.append(card);
   });
 }

@@ -74,22 +74,46 @@ if (!selectedFlight) {
   }
 }
 
-document.getElementById("paymentForm").addEventListener("submit", (event) => {
+document.getElementById("paymentForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   if (selectedSeats.length !== passengerCount) return;
-  const reservations = JSON.parse(window.localStorage.getItem("senairReservations") || "[]");
+
   const reservation = {
-    id: `${selectedFlight.id}-${selectedSeats.join("")}-${Date.now()}`,
     origin: selectedFlight.origin,
     destination: selectedFlight.destination,
     departureDate: selectedFlight.departure_date,
     departureTime: selectedFlight.departure_time,
     arrivalTime: selectedFlight.arrival_time,
-    seat: selectedSeats,
+    seat: selectedSeats.join(", "),
     price: selectedFlight.price * passengerCount,
     airline: selectedFlight.airline,
+    flightId: selectedFlight.id,
   };
-  window.localStorage.setItem("senairReservations", JSON.stringify([...reservations, reservation]));
+
+  try {
+    const response = await fetch("/api/reservations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(reservation),
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("server");
+  } catch {
+    const localReservations = JSON.parse(window.localStorage.getItem("senairReservations") || "[]");
+    localReservations.push({
+      id: `${selectedFlight.id}-${selectedSeats.join("")}-${Date.now()}`,
+      origin: reservation.origin,
+      destination: reservation.destination,
+      departureDate: reservation.departureDate,
+      departureTime: reservation.departureTime,
+      arrivalTime: reservation.arrivalTime,
+      seat: selectedSeats,
+      price: reservation.price,
+      airline: reservation.airline,
+    });
+    window.localStorage.setItem("senairReservations", JSON.stringify(localReservations));
+  }
+
   document.getElementById("confirmationText").textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")}. Te enviaremos los detalles al correo de tu cuenta.`;
   document.getElementById("confirmation").hidden = false;
   event.currentTarget.closest(".payment-step").hidden = true;

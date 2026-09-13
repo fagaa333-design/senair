@@ -1,3 +1,7 @@
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>'"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[c]);
+}
+
 const params = new URLSearchParams(window.location.search);
 const origin = params.get("origin") || "";
 const destination = params.get("destination") || "";
@@ -35,7 +39,7 @@ function renderFlights() {
 	visibleFlights.forEach((flight, index) => {
 		const card = document.createElement("article");
 		card.className = "flight-card";
-		card.innerHTML = `<div class="airline-mark"><strong>${flight.airline}</strong><span>${index === 0 ? "Recomendado" : "SENAIR"}</span></div><div class="flight-times"><div><strong>${flight.departure_time}</strong><span>${flight.origin}</span></div><div class="flight-line"><span>${formatStops(flight.stops)}</span><i></i><span>${flight.arrival_time}</span></div><div class="arrival"><strong>${flight.arrival_time}</strong><span>${flight.destination}</span></div></div><div class="flight-price"><strong>${moneyFormatter.format(flight.price)}</strong><span>por pasajero</span><button type="button" class="choose-flight">Seleccionar</button></div>`;
+		card.innerHTML = `<div class="airline-mark"><strong>${escapeHtml(flight.airline)}</strong><span>${index === 0 ? "Recomendado" : "SENAIR"}</span></div><div class="flight-times"><div><strong>${escapeHtml(flight.departure_time)}</strong><span>${escapeHtml(flight.origin)}</span></div><div class="flight-line"><span>${escapeHtml(formatStops(flight.stops))}</span><i></i><span>${escapeHtml(flight.arrival_time)}</span></div><div class="arrival"><strong>${escapeHtml(flight.arrival_time)}</strong><span>${escapeHtml(flight.destination)}</span></div></div><div class="flight-price"><strong>${moneyFormatter.format(flight.price)}</strong><span>por pasajero</span><button type="button" class="choose-flight">Seleccionar</button></div>`;
 		resultsContainer.append(card);
 	});
 

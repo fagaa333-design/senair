@@ -72,6 +72,7 @@ document.querySelectorAll("[data-account-menu]").forEach((menu) => {
 
 document.querySelectorAll("[data-logout]").forEach((button) => {
     button.addEventListener("click", () => {
+        fetch("/logout", { method: "POST", credentials: "include" }).catch(() => {});
         window.sessionStorage.removeItem(authStorageKey);
         window.sessionStorage.removeItem("senairUserName");
         window.sessionStorage.removeItem("senairUserEmail");
@@ -103,6 +104,7 @@ async function submitAuthForm(form, isRegistration) {
             method: "POST",
             body: JSON.stringify(Object.fromEntries(formData.entries())),
             headers: { Accept: "application/json", "Content-Type": "application/json" },
+            credentials: "include",
         });
         const result = await response.json();
 
@@ -117,7 +119,7 @@ async function submitAuthForm(form, isRegistration) {
         window.sessionStorage.setItem("senairUserEmail", String(formData.get("email") || ""));
         window.location.href = new URL("../index.html", window.location.href).href;
     } catch {
-        window.alert("No se pudo conectar con SENAIR. Enciende Apache y MySQL en XAMPP e inténtalo de nuevo.");
+        window.alert("No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.");
     }
 }
 
@@ -565,6 +567,7 @@ document.querySelectorAll('.flip-card__form').forEach((form) => {
                 method: 'POST',
                 headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
+                credentials: 'include',
             });
 
             const data = await res.json().catch(() => ({}));
