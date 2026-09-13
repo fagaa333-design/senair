@@ -78,6 +78,10 @@ document.getElementById("paymentForm").addEventListener("submit", async (event) 
   event.preventDefault();
   if (selectedSeats.length !== passengerCount) return;
 
+  const paymentStep = document.querySelector(".payment-step");
+  const confirmation = document.getElementById("confirmation");
+  const confirmationText = document.getElementById("confirmationText");
+
   const reservation = {
     origin: selectedFlight.origin,
     destination: selectedFlight.destination,
@@ -114,8 +118,14 @@ document.getElementById("paymentForm").addEventListener("submit", async (event) 
     window.localStorage.setItem("senairReservations", JSON.stringify(localReservations));
   }
 
-  document.getElementById("confirmationText").textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")}. Te enviaremos los detalles al correo de tu cuenta.`;
-  document.getElementById("confirmation").hidden = false;
-  event.currentTarget.closest(".payment-step").hidden = true;
-  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+  confirmationText.textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")}. Te enviaremos los detalles al correo de tu cuenta.`;
+  confirmation.hidden = false;
+  confirmation.style.display = "block";
+
+  if (paymentStep) {
+    paymentStep.hidden = true;
+    paymentStep.style.display = "none";
+  }
+
+  confirmation.scrollIntoView({ behavior: "smooth", block: "center" });
 });

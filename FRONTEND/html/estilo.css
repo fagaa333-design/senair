@@ -2809,57 +2809,34 @@ footer li:hover {
     box-sizing: border-box;
 }
 
-.password-preview-wrapper {
+.password-input-wrapper {
     position: relative;
     display: block;
 }
 
-.password-preview-wrapper .input {
-    color: transparent;
-    caret-color: transparent;
+.password-input-wrapper .input {
+    padding-right: 92px;
 }
 
-.password-preview {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    display: flex;
-    align-items: center;
-    padding: 17px 22px;
-    overflow: hidden;
-    color: var(--font-color);
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    pointer-events: none;
-    box-sizing: border-box;
-}
-
-.password-preview-caret {
+.password-toggle {
     position: absolute;
     top: 50%;
-    left: 22px;
-    height: 17px;
-    width: 1px;
-    background: var(--font-color);
-    opacity: 0;
-    pointer-events: none;
+    right: 14px;
     transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    color: var(--blue);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: 999px;
 }
 
-.password-preview-wrapper:focus-within .password-preview-caret {
-    animation: password-caret-blink 1s step-end infinite;
-}
-
-.password-preview-wrapper.has-password-value .password-preview-caret {
-    display: none;
-}
-
-@keyframes password-caret-blink {
-    0%, 49% { opacity: 1; }
-    50%, 100% { opacity: 0; }
+.password-toggle:hover,
+.password-toggle:focus-visible {
+    background: rgba(18, 177, 209, 0.12);
+    outline: none;
 }
 
 .input::-moz-placeholder {

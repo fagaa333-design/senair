@@ -138,27 +138,29 @@ if (registerForm) {
 }
 
 document.querySelectorAll('input[type="password"]').forEach((passwordInput) => {
-    const wrapper = document.createElement("span");
-    const preview = document.createElement("span");
-    const caret = document.createElement("span");
-    let revealTimer;
+    const wrapper = document.createElement("div");
+    const toggleBtn = document.createElement("button");
+    const inputId = passwordInput.id || `password-${Math.random().toString(16).slice(2)}`;
 
-    wrapper.className = "password-preview-wrapper";
-    preview.className = "password-preview";
-    caret.className = "password-preview-caret";
-    preview.setAttribute("aria-hidden", "true");
-    caret.setAttribute("aria-hidden", "true");
+    wrapper.className = "password-input-wrapper";
+    toggleBtn.type = "button";
+    toggleBtn.className = "password-toggle";
+    toggleBtn.setAttribute("aria-label", "Mostrar contraseña");
+    toggleBtn.textContent = "Mostrar";
+    passwordInput.setAttribute("id", inputId);
     passwordInput.parentNode.insertBefore(wrapper, passwordInput);
-    wrapper.append(passwordInput, preview, caret);
+    wrapper.append(passwordInput, toggleBtn);
 
     passwordInput.addEventListener("input", () => {
-        const value = passwordInput.value;
-        window.clearTimeout(revealTimer);
-        wrapper.classList.toggle("has-password-value", Boolean(value));
-        preview.textContent = value ? `${"•".repeat(value.length - 1)}${value.slice(-1)}` : "";
-        revealTimer = window.setTimeout(() => {
-            preview.textContent = value ? "•".repeat(value.length) : "";
-        }, 1400);
+        toggleBtn.textContent = passwordInput.value ? (passwordInput.type === "password" ? "Mostrar" : "Ocultar") : "Mostrar";
+    });
+
+    toggleBtn.addEventListener("click", () => {
+        const isHidden = passwordInput.type === "password";
+        passwordInput.type = isHidden ? "text" : "password";
+        toggleBtn.textContent = isHidden ? "Ocultar" : "Mostrar";
+        toggleBtn.setAttribute("aria-label", isHidden ? "Ocultar contraseña" : "Mostrar contraseña");
+        passwordInput.focus();
     });
 });
 
