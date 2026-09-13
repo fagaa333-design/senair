@@ -193,8 +193,9 @@ const authLimiter = rateLimit({
 
 /* ── Static files ─────────────────────────────────────────────── */
 
-app.get("/", (request, response) => response.redirect("/html/index.html"));
+app.get(["/", "/index.html", "/SENAIR/FRONTEND/html/index.html"], (request, response) => response.redirect("/html/index.html"));
 app.use(express.static(FRONTEND_ROOT, { index: false }));
+app.use("/SENAIR/FRONTEND", express.static(FRONTEND_ROOT, { index: false }));
 
 /* ── Auth endpoints ───────────────────────────────────────────── */
 
@@ -260,6 +261,11 @@ app.post("/login", authLimiter, async (request, response) => {
 app.post("/logout", (request, response) => {
   response.clearCookie("senair_token", { path: "/" });
   response.json({ success: true, message: "Sesión cerrada." });
+});
+
+app.get("/logout", (request, response) => {
+  response.clearCookie("senair_token", { path: "/" });
+  response.redirect("/html/index.html");
 });
 
 /* ── Flight endpoints ─────────────────────────────────────────── */

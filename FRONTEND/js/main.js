@@ -31,9 +31,7 @@ if (hamburgerBtn && mobileNavEl) {
 }
 
 function goToHome() {
-    window.location.href = window.location.protocol === "file:"
-        ? new URL("../index.html", window.location.href).href
-        : "/SENAIR/FRONTEND/html/index.html";
+    window.location.href = "index.html";
 }
 
 document.querySelectorAll("[data-auth-required]").forEach((element) => {
