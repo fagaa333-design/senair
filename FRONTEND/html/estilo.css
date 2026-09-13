@@ -2457,11 +2457,17 @@ footer li:hover {
 }
 
 /* Login flip-card - Combined design (andrew-demchenk0 + mahbowal) */
+body.login-page {
+    background-color: var(--navy);
+}
+
 .login-section {
     position: relative;
     overflow: hidden;
     padding: 70px 20px 110px;
-    background: linear-gradient(135deg, #f5faff 0%, #ffffff 58%, #e7f4ff 100%);
+    background-color: var(--navy);
+    background: linear-gradient(140deg, #031c39 0%, var(--navy) 40%, #084c94 75%, var(--blue) 100%);
+    color: var(--white);
 }
 
 .login-section::before {
@@ -2470,9 +2476,22 @@ footer li:hover {
     right: -120px;
     width: 420px;
     height: 420px;
-    border: 1px solid rgba(8, 102, 198, .13);
+    border: 1px solid rgba(223, 242, 255, 0.12);
     border-radius: 50%;
     content: "";
+    pointer-events: none;
+}
+
+.login-section::after {
+    position: absolute;
+    bottom: -160px;
+    left: -100px;
+    width: 380px;
+    height: 380px;
+    border: 1px solid rgba(223, 242, 255, 0.08);
+    border-radius: 50%;
+    content: "";
+    pointer-events: none;
 }
 
 .login-section { 
@@ -2503,27 +2522,42 @@ footer li:hover {
 .login-kicker {
     display: inline-block;
     margin-bottom: 12px;
-    color: var(--blue);
+    color: #9cd5ff;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 6px 14px;
+    border-radius: 999px;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 2px;
     text-transform: uppercase;
 }
 
+.recovery-dialog .login-kicker {
+    color: var(--blue);
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-bottom: 10px;
+}
+
 .login-copy h1 {
-    color: var(--navy);
+    color: var(--white);
     font-size: clamp(36px, 5vw, 60px);
-    line-height: 1;
+    line-height: 1.08;
     letter-spacing: -1px;
 }
 
-.login-copy h1 strong { color: var(--blue); }
+.login-copy h1 strong {
+    color: #8ad1ff;
+}
 
 .login-copy p {
     max-width: 470px;
     margin-top: 16px;
-    color: var(--muted);
+    color: #d6e8fa;
     font-size: 17px;
+    line-height: 1.6;
 }
 
 .login-benefits {
@@ -2543,19 +2577,30 @@ footer li:hover {
     width: 44px;
     height: 44px;
     place-items: center;
-    color: var(--blue);
-    background: #dff2ff;
+    color: var(--navy);
+    background: #ffffff;
     border-radius: 50%;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 800;
     flex: 0 0 44px;
+    box-shadow: 0 4px 14px rgba(3, 29, 58, 0.25);
 }
 
 .login-benefits strong,
 .login-benefits small { display: block; }
 
-.login-benefits strong { color: var(--navy); font-size: 16px; }
-.login-benefits small { margin-top: 4px; color: var(--muted); font-size: 14px; }
+.login-benefits strong {
+    color: var(--white);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.login-benefits small {
+    margin-top: 4px;
+    color: #c5dff6;
+    font-size: 14px;
+    line-height: 1.4;
+}
 
 .login-home-button {
     position: absolute;
@@ -2569,9 +2614,9 @@ footer li:hover {
     overflow: hidden;
     color: var(--navy);
     background: var(--white);
-    border: 1px solid rgba(8, 102, 198, .18);
+    border: 1px solid rgba(255, 255, 255, .3);
     border-radius: 16px;
-    box-shadow: 0 10px 24px rgba(3, 29, 58, .12);
+    box-shadow: 0 10px 24px rgba(3, 29, 58, .28);
     font-size: 16px;
     font-weight: 700;
     white-space: nowrap;
@@ -2581,8 +2626,8 @@ footer li:hover {
 .login-home-button:hover,
 .login-home-button:focus-visible {
     width: 190px;
-    color: var(--blue);
-    box-shadow: 0 14px 28px rgba(8, 102, 198, .2);
+    color: var(--navy);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, .3);
 }
 
 .login-home-icon {
@@ -2674,28 +2719,32 @@ footer li:hover {
     display: flex;
     width: 270px;
     justify-content: space-between;
-    color: var(--font-color);
+    color: #ffffff;
     font-family: "Trebuchet MS", sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
 }
 
 .side-label {
     cursor: pointer;
+    color: rgba(255, 255, 255, 0.85);
     transition: color .15s ease, text-decoration-color .15s ease;
 }
 
 .side-label:hover,
 .side-label:focus-visible {
-    color: var(--blue);
+    color: #ffffff;
     text-decoration: underline;
-    text-decoration-color: var(--blue);
+    text-decoration-color: #8ad1ff;
     text-underline-offset: 4px;
 }
 
 .toggle:not(:checked) ~ .card-side .side-label-login,
 .toggle:checked ~ .card-side .side-label-register {
+    color: #ffffff;
+    font-weight: 800;
     text-decoration: underline;
+    text-decoration-color: #8ad1ff;
     text-underline-offset: 4px;
 }
 
