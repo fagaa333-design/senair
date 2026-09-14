@@ -376,6 +376,26 @@ app.get("/api/reservations", requireAuth, async (request, response) => {
   }
 });
 
+app.delete("/api/reservations/:id", requireAuth, async (request, response) => {
+  const reservationId = Number.parseInt(request.params.id, 10);
+  if (!reservationId) {
+    return response.status(400).json({ success: false, message: "ID de reserva inválido." });
+  }
+
+  try {
+    const result = await db.execute({
+      sql: "DELETE FROM reservations WHERE id = ? AND user_id = ?",
+      args: [reservationId, request.user.id],
+    });
+    if (result.rowsAffected === 0) {
+      return response.status(404).json({ success: false, message: "Reserva no encontrada o no pertenece al usuario." });
+    }
+    return response.json({ success: true, message: "Reserva eliminada con éxito." });
+  } catch {
+    return response.status(500).json({ success: false, message: "No se pudo eliminar la reserva." });
+  }
+});
+
 /* ── 404 ──────────────────────────────────────────────────────── */
 
 app.use((request, response) => response.status(404).send("Recurso no encontrado"));

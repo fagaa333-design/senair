@@ -78,6 +78,15 @@ document.getElementById("paymentForm").addEventListener("submit", async (event) 
   event.preventDefault();
   if (selectedSeats.length !== passengerCount) return;
 
+  const authStorageKey = "senairAuthenticated";
+  const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
+
+  if (!isAuthenticated) {
+    alert("Debes iniciar sesión para completar tu compra y asociar el vuelo a tu cuenta.");
+    window.location.href = "login.html";
+    return;
+  }
+
   const paymentStep = document.querySelector(".payment-step");
   const confirmation = document.getElementById("confirmation");
   const confirmationText = document.getElementById("confirmationText");
@@ -101,22 +110,26 @@ document.getElementById("paymentForm").addEventListener("submit", async (event) 
       body: JSON.stringify(reservation),
       credentials: "include",
     });
-    if (!response.ok) throw new Error("server");
+
+    if (response.status === 401) {
+      alert("Tu sesión ha expirado. Por favor, inicia sesión para completar tu reserva.");
+      window.sessionStorage.removeItem(authStorageKey);
+      window.location.href = "login.html";
+      return;
+    }
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      alert(data.message || "No se pudo registrar la reserva. Intenta de nuevo.");
+      return;
+    }
   } catch {
-    const localReservations = JSON.parse(window.localStorage.getItem("senairReservations") || "[]");
-    localReservations.push({
-      id: `${selectedFlight.id}-${selectedSeats.join("")}-${Date.now()}`,
-      origin: reservation.origin,
-      destination: reservation.destination,
-      departureDate: reservation.departureDate,
-      departureTime: reservation.departureTime,
-      arrivalTime: reservation.arrivalTime,
-      seat: selectedSeats,
-      price: reservation.price,
-      airline: reservation.airline,
-    });
-    window.localStorage.setItem("senairReservations", JSON.stringify(localReservations));
+    alert("Hubo un problema de conexión con el servidor. Inténtalo de nuevo.");
+    return;
   }
+
+  // Eliminar cualquier residuo antiguo del localStorage global
+  window.localStorage.removeItem("senairReservations");
 
   confirmationText.textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")}. Te enviaremos los detalles al correo de tu cuenta.`;
   confirmation.hidden = false;

@@ -7,6 +7,9 @@ const reservationsGrid = document.getElementById("reservationsGrid");
 const reservationsEmpty = document.getElementById("reservationsEmpty");
 const reservationsCount = document.getElementById("reservationsCount");
 
+// Eliminar cualquier residuo antiguo del localStorage global no autenticado
+window.localStorage.removeItem("senairReservations");
+
 function getFavorites() {
   try {
     const favorites = JSON.parse(window.localStorage.getItem(favoritesStorageKey) || "[]");
@@ -20,17 +23,21 @@ function escapeHtml(value) {
   return String(value || "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 }
 
-function getReservations() {
-  try {
-    const reservations = JSON.parse(window.localStorage.getItem("senairReservations") || "[]");
-    return Array.isArray(reservations) ? reservations : [];
-  } catch {
-    return [];
-  }
-}
-
 async function renderReservations() {
-  let reservations = getReservations();
+  const authStorageKey = "senairAuthenticated";
+  const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
+  const userEmail = window.sessionStorage.getItem("senairUserEmail") || "";
+
+  // Si no ha iniciado sesión, NO mostrar vuelos pagados
+  if (!isAuthenticated) {
+    reservationsCount.textContent = "0 reservas";
+    reservationsGrid.replaceChildren();
+    reservationsEmpty.innerHTML = 'Inicia sesión para consultar tus vuelos confirmados. <a href="login.html" class="reservations-login-link">Iniciar sesión</a>';
+    reservationsEmpty.hidden = false;
+    return;
+  }
+
+  let reservations = [];
 
   try {
     const response = await fetch("/api/reservations", { credentials: "include" });
@@ -47,19 +54,82 @@ async function renderReservations() {
         price: r.price,
         airline: r.airline,
       }));
+      if (userEmail) {
+        window.sessionStorage.setItem(`senairReservations_${userEmail}`, JSON.stringify(reservations));
+      }
+    } else if (response.status === 401) {
+      window.sessionStorage.removeItem(authStorageKey);
+      reservationsCount.textContent = "0 reservas";
+      reservationsGrid.replaceChildren();
+      reservationsEmpty.innerHTML = 'Tu sesión ha expirado. <a href="login.html" class="reservations-login-link">Inicia sesión</a> para ver tus vuelos confirmados.';
+      reservationsEmpty.hidden = false;
+      return;
+    } else {
+      if (userEmail) {
+        reservations = JSON.parse(window.sessionStorage.getItem(`senairReservations_${userEmail}`) || "[]");
+      }
     }
   } catch {
-    // Network error or not authenticated — use localStorage data
+    if (userEmail) {
+      reservations = JSON.parse(window.sessionStorage.getItem(`senairReservations_${userEmail}`) || "[]");
+    }
   }
 
   reservationsCount.textContent = `${reservations.length} reserva${reservations.length === 1 ? "" : "s"}`;
   reservationsGrid.replaceChildren();
+  reservationsEmpty.textContent = "Aún no tienes vuelos confirmados.";
   reservationsEmpty.hidden = reservations.length > 0;
+
   reservations.forEach((reservation) => {
     const card = document.createElement("article");
     const seats = Array.isArray(reservation.seat) ? reservation.seat.join(", ") : reservation.seat;
     card.className = "reservation-card";
-    card.innerHTML = `<div><span class="reservation-status">Confirmado</span><h3>${escapeHtml(reservation.origin)} <b>→</b> ${escapeHtml(reservation.destination)}</h3><p>${escapeHtml(reservation.departureDate)} · ${escapeHtml(reservation.departureTime)} - ${escapeHtml(reservation.arrivalTime)}</p></div><dl><div><dt>${Array.isArray(reservation.seat) ? "Asientos" : "Asiento"}</dt><dd>${escapeHtml(seats)}</dd></div><div><dt>Reserva</dt><dd>${escapeHtml(String(reservation.id).slice(-6).toUpperCase())}</dd></div></dl>`;
+    card.dataset.id = reservation.id;
+    card.innerHTML = `
+      <div class="reservation-main">
+        <div>
+          <span class="reservation-status">Confirmado</span>
+          <h3>${escapeHtml(reservation.origin)} <b>→</b> ${escapeHtml(reservation.destination)}</h3>
+          <p>${escapeHtml(reservation.departureDate)} · ${escapeHtml(reservation.departureTime)} - ${escapeHtml(reservation.arrivalTime)}</p>
+        </div>
+        <dl>
+          <div><dt>${Array.isArray(reservation.seat) ? "Asientos" : "Asiento"}</dt><dd>${escapeHtml(seats)}</dd></div>
+          <div><dt>Reserva</dt><dd>${escapeHtml(String(reservation.id).slice(-6).toUpperCase())}</dd></div>
+        </dl>
+      </div>
+      <div class="reservation-actions">
+        <button class="remove-reservation-button" type="button">Quitar de Mis viajes</button>
+      </div>
+    `;
+
+    const removeBtn = card.querySelector(".remove-reservation-button");
+    removeBtn.addEventListener("click", async () => {
+      removeBtn.disabled = true;
+      removeBtn.textContent = "Quitando...";
+      try {
+        const delRes = await fetch(`/api/reservations/${encodeURIComponent(reservation.id)}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+        if (delRes.ok) {
+          if (userEmail) {
+            const cached = JSON.parse(window.sessionStorage.getItem(`senairReservations_${userEmail}`) || "[]");
+            const updated = cached.filter((r) => String(r.id) !== String(reservation.id));
+            window.sessionStorage.setItem(`senairReservations_${userEmail}`, JSON.stringify(updated));
+          }
+          await renderReservations();
+        } else {
+          alert("No se pudo quitar el vuelo de Mis viajes. Inténtalo de nuevo.");
+          removeBtn.disabled = false;
+          removeBtn.textContent = "Quitar de Mis viajes";
+        }
+      } catch {
+        alert("Error de conexión al intentar quitar el vuelo.");
+        removeBtn.disabled = false;
+        removeBtn.textContent = "Quitar de Mis viajes";
+      }
+    });
+
     reservationsGrid.append(card);
   });
 }
