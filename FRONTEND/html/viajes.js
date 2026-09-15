@@ -39,12 +39,8 @@ async function renderReservations() {
 
   let reservations = [];
 
-  const apiBase = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") && window.location.port !== "3000"
-    ? "http://localhost:3000"
-    : "";
-
   try {
-    const response = await fetch(`${apiBase}/api/reservations`, { credentials: "include" });
+    const response = await fetch("/api/reservations", { credentials: "include" });
     if (response.ok) {
       const data = await response.json();
       reservations = (data.reservations || []).map((r) => ({
@@ -111,7 +107,7 @@ async function renderReservations() {
       removeBtn.disabled = true;
       removeBtn.textContent = "Quitando...";
       try {
-        const delRes = await fetch(`${apiBase}/api/reservations/${encodeURIComponent(reservation.id)}`, {
+        const delRes = await fetch(`/api/reservations/${encodeURIComponent(reservation.id)}`, {
           method: "DELETE",
           credentials: "include",
         });

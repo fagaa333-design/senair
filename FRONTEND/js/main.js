@@ -94,11 +94,9 @@ const registerForm = document.querySelector('form[action="/register"]');
 
 async function submitAuthForm(form, isRegistration) {
     try {
-        const actionPath = form.getAttribute("action") || (isRegistration ? "/register" : "/login");
-        const apiBase = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") && window.location.port !== "3000"
-            ? "http://localhost:3000"
-            : (window.location.protocol === "file:" ? "http://localhost:3000" : "");
-        const endpoint = apiBase ? `${apiBase}${actionPath.startsWith("/") ? actionPath : `/${actionPath}`}` : form.action;
+        const endpoint = window.location.protocol === "file:"
+            ? `http://localhost:3000/${isRegistration ? "register" : "login"}`
+            : form.action;
         const formData = new FormData(form);
         const response = await fetch(endpoint, {
             method: "POST",

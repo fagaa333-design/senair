@@ -60,11 +60,8 @@ function renderSummary() {
 async function loadFlights() {
 	renderSummary();
 	const query = new URLSearchParams({ origin, destination, date: departure });
-	const apiBase = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") && window.location.port !== "3000"
-		? "http://localhost:3000"
-		: "";
 	try {
-		const response = await fetch(`${apiBase}/api/flights?${query.toString()}`);
+		const response = await fetch(`/api/flights?${query.toString()}`);
 		if (!response.ok) throw new Error("No se pudo consultar la API");
 		const data = await response.json();
 		flights = data.flights || [];
@@ -73,7 +70,7 @@ async function loadFlights() {
 		emptyState.hidden = flights.length !== 0;
 		if (flights.length) renderFlights();
 	} catch {
-		loadingState.innerHTML = "<strong>No pudimos cargar los vuelos.</strong><span>Revisa que MySQL en XAMPP y el servidor Node de SENAIR (puerto 3000) estén activos e inténtalo de nuevo.</span>";
+		loadingState.innerHTML = "<strong>No pudimos cargar los vuelos.</strong><span>Revisa que el servidor de SENAIR esté activo e inténtalo de nuevo.</span>";
 		resultCount.textContent = "Consulta no disponible";
 		emptyState.hidden = true;
 	}

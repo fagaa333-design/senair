@@ -1,10 +1,10 @@
 
-require("dotenv").config();
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
-const mysql = require("mysql2/promise");
+const { pathToFileURL } = require("url");
+const { createClient } = require("@libsql/client");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
@@ -21,6 +21,7 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean)
   : [`http://localhost:${PORT}`, `http://127.0.0.1:${PORT}`];
 const FRONTEND_ROOT = path.resolve(__dirname, "../FRONTEND");
+const DB_FILE = path.resolve(__dirname, "../database/senair.db");
 const app = express();
 
 if (!process.env.JWT_SECRET && IS_PRODUCTION) {
@@ -29,18 +30,10 @@ if (!process.env.JWT_SECRET && IS_PRODUCTION) {
 
 /* ── Database ─────────────────────────────────────────────────── */
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  port: Number.parseInt(process.env.DB_PORT || "3306", 10),
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "senair",
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  connectTimeout: 5000,
-  charset: "utf8mb4",
-  dateStrings: true,
+fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
+const db = createClient({
+  url: process.env.TURSO_DATABASE_URL || pathToFileURL(DB_FILE).href,
+  authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
 const demoFlights = [
@@ -53,63 +46,47 @@ const demoFlights = [
 ];
 
 async function initializeDatabase() {
-  try {
-    const connection = await pool.getConnection();
-    connection.release();
-
-    await pool.execute(`CREATE TABLE IF NOT EXISTS users (
-      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-      name VARCHAR(120) NOT NULL,
-      email VARCHAR(190) NOT NULL UNIQUE,
-      password VARCHAR(255) NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB`);
-
-    await pool.execute(`CREATE TABLE IF NOT EXISTS flights (
-      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-      origin VARCHAR(120) NOT NULL,
-      destination VARCHAR(120) NOT NULL,
-      departure_date DATE NOT NULL,
-      departure_time TIME NOT NULL,
-      arrival_time TIME NOT NULL,
-      price INT UNSIGNED NOT NULL,
-      airline VARCHAR(80) NOT NULL DEFAULT 'SENAIR',
-      stops TINYINT UNSIGNED NOT NULL DEFAULT 0,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE KEY uq_flight_route (origin, destination, departure_date, departure_time)
-    ) ENGINE=InnoDB`);
-
-    await pool.execute(`CREATE TABLE IF NOT EXISTS reservations (
-      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-      user_id INT UNSIGNED NOT NULL,
-      flight_id INT UNSIGNED NULL,
-      origin VARCHAR(120) NOT NULL,
-      destination VARCHAR(120) NOT NULL,
-      departure_date DATE NOT NULL,
-      departure_time TIME NOT NULL,
-      arrival_time TIME NOT NULL,
-      seat VARCHAR(50) NOT NULL,
-      price INT UNSIGNED NOT NULL,
-      airline VARCHAR(80) NOT NULL DEFAULT 'SENAIR',
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-      FOREIGN KEY (flight_id) REFERENCES flights(id) ON DELETE SET NULL,
-      INDEX idx_reservations_user (user_id)
-    ) ENGINE=InnoDB`);
-
-    for (const flight of demoFlights) {
-      await pool.execute(
-        "INSERT IGNORE INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        flight
-      );
-    }
-    console.log("✔ Base de datos MySQL conectada e inicializada con éxito.");
-  } catch (error) {
-    console.warn("⚠ Aviso: No se pudo conectar a la base de datos MySQL.");
-    console.warn("  Detalle:", error.message || error.code);
-    console.warn("  El servidor web continuará funcionando para servir el frontend.");
-    console.warn("  Para habilitar las funciones de base de datos, asegúrate de que MySQL esté activo.");
-  }
+  await db.batch([
+    `CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS flights (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      origin TEXT NOT NULL,
+      destination TEXT NOT NULL,
+      departure_date TEXT NOT NULL,
+      departure_time TEXT NOT NULL,
+      arrival_time TEXT NOT NULL,
+      price INTEGER NOT NULL CHECK (price >= 0),
+      airline TEXT NOT NULL DEFAULT 'SENAIR',
+      stops INTEGER NOT NULL DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (origin, destination, departure_date, departure_time)
+    )`,
+    `CREATE TABLE IF NOT EXISTS reservations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      flight_id INTEGER,
+      origin TEXT NOT NULL,
+      destination TEXT NOT NULL,
+      departure_date TEXT NOT NULL,
+      departure_time TEXT NOT NULL,
+      arrival_time TEXT NOT NULL,
+      seat TEXT NOT NULL,
+      price INTEGER NOT NULL CHECK (price >= 0),
+      airline TEXT NOT NULL DEFAULT 'SENAIR',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )`,
+    ...demoFlights.map((flight) => ({
+      sql: "INSERT OR IGNORE INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      args: flight,
+    })),
+  ], "write");
 }
 
 async function createRouteFlights(origin, destination, date) {
@@ -118,12 +95,10 @@ async function createRouteFlights(origin, destination, date) {
     ["12:45", "13:40", 159000, 0],
     ["18:20", "19:15", 189000, 0],
   ];
-  for (const [departureTime, arrivalTime, price, stops] of schedules) {
-    await pool.execute(
-      "INSERT IGNORE INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [origin, destination, date, departureTime, arrivalTime, price, "SENAIR", stops]
-    );
-  }
+  await db.batch(schedules.map(([departureTime, arrivalTime, price, stops]) => ({
+    sql: "INSERT OR IGNORE INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    args: [origin, destination, date, departureTime, arrivalTime, price, "SENAIR", stops],
+  })), "write");
 }
 
 /* ── Auth helpers ─────────────────────────────────────────────── */
@@ -196,7 +171,7 @@ app.use((request, response, next) => {
     response.setHeader("Access-Control-Allow-Origin", origin);
     response.setHeader("Access-Control-Allow-Credentials", "true");
   }
-  response.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
+  response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
   if (request.method === "OPTIONS") return response.sendStatus(204);
   next();
@@ -220,7 +195,6 @@ const authLimiter = rateLimit({
 
 app.get(["/", "/index.html", "/SENAIR/FRONTEND/html/index.html"], (request, response) => response.redirect("/html/index.html"));
 app.use(express.static(FRONTEND_ROOT, { index: false }));
-app.use(express.static(path.join(FRONTEND_ROOT, "html"), { index: false }));
 app.use("/SENAIR/FRONTEND", express.static(FRONTEND_ROOT, { index: false }));
 
 /* ── Auth endpoints ───────────────────────────────────────────── */
@@ -243,8 +217,8 @@ app.post("/register", authLimiter, async (request, response) => {
 
   try {
     const passwordHash = await bcrypt.hash(password, 10);
-    const [result] = await pool.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", [name, email, passwordHash]);
-    const userId = result.insertId;
+    const result = await db.execute({ sql: "INSERT INTO users (name, email, password) VALUES (?, ?, ?)", args: [name, email, passwordHash] });
+    const userId = Number(result.lastInsertRowid);
     const token = signToken({ id: userId, email, name });
     setAuthCookie(response, token);
     return response.status(201).json({
@@ -255,7 +229,7 @@ app.post("/register", authLimiter, async (request, response) => {
       redirect: "/html/index.html",
     });
   } catch (error) {
-    if (error.code === "ER_DUP_ENTRY") {
+    if (error.code === "SQLITE_CONSTRAINT") {
       return response.status(409).json({ success: false, message: "El correo ya está registrado." });
     }
     return response.status(500).json({ success: false, message: "Error interno del servidor." });
@@ -271,8 +245,8 @@ app.post("/login", authLimiter, async (request, response) => {
   }
 
   try {
-    const [rows] = await pool.execute("SELECT id, name, email, password FROM users WHERE email = ?", [email]);
-    const user = rows[0];
+    const result = await db.execute({ sql: "SELECT id, name, email, password FROM users WHERE email = ?", args: [email] });
+    const user = result.rows[0];
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return response.status(401).json({ success: false, message: "Credenciales inválidas." });
     }
@@ -318,14 +292,15 @@ app.get("/api/flights", async (request, response) => {
 
   const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
   try {
-    const [flights] = await pool.execute(`SELECT id, origin, destination, departure_date, departure_time, arrival_time, price, airline, stops FROM flights ${where} ORDER BY departure_date, departure_time`, values);
+    const result = await db.execute({ sql: `SELECT id, origin, destination, departure_date, departure_time, arrival_time, price, airline, stops FROM flights ${where} ORDER BY departure_date, departure_time`, args: values });
+    const flights = result.rows.map((row) => ({ ...row }));
     if (flights.length || !origin || !destination || !date || origin === destination || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return response.json({ success: true, flights });
     }
 
     await createRouteFlights(origin, destination, date);
-    const [createdFlights] = await pool.execute("SELECT id, origin, destination, departure_date, departure_time, arrival_time, price, airline, stops FROM flights WHERE origin = ? AND destination = ? AND departure_date = ? ORDER BY departure_time", [origin, destination, date]);
-    return response.json({ success: true, flights: createdFlights, created: true });
+    const createdResult = await db.execute({ sql: "SELECT id, origin, destination, departure_date, departure_time, arrival_time, price, airline, stops FROM flights WHERE origin = ? AND destination = ? AND departure_date = ? ORDER BY departure_time", args: [origin, destination, date] });
+    return response.json({ success: true, flights: createdResult.rows.map((row) => ({ ...row })), created: true });
   } catch {
     return response.status(500).json({ success: false, message: "No se pudieron consultar los vuelos." });
   }
@@ -348,13 +323,13 @@ app.post("/api/flights", requireAuth, async (request, response) => {
   }
 
   try {
-    const [result] = await pool.execute(
-      "INSERT INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [flight.origin, flight.destination, flight.departureDate, flight.departureTime, flight.arrivalTime, flight.price, flight.airline, flight.stops]
-    );
-    return response.status(201).json({ success: true, id: result.insertId, message: "Vuelo guardado." });
+    const result = await db.execute({
+      sql: "INSERT INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      args: [flight.origin, flight.destination, flight.departureDate, flight.departureTime, flight.arrivalTime, flight.price, flight.airline, flight.stops],
+    });
+    return response.status(201).json({ success: true, id: Number(result.lastInsertRowid), message: "Vuelo guardado." });
   } catch (error) {
-    if (error.code === "ER_DUP_ENTRY") return response.status(409).json({ success: false, message: "Ese vuelo ya existe para esa fecha y hora." });
+    if (error.code === "SQLITE_CONSTRAINT") return response.status(409).json({ success: false, message: "Ese vuelo ya existe para esa fecha y hora." });
     return response.status(500).json({ success: false, message: "No se pudo guardar el vuelo." });
   }
 });
@@ -379,11 +354,11 @@ app.post("/api/reservations", requireAuth, async (request, response) => {
   }
 
   try {
-    const [result] = await pool.execute(
-      "INSERT INTO reservations (user_id, flight_id, origin, destination, departure_date, departure_time, arrival_time, seat, price, airline) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [request.user.id, reservation.flightId, reservation.origin, reservation.destination, reservation.departureDate, reservation.departureTime, reservation.arrivalTime, reservation.seat, reservation.price, reservation.airline]
-    );
-    return response.status(201).json({ success: true, id: result.insertId, message: "Reserva confirmada." });
+    const result = await db.execute({
+      sql: "INSERT INTO reservations (user_id, flight_id, origin, destination, departure_date, departure_time, arrival_time, seat, price, airline) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      args: [request.user.id, reservation.flightId, reservation.origin, reservation.destination, reservation.departureDate, reservation.departureTime, reservation.arrivalTime, reservation.seat, reservation.price, reservation.airline],
+    });
+    return response.status(201).json({ success: true, id: Number(result.lastInsertRowid), message: "Reserva confirmada." });
   } catch {
     return response.status(500).json({ success: false, message: "No se pudo guardar la reserva." });
   }
@@ -391,11 +366,11 @@ app.post("/api/reservations", requireAuth, async (request, response) => {
 
 app.get("/api/reservations", requireAuth, async (request, response) => {
   try {
-    const [rows] = await pool.execute(
-      "SELECT id, origin, destination, departure_date, departure_time, arrival_time, seat, price, airline, created_at FROM reservations WHERE user_id = ? ORDER BY created_at DESC",
-      [request.user.id]
-    );
-    return response.json({ success: true, reservations: rows });
+    const result = await db.execute({
+      sql: "SELECT id, origin, destination, departure_date, departure_time, arrival_time, seat, price, airline, created_at FROM reservations WHERE user_id = ? ORDER BY created_at DESC",
+      args: [request.user.id],
+    });
+    return response.json({ success: true, reservations: result.rows.map((row) => ({ ...row })) });
   } catch {
     return response.status(500).json({ success: false, message: "No se pudieron consultar las reservas." });
   }
@@ -408,11 +383,11 @@ app.delete("/api/reservations/:id", requireAuth, async (request, response) => {
   }
 
   try {
-    const [result] = await pool.execute(
-      "DELETE FROM reservations WHERE id = ? AND user_id = ?",
-      [reservationId, request.user.id]
-    );
-    if (result.affectedRows === 0) {
+    const result = await db.execute({
+      sql: "DELETE FROM reservations WHERE id = ? AND user_id = ?",
+      args: [reservationId, request.user.id],
+    });
+    if (result.rowsAffected === 0) {
       return response.status(404).json({ success: false, message: "Reserva no encontrada o no pertenece al usuario." });
     }
     return response.json({ success: true, message: "Reserva eliminada con éxito." });
@@ -427,8 +402,11 @@ app.use((request, response) => response.status(404).send("Recurso no encontrado"
 
 /* ── Start ────────────────────────────────────────────────────── */
 
-initializeDatabase().finally(() => {
-  app.listen(PORT, () => {
+initializeDatabase()
+  .then(() => app.listen(PORT, () => {
     console.log(`SENAIR disponible en http://localhost:${PORT}`);
+  }))
+  .catch((error) => {
+    console.error("No se pudo inicializar la base de datos.", error);
+    process.exit(1);
   });
-});

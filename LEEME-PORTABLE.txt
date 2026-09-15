@@ -1,24 +1,21 @@
-SENAIR - Proyecto
-=================
+SENAIR - Proyecto portable
+==========================
 
 El proyecto incluye:
 - FRONTEND: paginas, estilos, scripts e imagenes.
-- BACKEND: servidor Node.js + Express y API REST (vuelos, reservas, autenticación).
-- database\senair.sql: esquema completo MySQL (tablas users, flights, reservations y datos iniciales).
+- BACKEND: servidor Node.js y API de vuelos.
+- database\senair.db: base de datos SQLite con usuarios y vuelos.
+- database\senair.sql: esquema de respaldo.
 
-Configuración de la Base de Datos:
-1. Inicia tu servidor MySQL (XAMPP localmente o servidor de hosting/nube).
-2. Importa el archivo database\senair.sql en tu MySQL.
-3. En la carpeta BACKEND, crea o edita el archivo .env con tus credenciales:
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_USER=root
-   DB_PASSWORD=
-   DB_NAME=senair
-   JWT_SECRET=tu_clave_secreta
+Para usarlo en otro computador:
 
-Para ejecutar:
 1. Instala Node.js LTS desde https://nodejs.org/
-2. Ejecuta instalar-dependencias.bat (o 'npm install' en BACKEND).
-3. Ejecuta iniciar-senair.bat (o 'npm start' en BACKEND).
-4. La pagina se abrira en http://localhost:3000/html/index.html
+2. Abre la carpeta SENAIR desde el USB.
+3. Ejecuta instalar-dependencias.bat una sola vez.
+4. Ejecuta iniciar-senair.bat.
+5. La pagina se abrira en http://localhost:3000/html/index.html
+
+No es obligatorio instalar XAMPP para esta version. Node.js sirve las paginas y la API en el mismo puerto.
+La base de datos senair.db debe permanecer dentro de la carpeta database.
+
+Si copias el proyecto a otra ubicacion, conserva toda la estructura de carpetas.
