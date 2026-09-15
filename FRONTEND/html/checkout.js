@@ -306,19 +306,88 @@ if (paymentForm) {
 
     closePaymentModal();
 
+    // 1. Datos para la Factura Electrónica
+    const totalAmount = selectedFlight.price * passengerCount;
+    const subtotalAmount = Math.round(totalAmount / 1.19);
+    const taxesAmount = totalAmount - subtotalAmount;
+    const invoiceNum = `SEN-${Math.floor(100000 + Math.random() * 900000)}`;
+    const now = new Date();
+    const invoiceDateStr = now.toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" }) + " " + now.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+    const userName = (nameInput?.value || "").trim() || window.sessionStorage.getItem("senairUserName") || "Pasajero SENAIR";
+    const userEmail = window.sessionStorage.getItem("senairUserEmail") || "correo@senair.com";
+    const reservationCode = `SNR-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+
+    const paymentMethodLabel = selectedPaymentMethod === "card"
+      ? (cardInput?.value ? `Tarjeta •••• ${cardInput.value.replace(/\s+/g, "").slice(-4)}` : "Tarjeta de Crédito")
+      : selectedPaymentMethod === "paypal" ? "PayPal" : selectedPaymentMethod === "apple-pay" ? "Apple Pay" : "Google Pay";
+
     const nCuotas = selectedPaymentMethod === "card" ? getSelectedInstallments() : 1;
+    const installmentsLabel = nCuotas === 1
+      ? "1 cuota (pago directo)"
+      : `${nCuotas} cuotas de ${currency.format(Math.round(totalAmount / nCuotas))} / mes`;
+
+    // Llenar campos de la factura
+    const invoiceNumberEl = document.getElementById("invoiceNumber");
+    if (invoiceNumberEl) invoiceNumberEl.textContent = `N° ${invoiceNum}`;
+
+    const invoiceDateEl = document.getElementById("invoiceDate");
+    if (invoiceDateEl) invoiceDateEl.textContent = `Fecha: ${invoiceDateStr}`;
+
+    const invoiceCustNameEl = document.getElementById("invoiceCustomerName");
+    if (invoiceCustNameEl) invoiceCustNameEl.textContent = userName;
+
+    const invoiceCustEmailEl = document.getElementById("invoiceCustomerEmail");
+    if (invoiceCustEmailEl) invoiceCustEmailEl.textContent = userEmail;
+
+    const invoicePaymentEl = document.getElementById("invoicePaymentMethod");
+    if (invoicePaymentEl) invoicePaymentEl.textContent = paymentMethodLabel;
+
+    const invoiceInstallmentsEl = document.getElementById("invoiceInstallments");
+    if (invoiceInstallmentsEl) invoiceInstallmentsEl.textContent = installmentsLabel;
+
+    const invoiceResCodeEl = document.getElementById("invoiceReservationCode");
+    if (invoiceResCodeEl) invoiceResCodeEl.textContent = reservationCode;
+
+    const invoiceAirlineEl = document.getElementById("invoiceFlightAirline");
+    if (invoiceAirlineEl) invoiceAirlineEl.textContent = `Operado por ${selectedFlight.airline || "SENAIR"}`;
+
+    const invoiceRouteDateEl = document.getElementById("invoiceFlightRouteDate");
+    if (invoiceRouteDateEl) {
+      invoiceRouteDateEl.innerHTML = `${selectedFlight.origin} → ${selectedFlight.destination}<br><small>${selectedFlight.departure_date} · ${selectedFlight.departure_time} - ${selectedFlight.arrival_time}</small>`;
+    }
+
+    const invoiceSeatsEl = document.getElementById("invoiceFlightSeats");
+    if (invoiceSeatsEl) invoiceSeatsEl.textContent = selectedSeats.join(", ");
+
+    const invoicePassEl = document.getElementById("invoiceFlightPassengers");
+    if (invoicePassEl) invoicePassEl.textContent = `${passengerCount} pasajero${passengerCount === 1 ? "" : "s"}`;
+
+    const invoiceBasePriceEl = document.getElementById("invoiceBasePrice");
+    if (invoiceBasePriceEl) invoiceBasePriceEl.textContent = currency.format(totalAmount);
+
+    const invoiceSubtotalEl = document.getElementById("invoiceSubtotal");
+    if (invoiceSubtotalEl) invoiceSubtotalEl.textContent = currency.format(subtotalAmount);
+
+    const invoiceTaxesEl = document.getElementById("invoiceTaxes");
+    if (invoiceTaxesEl) invoiceTaxesEl.textContent = currency.format(taxesAmount);
+
+    const invoiceGrandTotalEl = document.getElementById("invoiceGrandTotal");
+    if (invoiceGrandTotalEl) invoiceGrandTotalEl.textContent = currency.format(totalAmount);
+
+    // 2. Llenar sección de confirmación (debajo de la factura)
     const cuotasInfo = nCuotas > 1 ? ` (diferido a ${nCuotas} cuotas)` : "";
     if (confirmationText) {
-      confirmationText.textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")}${cuotasInfo}. Te enviaremos los detalles al correo de tu cuenta.`;
+      confirmationText.textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")}${cuotasInfo}. Te hemos enviado los detalles al correo ${userEmail}.`;
     }
 
     if (checkoutLayout) checkoutLayout.style.display = "none";
     if (checkoutIntro) checkoutIntro.style.display = "none";
 
-    if (confirmation) {
-      confirmation.hidden = false;
-      confirmation.style.display = "block";
-      confirmation.scrollIntoView({ behavior: "smooth", block: "center" });
+    const postCheckoutContainer = document.getElementById("postCheckoutContainer");
+    if (postCheckoutContainer) {
+      postCheckoutContainer.hidden = false;
+      postCheckoutContainer.style.display = "flex";
+      postCheckoutContainer.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   });
 }
