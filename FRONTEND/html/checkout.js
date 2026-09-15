@@ -43,6 +43,57 @@ if (cvvInput) {
   });
 }
 
+const installmentsSelect = document.getElementById("card_installments_select");
+const installmentsContainer = document.getElementById("installmentsContainer");
+const creditCardForm = document.querySelector(".credit-card-info--form");
+
+function getSelectedInstallments() {
+  return Math.max(1, Number(installmentsSelect?.value || 1));
+}
+
+function updateInstallmentsOptions() {
+  if (!installmentsSelect || !selectedFlight) return;
+  const total = selectedFlight.price * passengerCount;
+  const plans = [1, 2, 3, 6, 12, 24, 36];
+  const cur = installmentsSelect.value || "1";
+
+  installmentsSelect.innerHTML = plans
+    .map((n) => {
+      const perMonth = Math.round(total / n);
+      const text = n === 1
+        ? `1 cuota (sin interés) • ${currency.format(total)}`
+        : `${n} cuotas de ${currency.format(perMonth)} / mes`;
+      return `<option value="${n}">${text}</option>`;
+    })
+    .join("");
+
+  if (plans.includes(Number(cur))) {
+    installmentsSelect.value = cur;
+  }
+}
+
+function updatePurchaseButtonText() {
+  if (!purchaseBtn || !selectedFlight) return;
+  const total = selectedFlight.price * passengerCount;
+  if (selectedPaymentMethod !== "card") {
+    const providerName = selectedPaymentMethod === "paypal" ? "PayPal" : selectedPaymentMethod === "apple-pay" ? "Apple Pay" : "Google Pay";
+    purchaseBtn.textContent = `Pagar con ${providerName} • ${currency.format(total)}`;
+    return;
+  }
+
+  const n = getSelectedInstallments();
+  if (n === 1) {
+    purchaseBtn.textContent = `Checkout • ${currency.format(total)}`;
+  } else {
+    const perMonth = Math.round(total / n);
+    purchaseBtn.textContent = `Pagar en ${n} cuotas de ${currency.format(perMonth)}`;
+  }
+}
+
+if (installmentsSelect) {
+  installmentsSelect.addEventListener("change", updatePurchaseButtonText);
+}
+
 // Opciones de pago rápido (PayPal, Apple Pay, Google Pay)
 paymentOptionBtns.forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -51,20 +102,21 @@ paymentOptionBtns.forEach((btn) => {
 
     if (isAlreadySelected) {
       selectedPaymentMethod = "card";
-      if (purchaseBtn) purchaseBtn.textContent = `Checkout • ${currency.format(selectedFlight.price * passengerCount)}`;
+      creditCardForm?.classList.remove("is-dimmed");
       if (nameInput) nameInput.required = true;
       if (cardInput) cardInput.required = true;
       if (expiryInput) expiryInput.required = true;
       if (cvvInput) cvvInput.required = true;
+      updatePurchaseButtonText();
     } else {
       btn.classList.add("is-selected");
       selectedPaymentMethod = btn.name;
-      const providerName = btn.name === "paypal" ? "PayPal" : btn.name === "apple-pay" ? "Apple Pay" : "Google Pay";
-      if (purchaseBtn) purchaseBtn.textContent = `Pagar con ${providerName} • ${currency.format(selectedFlight.price * passengerCount)}`;
+      creditCardForm?.classList.add("is-dimmed");
       if (nameInput) nameInput.required = false;
       if (cardInput) cardInput.required = false;
       if (expiryInput) expiryInput.required = false;
       if (cvvInput) cvvInput.required = false;
+      updatePurchaseButtonText();
     }
   });
 });
@@ -73,18 +125,16 @@ function openPaymentModal() {
   if (selectedSeats.length !== passengerCount) return;
   if (!paymentOverlay) return;
 
+  updateInstallmentsOptions();
+  updatePurchaseButtonText();
+
   paymentOverlay.style.display = "flex";
   paymentOverlay.classList.add("is-open");
   paymentOverlay.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
 
-  const totalFormatted = currency.format(selectedFlight.price * passengerCount);
-  if (purchaseBtn && selectedPaymentMethod === "card") {
-    purchaseBtn.textContent = `Checkout • ${totalFormatted}`;
-  }
-
   setTimeout(() => {
-    if (nameInput) nameInput.focus();
+    if (nameInput && selectedPaymentMethod === "card") nameInput.focus();
   }, 100);
 }
 
@@ -256,8 +306,10 @@ if (paymentForm) {
 
     closePaymentModal();
 
+    const nCuotas = selectedPaymentMethod === "card" ? getSelectedInstallments() : 1;
+    const cuotasInfo = nCuotas > 1 ? ` (diferido a ${nCuotas} cuotas)` : "";
     if (confirmationText) {
-      confirmationText.textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")}. Te enviaremos los detalles al correo de tu cuenta.`;
+      confirmationText.textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")}${cuotasInfo}. Te enviaremos los detalles al correo de tu cuenta.`;
     }
 
     if (checkoutLayout) checkoutLayout.style.display = "none";

@@ -33,7 +33,6 @@
           <div><dt>Pasajeros</dt><dd id="passengerCount">1</dd></div>
         </dl>
         <div class="price-row"><span>Total a pagar</span><strong id="totalPrice">$0</strong></div>
-        <button class="pay-button open-modal-btn summary-pay-btn" id="openModalBtnSummary" type="button" disabled>Selecciona un asiento para continuar</button>
       </aside>
     </div>
 
@@ -101,6 +100,18 @@
                 <input id="card_expiry_input" class="input_field" type="text" inputmode="numeric" name="expiry" placeholder="01/23" maxlength="5" required autocomplete="cc-exp">
                 <input id="card_cvv_input" class="input_field" type="password" inputmode="numeric" name="cvv" placeholder="CVV" maxlength="4" required autocomplete="cc-csc">
               </div>
+            </div>
+            <div class="input_container" id="installmentsContainer">
+              <label for="card_installments_select" class="input_label">Número de cuotas</label>
+              <select id="card_installments_select" class="input_field installments_select" name="installments">
+                <option value="1">1 cuota (sin interés)</option>
+                <option value="2">2 cuotas</option>
+                <option value="3">3 cuotas</option>
+                <option value="6">6 cuotas</option>
+                <option value="12">12 cuotas</option>
+                <option value="24">24 cuotas</option>
+                <option value="36">36 cuotas</option>
+              </select>
             </div>
           </div>
           <button class="purchase--btn" type="submit" id="purchaseBtn">Checkout</button>

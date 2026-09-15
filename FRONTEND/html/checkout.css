@@ -229,7 +229,24 @@
   max-width: 390px;
 }
 
-.summary-pay-btn {
-  width: 100%;
-  margin-top: 20px;
+select.input_field.installments_select {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23555' d='M6 8L0 1.5 1.5 0 6 4.9 10.5 0 12 1.5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 10px;
+  padding-right: 36px;
+}
+
+select.input_field.installments_select:focus {
+  background-color: #ffffff;
+}
+
+.credit-card-info--form.is-dimmed {
+  opacity: 0.45;
+  pointer-events: none;
+  filter: grayscale(0.5);
+  transition: opacity 0.2s ease, filter 0.2s ease;
 }@media(max-width:760px){.checkout-header{min-height:64px}.checkout-shell{width:min(100% - 28px,1080px);padding:38px 0 60px}.checkout-intro h1{font-size:34px}.checkout-layout{grid-template-columns:1fr}.trip-summary{position:static;grid-row:1}.form-grid{grid-template-columns:1fr 1fr}.form-grid label:first-child,.form-grid label:nth-child(2){grid-column:1/-1}}@media(max-width:420px){.back-link{font-size:13px}.checkout-step,.trip-summary{padding:22px 16px}.aircraft{padding:15px 12px 22px}.seat-map{gap:6px}.seat-button{height:31px}.form-grid{grid-template-columns:1fr}.form-grid label:first-child,.form-grid label:nth-child(2){grid-column:auto}}

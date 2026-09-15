@@ -23,6 +23,60 @@ function escapeHtml(value) {
   return String(value || "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 }
 
+function updateMilesDisplay(reservations = [], isAuthenticated = false) {
+  const milesCountEl = document.getElementById("milesCount");
+  const milesTierEl = document.getElementById("milesTier");
+  const milesFlightsEl = document.getElementById("milesFlightsCount");
+  const milesNextTargetEl = document.getElementById("milesNextTarget");
+  const milesProgressBarEl = document.getElementById("milesProgressBar");
+  const milesBenefitEl = document.getElementById("milesBenefit");
+
+  if (!milesCountEl) return;
+
+  if (!isAuthenticated) {
+    milesCountEl.textContent = "0";
+    if (milesTierEl) milesTierEl.textContent = "Sin registrar";
+    if (milesFlightsEl) milesFlightsEl.textContent = "0 vuelos";
+    if (milesNextTargetEl) milesNextTargetEl.textContent = "Inicia sesión y recibe 500 millas de bienvenida";
+    if (milesProgressBarEl) milesProgressBarEl.style.width = "0%";
+    if (milesBenefitEl) milesBenefitEl.textContent = "Acumula en cada vuelo";
+    return;
+  }
+
+  const welcomeBonus = 500;
+  const flightMiles = reservations.length * 650;
+  const totalMiles = welcomeBonus + flightMiles;
+
+  const numberFormatter = new Intl.NumberFormat("es-CO");
+  milesCountEl.textContent = numberFormatter.format(totalMiles);
+  if (milesFlightsEl) {
+    milesFlightsEl.textContent = `${reservations.length} vuelo${reservations.length === 1 ? "" : "s"}`;
+  }
+
+  if (totalMiles < 3000) {
+    if (milesTierEl) milesTierEl.textContent = "Plata · Explorador";
+    if (milesBenefitEl) milesBenefitEl.textContent = "Descuento en equipaje";
+    const percent = Math.min(100, Math.max(10, Math.round((totalMiles / 3000) * 100)));
+    if (milesProgressBarEl) milesProgressBarEl.style.width = `${percent}%`;
+    if (milesNextTargetEl) {
+      milesNextTargetEl.textContent = `Faltan ${numberFormatter.format(3000 - totalMiles)} millas para Nivel Oro`;
+    }
+  } else if (totalMiles < 6000) {
+    if (milesTierEl) milesTierEl.textContent = "Oro · Frecuente";
+    if (milesBenefitEl) milesBenefitEl.textContent = "Embarque prioritario";
+    const percent = Math.min(100, Math.max(10, Math.round((totalMiles / 6000) * 100)));
+    if (milesProgressBarEl) milesProgressBarEl.style.width = `${percent}%`;
+    if (milesNextTargetEl) {
+      milesNextTargetEl.textContent = `Faltan ${numberFormatter.format(6000 - totalMiles)} millas para Nivel Platino`;
+    }
+  } else {
+    if (milesTierEl) milesTierEl.textContent = "Platino · Élite";
+    if (milesBenefitEl) milesBenefitEl.textContent = "Acceso a sala VIP y upgrades";
+    if (milesProgressBarEl) milesProgressBarEl.style.width = "100%";
+    if (milesNextTargetEl) milesNextTargetEl.textContent = "¡Nivel máximo alcanzado!";
+  }
+}
+
 async function renderReservations() {
   const authStorageKey = "senairAuthenticated";
   const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
@@ -30,6 +84,7 @@ async function renderReservations() {
 
   // Si no ha iniciado sesión, NO mostrar vuelos pagados
   if (!isAuthenticated) {
+    updateMilesDisplay([], false);
     reservationsCount.textContent = "0 reservas";
     reservationsGrid.replaceChildren();
     reservationsEmpty.innerHTML = 'Inicia sesión para consultar tus vuelos confirmados. <a href="login.html" class="reservations-login-link">Iniciar sesión</a>';
@@ -75,6 +130,7 @@ async function renderReservations() {
     }
   }
 
+  updateMilesDisplay(reservations, true);
   reservationsCount.textContent = `${reservations.length} reserva${reservations.length === 1 ? "" : "s"}`;
   reservationsGrid.replaceChildren();
   reservationsEmpty.textContent = "Aún no tienes vuelos confirmados.";

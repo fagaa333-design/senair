@@ -18,3 +18,163 @@
 .reservations-login-link{color:var(--blue);font-weight:700;text-decoration:underline;margin-left:6px}
 @media(max-width:900px){.reservations-grid{grid-template-columns:1fr}}
 @media(max-width:650px){.reservation-main{display:block}.reservation-main dl{margin-top:18px}}
+
+/* ── Millas Acumuladas ────────────────────────────────────────── */
+.miles-summary-card {
+  margin: 24px 0 36px;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, #062b55 0%, #0c437e 60%, #0866c6 100%);
+  color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(6, 43, 85, 0.14);
+  position: relative;
+  overflow: hidden;
+}
+
+.miles-summary-card::after {
+  content: "";
+  position: absolute;
+  top: -70px;
+  right: -50px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+}
+
+.miles-main-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.miles-badge-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.miles-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 4px 11px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #dff2ff;
+}
+
+.miles-title {
+  margin: 2px 0 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+}
+
+.miles-value-container {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.14);
+  padding: 10px 22px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+}
+
+.miles-number {
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.miles-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: #b9dcfe;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.miles-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 20px 0 16px;
+  padding: 14px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.miles-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-title {
+  font-size: 11px;
+  color: #b9dcfe;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.stat-value {
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.miles-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.miles-bar-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.miles-bar-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #4da1ff, #00e0ff);
+  border-radius: 10px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.miles-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #dff2ff;
+  font-weight: 600;
+}
+
+@media(max-width: 680px) {
+  .miles-summary-card {
+    padding: 20px 18px;
+  }
+  .miles-stats-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .miles-number {
+    font-size: 30px;
+  }
+}

@@ -35,6 +35,47 @@
   <main class="legal-main trips-main">
     <div class="page-shell">
       <section class="legal-hero trips-hero"><div><span class="eyebrow">Tu espacio SENAIR</span><h1>Mis viajes.</h1></div><p>Guarda los destinos que te inspiran y tenlos listos para planear tu próxima ruta.</p></section>
+
+      <!-- Sección Millas Acumuladas -->
+      <section class="miles-summary-card" id="milesCard" aria-label="Millas acumuladas SENAIR Rewards">
+        <div class="miles-main-info">
+          <div class="miles-badge-group">
+            <span class="miles-badge">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              SENAIR Rewards
+            </span>
+            <h2 class="miles-title">Millas Acumuladas</h2>
+          </div>
+          <div class="miles-value-container">
+            <span class="miles-number" id="milesCount">0</span>
+            <span class="miles-label">millas</span>
+          </div>
+        </div>
+        <div class="miles-stats-row">
+          <div class="miles-stat-item">
+            <span class="stat-title">Nivel de viajero</span>
+            <strong class="stat-value" id="milesTier">Plata · Explorador</strong>
+          </div>
+          <div class="miles-stat-item">
+            <span class="stat-title">Vuelos acumulados</span>
+            <strong class="stat-value" id="milesFlightsCount">0 vuelos</strong>
+          </div>
+          <div class="miles-stat-item">
+            <span class="stat-title">Beneficio activo</span>
+            <strong class="stat-value" id="milesBenefit">Descuento en próximo vuelo</strong>
+          </div>
+        </div>
+        <div class="miles-bar-container">
+          <div class="miles-bar-track">
+            <div class="miles-bar-progress" id="milesProgressBar" style="width: 15%;"></div>
+          </div>
+          <div class="miles-bar-labels">
+            <span>0 millas</span>
+            <span id="milesNextTarget">Meta: 3.000 millas (Nivel Oro)</span>
+          </div>
+        </div>
+      </section>
+
       <section class="reservations-section" aria-labelledby="reservationsTitle"><div class="trips-toolbar"><h2 id="reservationsTitle">Próximos vuelos</h2><span class="trips-count" id="reservationsCount">0 reservas</span></div><div class="reservations-grid" id="reservationsGrid"></div><p class="reservations-empty" id="reservationsEmpty">Aún no tienes vuelos confirmados.</p></section>
       <div class="trips-toolbar"><h2>Destinos guardados</h2><div><span class="trips-count" id="tripsCount">0 destinos guardados</span><input class="trips-search" id="tripsSearch" type="search" placeholder="Busca un destino" aria-label="Buscar destino guardado" /></div></div>
       <div class="trips-grid" id="tripsGrid"></div>
