@@ -172,9 +172,9 @@ header {
 
 nav {
     display: flex;
-    gap: 26px;
+    gap: 28px;
     color: #46637d;
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 600;
 }
 
@@ -191,24 +191,35 @@ nav:not(.mobile-nav) a::after {
     right: 0;
     bottom: 0;
     left: 0;
-    height: 2px;
+    height: 3px;
+    border-radius: 3px;
     background: var(--blue);
     content: "";
     transform: scaleX(0);
     transform-origin: center;
-    transition: transform .12s ease;
+    transition: transform .18s ease;
     will-change: transform;
     pointer-events: none;
 }
 
 nav:not(.mobile-nav) a:hover::after,
-nav:not(.mobile-nav) a:focus-visible::after {
+nav:not(.mobile-nav) a:focus-visible::after,
+nav:not(.mobile-nav) a[aria-current="page"]::after,
+nav:not(.mobile-nav) a.active::after {
     transform: scaleX(1);
 }
 
 nav a:hover,
+nav a[aria-current="page"],
+nav a.active,
 .topbar a:hover {
     color: var(--blue);
+}
+
+nav:not(.mobile-nav) a[aria-current="page"],
+nav:not(.mobile-nav) a.active {
+    color: var(--blue);
+    font-weight: 700;
 }
 
 .nav-actions {

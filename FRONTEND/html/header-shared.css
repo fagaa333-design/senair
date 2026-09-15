@@ -18,11 +18,12 @@ body > header { position: sticky; top: 0; z-index: 10; background: var(--white);
 body > header .navbar { display: flex; align-items: center; justify-content: space-between; min-height: 76px; gap: 30px; }
 body > header .logo { display: flex; align-items: center; gap: 10px; color: var(--navy); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
 body > header .logo-imagen { width: 90px; height: 90px; object-fit: cover; border-radius: 10px; }
-body > header nav:not(.mobile-nav) { display: flex; gap: 26px; color: #46637d; font-size: 14px; font-weight: 600; }
+body > header nav:not(.mobile-nav) { display: flex; gap: 28px; color: #46637d; font-size: 17px; font-weight: 600; }
 body > header nav:not(.mobile-nav) a { position: relative; padding: 8px 0; color: inherit; transition: color .2s ease; }
-body > header nav:not(.mobile-nav) a::after { position: absolute; right: 0; bottom: 0; left: 0; display: block; height: 2px; background: var(--blue); content: ""; transform: scaleX(0); transform-origin: center; transition: transform .12s ease; }
-body > header nav:not(.mobile-nav) a:hover::after, body > header nav:not(.mobile-nav) a:focus-visible::after { transform: scaleX(1); }
-body > header nav a:hover, .topbar a:hover { color: var(--blue); }
+body > header nav:not(.mobile-nav) a::after { position: absolute; right: 0; bottom: 0; left: 0; display: block; height: 3px; border-radius: 3px; background: var(--blue); content: ""; transform: scaleX(0); transform-origin: center; transition: transform .18s ease; pointer-events: none; }
+body > header nav:not(.mobile-nav) a:hover::after, body > header nav:not(.mobile-nav) a:focus-visible::after, body > header nav:not(.mobile-nav) a[aria-current="page"]::after, body > header nav:not(.mobile-nav) a.active::after { transform: scaleX(1); }
+body > header nav a:hover, body > header nav a[aria-current="page"], body > header nav a.active, .topbar a:hover { color: var(--blue); }
+body > header nav:not(.mobile-nav) a[aria-current="page"], body > header nav:not(.mobile-nav) a.active { color: var(--blue); font-weight: 700; }
 .nav-actions { align-items: center; gap: 12px; }
 .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; gap: 8px; padding: 0 18px; border-radius: 9px; font-weight: 700; transition: .2s ease; }
 .btn-outline { color: var(--blue); background: transparent; border: 1px solid var(--blue); }
@@ -47,7 +48,9 @@ body > header nav a:hover, .topbar a:hover { color: var(--blue); }
 .hamburger-inner { top: 50%; transform: translateY(-50%); }.hamburger-inner::before { top: -7px; content: ""; }.hamburger-inner::after { top: 7px; content: ""; }
 .hamburger.open .hamburger-inner { background: transparent; }.hamburger.open .hamburger-inner::before { transform: translateY(7px) rotate(45deg); }.hamburger.open .hamburger-inner::after { transform: translateY(-7px) rotate(-45deg); }
 .mobile-nav { position: absolute; top: 76px; right: 20px; z-index: 20; display: none; flex-direction: column; gap: 8px; min-width: 180px; padding: 12px 16px; background: var(--white); border-radius: 12px; box-shadow: var(--shadow); }
-.mobile-nav a, .mobile-nav button { padding: 8px 10px; color: var(--text); background: transparent; border: 0; text-align: left; font-weight: 700; }.mobile-nav.open { display: flex; }
+.mobile-nav a, .mobile-nav button { padding: 8px 10px; color: var(--text); background: transparent; border: 0; text-align: left; font-weight: 700; font-size: 15px; }
+.mobile-nav a:hover, .mobile-nav a[aria-current="page"], .mobile-nav a.active { color: var(--blue); }
+.mobile-nav.open { display: flex; }
 @media (max-width: 850px) { body > header nav:not(.mobile-nav), .nav-actions { display: none; }.hamburger { display: flex; } }
 @media (max-width: 560px) { .container { width: min(100% - 28px, 1180px); }.topbar { display: none; } body > header .navbar { min-height: 64px; } }
 @media (max-width: 420px) { .mobile-nav { top: 70px; right: 10px; left: 10px; } }
