@@ -38,6 +38,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  connectTimeout: 5000,
 });
 
 const demoFlights = [
@@ -50,51 +51,62 @@ const demoFlights = [
 ];
 
 async function initializeDatabase() {
-  await pool.execute(`CREATE TABLE IF NOT EXISTS users (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(120) NOT NULL,
-    email VARCHAR(190) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  ) ENGINE=InnoDB`);
+  try {
+    const connection = await pool.getConnection();
+    connection.release();
 
-  await pool.execute(`CREATE TABLE IF NOT EXISTS flights (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    origin VARCHAR(120) NOT NULL,
-    destination VARCHAR(120) NOT NULL,
-    departure_date DATE NOT NULL,
-    departure_time TIME NOT NULL,
-    arrival_time TIME NOT NULL,
-    price INT UNSIGNED NOT NULL,
-    airline VARCHAR(80) NOT NULL DEFAULT 'SENAIR',
-    stops TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_flight_route (origin, destination, departure_date, departure_time)
-  ) ENGINE=InnoDB`);
+    await pool.execute(`CREATE TABLE IF NOT EXISTS users (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(120) NOT NULL,
+      email VARCHAR(190) NOT NULL UNIQUE,
+      password VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB`);
 
-  await pool.execute(`CREATE TABLE IF NOT EXISTS reservations (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    user_id INT UNSIGNED NOT NULL,
-    flight_id INT UNSIGNED NULL,
-    origin VARCHAR(120) NOT NULL,
-    destination VARCHAR(120) NOT NULL,
-    departure_date DATE NOT NULL,
-    departure_time TIME NOT NULL,
-    arrival_time TIME NOT NULL,
-    seat VARCHAR(10) NOT NULL,
-    price INT UNSIGNED NOT NULL,
-    airline VARCHAR(80) NOT NULL DEFAULT 'SENAIR',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (flight_id) REFERENCES flights(id) ON DELETE SET NULL,
-    INDEX idx_reservations_user (user_id)
-  ) ENGINE=InnoDB`);
+    await pool.execute(`CREATE TABLE IF NOT EXISTS flights (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      origin VARCHAR(120) NOT NULL,
+      destination VARCHAR(120) NOT NULL,
+      departure_date DATE NOT NULL,
+      departure_time TIME NOT NULL,
+      arrival_time TIME NOT NULL,
+      price INT UNSIGNED NOT NULL,
+      airline VARCHAR(80) NOT NULL DEFAULT 'SENAIR',
+      stops TINYINT UNSIGNED NOT NULL DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY uq_flight_route (origin, destination, departure_date, departure_time)
+    ) ENGINE=InnoDB`);
 
-  for (const flight of demoFlights) {
-    await pool.execute(
-      "INSERT IGNORE INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      flight
-    );
+    await pool.execute(`CREATE TABLE IF NOT EXISTS reservations (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      user_id INT UNSIGNED NOT NULL,
+      flight_id INT UNSIGNED NULL,
+      origin VARCHAR(120) NOT NULL,
+      destination VARCHAR(120) NOT NULL,
+      departure_date DATE NOT NULL,
+      departure_time TIME NOT NULL,
+      arrival_time TIME NOT NULL,
+      seat VARCHAR(10) NOT NULL,
+      price INT UNSIGNED NOT NULL,
+      airline VARCHAR(80) NOT NULL DEFAULT 'SENAIR',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (flight_id) REFERENCES flights(id) ON DELETE SET NULL,
+      INDEX idx_reservations_user (user_id)
+    ) ENGINE=InnoDB`);
+
+    for (const flight of demoFlights) {
+      await pool.execute(
+        "INSERT IGNORE INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        flight
+      );
+    }
+    console.log("✔ Base de datos MySQL conectada e inicializada con éxito.");
+  } catch (error) {
+    console.warn("⚠ Aviso: No se pudo conectar a la base de datos MySQL.");
+    console.warn("  Detalle:", error.message || error.code);
+    console.warn("  El servidor web continuará funcionando para servir el frontend.");
+    console.warn("  Para habilitar las funciones de base de datos, asegúrate de que MySQL esté activo.");
   }
 }
 
@@ -412,11 +424,8 @@ app.use((request, response) => response.status(404).send("Recurso no encontrado"
 
 /* ── Start ────────────────────────────────────────────────────── */
 
-initializeDatabase()
-  .then(() => app.listen(PORT, () => {
+initializeDatabase().finally(() => {
+  app.listen(PORT, () => {
     console.log(`SENAIR disponible en http://localhost:${PORT}`);
-  }))
-  .catch((error) => {
-    console.error("No se pudo inicializar la base de datos.", error);
-    process.exit(1);
   });
+});

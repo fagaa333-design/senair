@@ -9,9 +9,15 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: TURSO_DATABASE_URL
+      - key: DB_HOST
         sync: false
-      - key: TURSO_AUTH_TOKEN
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
         sync: false
       - key: JWT_SECRET
         sync: false
