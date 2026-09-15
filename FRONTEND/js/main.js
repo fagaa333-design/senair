@@ -583,5 +583,13 @@ document.querySelectorAll('.flip-card__form').forEach((form) => {
     });
 });
 
+// Cargar asistente de IA (AeroBot)
+if (!document.querySelector('script[src*="ai-chatbot.js"]')) {
+    const aiScript = document.createElement('script');
+    aiScript.src = window.location.pathname.includes('/html/') ? '../js/ai-chatbot.js' : 'FRONTEND/js/ai-chatbot.js';
+    aiScript.defer = true;
+    document.head.appendChild(aiScript);
+}
+
 })();
 
