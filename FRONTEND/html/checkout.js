@@ -218,8 +218,12 @@ if (paymentForm) {
       flightId: selectedFlight.id,
     };
 
+    const apiBase = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") && window.location.port !== "3000"
+      ? "http://localhost:3000"
+      : "";
+
     try {
-      const response = await fetch("/api/reservations", {
+      const response = await fetch(`${apiBase}/api/reservations`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(reservation),

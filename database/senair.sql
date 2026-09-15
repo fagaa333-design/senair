@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS reservations (
     departure_date DATE NOT NULL,
     departure_time TIME NOT NULL,
     arrival_time TIME NOT NULL,
-    seat VARCHAR(10) NOT NULL,
+    seat VARCHAR(50) NOT NULL,
     price INT UNSIGNED NOT NULL,
     airline VARCHAR(80) NOT NULL DEFAULT 'SENAIR',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -39,6 +39,8 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
   connectTimeout: 5000,
+  charset: "utf8mb4",
+  dateStrings: true,
 });
 
 const demoFlights = [
@@ -86,7 +88,7 @@ async function initializeDatabase() {
       departure_date DATE NOT NULL,
       departure_time TIME NOT NULL,
       arrival_time TIME NOT NULL,
-      seat VARCHAR(10) NOT NULL,
+      seat VARCHAR(50) NOT NULL,
       price INT UNSIGNED NOT NULL,
       airline VARCHAR(80) NOT NULL DEFAULT 'SENAIR',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -218,6 +220,7 @@ const authLimiter = rateLimit({
 
 app.get(["/", "/index.html", "/SENAIR/FRONTEND/html/index.html"], (request, response) => response.redirect("/html/index.html"));
 app.use(express.static(FRONTEND_ROOT, { index: false }));
+app.use(express.static(path.join(FRONTEND_ROOT, "html"), { index: false }));
 app.use("/SENAIR/FRONTEND", express.static(FRONTEND_ROOT, { index: false }));
 
 /* ── Auth endpoints ───────────────────────────────────────────── */
