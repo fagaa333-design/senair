@@ -1,32 +1,139 @@
 const selectedFlight = JSON.parse(window.sessionStorage.getItem("senairSelectedFlight") || "null");
 const seatMap = document.getElementById("seatMap");
-const payButton = document.querySelector(".pay-button");
+const openModalBtns = document.querySelectorAll(".open-modal-btn");
+const paymentOverlay = document.getElementById("paymentOverlay");
+const closeModalBtn = document.getElementById("closeModalBtn");
+const paymentForm = document.getElementById("paymentForm");
+const purchaseBtn = document.getElementById("purchaseBtn");
 const currency = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
 const passengerCount = Math.max(1, Number(selectedFlight?.passengers || 1));
 const selectedSeats = [];
 
-const nameInput = document.querySelector('[name="name"]');
-const cardInput = document.querySelector('[name="card"]');
-const expiryInput = document.querySelector('[name="expiry"]');
-const cvcInput = document.querySelector('[name="cvc"]');
+const nameInput = document.getElementById("card_holder_name");
+const cardInput = document.getElementById("card_number_input");
+const expiryInput = document.getElementById("card_expiry_input");
+const cvvInput = document.getElementById("card_cvv_input");
+const paymentOptionBtns = document.querySelectorAll(".payment--options button");
 
-nameInput.addEventListener("input", () => {
-  nameInput.value = nameInput.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g, "");
+let selectedPaymentMethod = "card";
+
+if (nameInput) {
+  nameInput.addEventListener("input", () => {
+    nameInput.value = nameInput.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g, "");
+  });
+}
+
+if (cardInput) {
+  cardInput.addEventListener("input", () => {
+    const digits = cardInput.value.replace(/\D/g, "").slice(0, 16);
+    cardInput.value = digits.replace(/(.{4})/g, "$1 ").trim();
+  });
+}
+
+if (expiryInput) {
+  expiryInput.addEventListener("input", () => {
+    const digits = expiryInput.value.replace(/\D/g, "").slice(0, 4);
+    expiryInput.value = digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+  });
+}
+
+if (cvvInput) {
+  cvvInput.addEventListener("input", () => {
+    cvvInput.value = cvvInput.value.replace(/\D/g, "").slice(0, 4);
+  });
+}
+
+// Opciones de pago rápido (PayPal, Apple Pay, Google Pay)
+paymentOptionBtns.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const isAlreadySelected = btn.classList.contains("is-selected");
+    paymentOptionBtns.forEach((b) => b.classList.remove("is-selected"));
+
+    if (isAlreadySelected) {
+      selectedPaymentMethod = "card";
+      if (purchaseBtn) purchaseBtn.textContent = `Checkout • ${currency.format(selectedFlight.price * passengerCount)}`;
+      if (nameInput) nameInput.required = true;
+      if (cardInput) cardInput.required = true;
+      if (expiryInput) expiryInput.required = true;
+      if (cvvInput) cvvInput.required = true;
+    } else {
+      btn.classList.add("is-selected");
+      selectedPaymentMethod = btn.name;
+      const providerName = btn.name === "paypal" ? "PayPal" : btn.name === "apple-pay" ? "Apple Pay" : "Google Pay";
+      if (purchaseBtn) purchaseBtn.textContent = `Pagar con ${providerName} • ${currency.format(selectedFlight.price * passengerCount)}`;
+      if (nameInput) nameInput.required = false;
+      if (cardInput) cardInput.required = false;
+      if (expiryInput) expiryInput.required = false;
+      if (cvvInput) cvvInput.required = false;
+    }
+  });
 });
 
-cardInput.addEventListener("input", () => {
-  const digits = cardInput.value.replace(/\D/g, "").slice(0, 16);
-  cardInput.value = digits.replace(/(.{4})/g, "$1 ").trim();
+function openPaymentModal() {
+  if (selectedSeats.length !== passengerCount) return;
+  if (!paymentOverlay) return;
+
+  paymentOverlay.style.display = "flex";
+  paymentOverlay.classList.add("is-open");
+  paymentOverlay.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+
+  const totalFormatted = currency.format(selectedFlight.price * passengerCount);
+  if (purchaseBtn && selectedPaymentMethod === "card") {
+    purchaseBtn.textContent = `Checkout • ${totalFormatted}`;
+  }
+
+  setTimeout(() => {
+    if (nameInput) nameInput.focus();
+  }, 100);
+}
+
+function closePaymentModal() {
+  if (!paymentOverlay) return;
+  paymentOverlay.classList.remove("is-open");
+  paymentOverlay.style.display = "none";
+  paymentOverlay.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+openModalBtns.forEach((btn) => {
+  btn.addEventListener("click", openPaymentModal);
 });
 
-expiryInput.addEventListener("input", () => {
-  const digits = expiryInput.value.replace(/\D/g, "").slice(0, 4);
-  expiryInput.value = digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+if (closeModalBtn) {
+  closeModalBtn.addEventListener("click", closePaymentModal);
+}
+
+if (paymentOverlay) {
+  paymentOverlay.addEventListener("click", (event) => {
+    if (event.target === paymentOverlay) {
+      closePaymentModal();
+    }
+  });
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && paymentOverlay?.classList.contains("is-open")) {
+    closePaymentModal();
+  }
 });
 
-cvcInput.addEventListener("input", () => {
-  cvcInput.value = cvcInput.value.replace(/\D/g, "").slice(0, 4);
-});
+function updatePayButtons() {
+  const seatsComplete = selectedSeats.length === passengerCount;
+  const remaining = passengerCount - selectedSeats.length;
+  const totalFormatted = currency.format(selectedFlight ? selectedFlight.price * passengerCount : 0);
+
+  openModalBtns.forEach((btn) => {
+    btn.disabled = !seatsComplete;
+    if (seatsComplete) {
+      btn.textContent = `Realizar Pago • ${totalFormatted}`;
+      btn.classList.add("ready");
+    } else {
+      btn.textContent = `Selecciona ${remaining} asiento${remaining === 1 ? "" : "s"} más para continuar`;
+      btn.classList.remove("ready");
+    }
+  });
+}
 
 if (!selectedFlight) {
   window.location.replace("vuelos.html");
@@ -38,6 +145,8 @@ if (!selectedFlight) {
   document.getElementById("passengerCount").textContent = passengerCount;
   document.getElementById("seatInstruction").textContent = `Escoge ${passengerCount} asiento${passengerCount === 1 ? "" : "s"} disponible${passengerCount === 1 ? "" : "s"} para continuar.`;
   document.getElementById("totalPrice").textContent = currency.format(selectedFlight.price * passengerCount);
+
+  updatePayButtons();
 
   const occupiedSeats = new Set(["1B", "2C", "3A", "3F", "4D", "5E", "6B"]);
   for (let row = 1; row <= 6; row += 1) {
@@ -65,80 +174,99 @@ if (!selectedFlight) {
           button.classList.add("selected");
         }
         document.getElementById("selectedSeat").textContent = selectedSeats.length ? selectedSeats.join(", ") : "Sin seleccionar";
-        const seatsComplete = selectedSeats.length === passengerCount;
-        payButton.disabled = !seatsComplete;
-        payButton.textContent = seatsComplete ? `Pagar ${currency.format(selectedFlight.price * passengerCount)}` : `Selecciona ${passengerCount - selectedSeats.length} asiento${passengerCount - selectedSeats.length === 1 ? "" : "s"} más`;
+        updatePayButtons();
       });
       seatMap.append(button);
     });
   }
 }
 
-document.getElementById("paymentForm").addEventListener("submit", async (event) => {
-  event.preventDefault();
-  if (selectedSeats.length !== passengerCount) return;
+if (paymentForm) {
+  paymentForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (selectedSeats.length !== passengerCount) return;
 
-  const authStorageKey = "senairAuthenticated";
-  const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
+    const authStorageKey = "senairAuthenticated";
+    const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
 
-  if (!isAuthenticated) {
-    alert("Debes iniciar sesión para completar tu compra y asociar el vuelo a tu cuenta.");
-    window.location.href = "login.html";
-    return;
-  }
-
-  const paymentStep = document.querySelector(".payment-step");
-  const confirmation = document.getElementById("confirmation");
-  const confirmationText = document.getElementById("confirmationText");
-
-  const reservation = {
-    origin: selectedFlight.origin,
-    destination: selectedFlight.destination,
-    departureDate: selectedFlight.departure_date,
-    departureTime: selectedFlight.departure_time,
-    arrivalTime: selectedFlight.arrival_time,
-    seat: selectedSeats.join(", "),
-    price: selectedFlight.price * passengerCount,
-    airline: selectedFlight.airline,
-    flightId: selectedFlight.id,
-  };
-
-  try {
-    const response = await fetch("/api/reservations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(reservation),
-      credentials: "include",
-    });
-
-    if (response.status === 401) {
-      alert("Tu sesión ha expirado. Por favor, inicia sesión para completar tu reserva.");
-      window.sessionStorage.removeItem(authStorageKey);
+    if (!isAuthenticated) {
+      alert("Debes iniciar sesión para completar tu compra y asociar el vuelo a tu cuenta.");
+      closePaymentModal();
       window.location.href = "login.html";
       return;
     }
 
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      alert(data.message || "No se pudo registrar la reserva. Intenta de nuevo.");
+    if (purchaseBtn) {
+      purchaseBtn.disabled = true;
+      purchaseBtn.textContent = "Procesando pago...";
+    }
+
+    const confirmation = document.getElementById("confirmation");
+    const confirmationText = document.getElementById("confirmationText");
+    const checkoutLayout = document.querySelector(".checkout-layout");
+    const checkoutIntro = document.querySelector(".checkout-intro");
+
+    const reservation = {
+      origin: selectedFlight.origin,
+      destination: selectedFlight.destination,
+      departureDate: selectedFlight.departure_date,
+      departureTime: selectedFlight.departure_time,
+      arrivalTime: selectedFlight.arrival_time,
+      seat: selectedSeats.join(", "),
+      price: selectedFlight.price * passengerCount,
+      airline: selectedFlight.airline,
+      flightId: selectedFlight.id,
+    };
+
+    try {
+      const response = await fetch("/api/reservations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(reservation),
+        credentials: "include",
+      });
+
+      if (response.status === 401) {
+        alert("Tu sesión ha expirado. Por favor, inicia sesión para completar tu reserva.");
+        window.sessionStorage.removeItem(authStorageKey);
+        closePaymentModal();
+        window.location.href = "login.html";
+        return;
+      }
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        alert(data.message || "No se pudo registrar la reserva. Intenta de nuevo.");
+        if (purchaseBtn) {
+          purchaseBtn.disabled = false;
+          purchaseBtn.textContent = "Checkout";
+        }
+        return;
+      }
+    } catch {
+      alert("Hubo un problema de conexión con el servidor. Inténtalo de nuevo.");
+      if (purchaseBtn) {
+        purchaseBtn.disabled = false;
+        purchaseBtn.textContent = "Checkout";
+      }
       return;
     }
-  } catch {
-    alert("Hubo un problema de conexión con el servidor. Inténtalo de nuevo.");
-    return;
-  }
 
-  // Eliminar cualquier residuo antiguo del localStorage global
-  window.localStorage.removeItem("senairReservations");
+    window.localStorage.removeItem("senairReservations");
 
-  confirmationText.textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")}. Te enviaremos los detalles al correo de tu cuenta.`;
-  confirmation.hidden = false;
-  confirmation.style.display = "block";
+    closePaymentModal();
 
-  if (paymentStep) {
-    paymentStep.hidden = true;
-    paymentStep.style.display = "none";
-  }
+    if (confirmationText) {
+      confirmationText.textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")}. Te enviaremos los detalles al correo de tu cuenta.`;
+    }
 
-  confirmation.scrollIntoView({ behavior: "smooth", block: "center" });
-});
+    if (checkoutLayout) checkoutLayout.style.display = "none";
+    if (checkoutIntro) checkoutIntro.style.display = "none";
+
+    if (confirmation) {
+      confirmation.hidden = false;
+      confirmation.style.display = "block";
+      confirmation.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  });
+}
