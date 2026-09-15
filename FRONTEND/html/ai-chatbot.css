@@ -2,63 +2,68 @@
    SENAIR — Asistente de IA (Chatbot Widget)
    ============================================================ */
 
-/* ── Botón en el Navbar ───────────────────────────────────────── */
+/* ── Botón en el Navbar (Icono circular) ────────────────────────── */
 .ai-nav-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 45px;
-  padding: 0 16px;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
   background: linear-gradient(135deg, #062b55 0%, #0866c6 100%);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 40px;
-  font-family: Arial, sans-serif;
-  font-size: 14px;
-  font-weight: 700;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(8, 102, 198, 0.25);
+  box-shadow: 0 4px 14px rgba(8, 102, 198, 0.28);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   text-decoration: none;
-  white-space: nowrap;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .ai-nav-btn:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 0 6px 18px rgba(8, 102, 198, 0.38);
+  transform: translateY(-2px) scale(1.06);
+  box-shadow: 0 6px 20px rgba(8, 102, 198, 0.45);
   background: linear-gradient(135deg, #0866c6 0%, #062b55 100%);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .ai-nav-btn:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.97);
 }
 
 .ai-nav-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #79c3ff;
-  transition: transform 0.2s ease;
+  color: #ffffff;
+  transition: transform 0.25s ease;
+  width: 100%;
+  height: 100%;
 }
 
 .ai-nav-btn:hover .ai-nav-icon {
-  transform: scale(1.1) rotate(5deg);
+  transform: scale(1.12) rotate(6deg);
 }
 
 .ai-nav-text {
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
+  display: none !important;
 }
 
-.ai-online-dot {
-  width: 8px;
-  height: 8px;
+.ai-nav-btn .ai-online-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background-color: #22c55e;
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.35);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.4);
   animation: aiPulse 2s infinite ease-in-out;
 }
 
@@ -73,7 +78,7 @@
   }
 }
 
-/* ── Botón flotante móvil (opcional para acceso rápido) ───────── */
+/* ── Botón flotante móvil (acceso rápido) ─────────────────────── */
 .ai-floating-trigger {
   position: fixed;
   bottom: 24px;
@@ -81,23 +86,22 @@
   z-index: 9998;
   display: none;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  width: 52px;
   height: 52px;
-  padding: 0 20px;
+  border-radius: 50%;
+  padding: 0;
   background: linear-gradient(135deg, #062b55 0%, #0866c6 100%);
   color: #ffffff;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50px;
-  box-shadow: 0 10px 28px rgba(6, 43, 85, 0.35);
-  font-weight: 800;
-  font-size: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 28px rgba(6, 43, 85, 0.38);
   cursor: pointer;
   transition: all 0.25s ease;
 }
 
 .ai-floating-trigger:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 14px 34px rgba(6, 43, 85, 0.45);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 14px 34px rgba(6, 43, 85, 0.48);
 }
 
 /* ── Ventana del Chatbot ──────────────────────────────────────── */
@@ -505,3 +509,4 @@
     max-height: 560px;
   }
 }
+
