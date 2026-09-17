@@ -10,90 +10,175 @@
   const STORAGE_KEY = "senairAiChatHistory";
 
   // Base de conocimiento y respuestas de AeroBot
-  const KNOWLEDGE = [
+  // Base de conocimiento y respuestas de AeroBot (Español e Inglés sin asteriscos)
+  const KNOWLEDGE_ES = [
     {
       keywords: ["ruta", "vuelo", "destino", "bogota", "medellin", "cali", "cartagena", "horario", "precio", "cuanto vale", "costo"],
-      response: `En **SENAIR** operamos las principales rutas nacionales en Colombia con vuelos directos y conexiones cómodas:
-• **Bogotá (BOG) ⇄ Medellín (MDE)**: desde $159.000 COP
-• **Bogotá (BOG) ⇄ Cartagena (CTG)**: desde $189.000 COP
-• **Medellín (MDE) ⇄ Bogotá (BOG)**: desde $169.000 COP
-• **Cali (CLO) ⇄ Cartagena (CTG)**: desde $249.000 COP
+      response: `En SENAIR operamos las principales rutas nacionales en Colombia con vuelos directos y conexiones cómodas:
+• Bogotá (BOG) ⇄ Medellín (MDE): desde $159.000 COP
+• Bogotá (BOG) ⇄ Cartagena (CTG): desde $189.000 COP
+• Medellín (MDE) ⇄ Bogotá (BOG): desde $169.000 COP
+• Cali (CLO) ⇄ Cartagena (CTG): desde $249.000 COP
 
 Todos los precios incluyen tasas e impuestos. ¿Deseas consultar vuelos ahora?
 <a href="vuelos.html" class="ai-btn-link">✈️ Ver vuelos disponibles</a>`
     },
     {
       keywords: ["cuota", "financiar", "interes", "pago", "pagar", "tarjeta", "credito", "debito", "paypal", "apple pay", "google pay", "metodo de pago"],
-      response: `¡Claro! En **SENAIR** puedes pagar con total flexibilidad:
-• **Tarjetas de crédito:** Puedes diferir tu compra desde **1 hasta 36 cuotas**. La opción de 1 cuota es sin interés de financiación.
-• **Cálculo en tiempo real:** Al seleccionar las cuotas en el checkout verás el valor exacto que pagarás mensualmente.
-• **Otros métodos:** Aceptamos **PayPal**, **Apple Pay**, **Google Pay** y débito.
-• **Factura electrónica:** Al completar tu pago se genera al instante tu factura fiscal con código de reserva.`
+      response: `¡Claro! En SENAIR puedes pagar con total flexibilidad:
+• Tarjetas de crédito: Puedes diferir tu compra desde 1 hasta 36 cuotas. La opción de 1 cuota es sin interés de financiación.
+• Cálculo en tiempo real: Al seleccionar las cuotas en el checkout verás el valor exacto que pagarás mensualmente.
+• Otros métodos: Aceptamos PayPal, Apple Pay, Google Pay y débito.
+• Factura electrónica: Al completar tu pago se genera al instante tu factura fiscal con código de reserva.`
     },
     {
       keywords: ["equipaje", "maleta", "peso", "mochila", "kilo", "carry on", "bodega", "dimension"],
-      response: `Nuestras políticas de equipaje en **SENAIR** son claras y transparentes:
-• **Artículo personal (Gratis):** 1 bolso o mochila de hasta 10 kg que quepa debajo del asiento delantero.
-• **Equipaje de mano (Cabina):** 1 maleta de hasta 10 kg para el compartimiento superior (55 x 35 x 25 cm).
-• **Equipaje de bodega:** Maletas facturadas de hasta 23 kg por pieza.
+      response: `Nuestras políticas de equipaje en SENAIR son claras y transparentes:
+• Artículo personal (Gratis): 1 bolso o mochila de hasta 10 kg que quepa debajo del asiento delantero.
+• Equipaje de mano (Cabina): 1 maleta de hasta 10 kg para el compartimiento superior (55 x 35 x 25 cm).
+• Equipaje de bodega: Maletas facturadas de hasta 23 kg por pieza.
 ¿Tienes dudas sobre algún artículo especial o deportivo? Pregúntame con gusto.`
     },
     {
       keywords: ["milla", "rewards", "punto", "acumular", "nivel", "plata", "oro", "platino", "frecuente", "beneficio"],
-      response: `El programa **SENAIR Rewards** premia tu fidelidad:
-• **500 millas de bienvenida:** Al iniciar sesión o registrar tu cuenta gratuita.
-• **650 millas por cada vuelo:** Se acumulan automáticamente con cada viaje confirmado.
-• **Niveles:**
-  - **Plata · Explorador** (< 3.000 millas): Descuentos en equipaje.
-  - **Oro · Frecuente** (3.000 - 5.999 millas): Embarque prioritario.
-  - **Platino · Élite** (6.000+ millas): Acceso a salas VIP y upgrades.
+      response: `El programa SENAIR Rewards premia tu fidelidad:
+• 500 millas de bienvenida: Al iniciar sesión o registrar tu cuenta gratuita.
+• 650 millas por cada vuelo: Se acumulan automáticamente con cada viaje confirmado.
+• Niveles:
+  - Plata · Explorador (< 3.000 millas): Descuentos en equipaje.
+  - Oro · Frecuente (3.000 - 5.999 millas): Embarque prioritario.
+  - Platino · Élite (6.000+ millas): Acceso a salas VIP y upgrades.
 <a href="viajes.html" class="ai-btn-link">⭐ Consultar mis millas</a>`
     },
     {
       keywords: ["asiento", "puesto", "silla", "checkin", "check in", "mapa", "ventana", "pasillo"],
-      response: `La selección de asientos en **SENAIR** es interactiva y muy sencilla:
+      response: `La selección de asientos en SENAIR es interactiva y muy sencilla:
 • Durante el proceso de reserva verás el mapa 3D/plano de la aeronave con filas del 1 al 6.
-• Puedes elegir puestos de **Ventana (A, F)**, **Medio (B, E)** o **Pasillo (C, D)**.
+• Puedes elegir puestos de Ventana (A, F), Medio (B, E) o Pasillo (C, D).
 • Si viajas en grupo, el sistema te permite seleccionar los puestos continuos para todos los pasajeros.`
     },
     {
       keywords: ["factura", "comprobante", "recibo", "fiscal", "dian", "iva", "impuesto"],
       response: `Al finalizar tu compra en el checkout, el sistema te muestra automáticamente:
-1. **Factura Electrónica de Venta:** Con número fiscal oficial (\`SEN-XXXXXX\`), NIT de SENAIR, desglose de tarifa base e IVA (19%), método de pago y cuotas.
-2. **Botón para imprimir:** Puedes imprimir tu factura o guardarla directamente en PDF.
-3. **Código de reserva:** Para realizar tu check-in o consultar en *Mis viajes*.`
+1. Factura Electrónica de Venta: Con número fiscal oficial (SEN-XXXXXX), NIT de SENAIR, desglose de tarifa base e IVA (19%), método de pago y cuotas.
+2. Botón para imprimir: Puedes imprimir tu factura o guardarla directamente en PDF.
+3. Código de reserva: Para realizar tu check-in o consultar en Mis viajes.`
     },
     {
       keywords: ["quien", "quienes", "desarrollador", "creador", "equipo", "nosotros", "freiner", "isabel", "jesus", "soto", "cervantes"],
-      response: `La plataforma **SENAIR** fue diseñada y desarrollada por un equipo multidisciplinario:
-• **Freiner:** Coordinación y Desarrollo Full Stack.
-• **Isabel Fernández:** Diseño de Experiencia de Usuario (UI/UX) y Frontend.
-• **Jesús Soto:** Arquitectura y Desarrollo.
-• **Juan Cervantes:** Desarrollo de Sistemas y Aseguramiento de Calidad.
+      response: `La plataforma SENAIR fue diseñada y desarrollada por un equipo multidisciplinario:
+• Freiner: Coordinación y Desarrollo Full Stack.
+• Isabel Fernández: Diseño de Experiencia de Usuario (UI/UX) y Frontend.
+• Jesús Soto: Arquitectura y Desarrollo.
+• Juan Cervantes: Desarrollo de Sistemas y Aseguramiento de Calidad.
 <a href="nosotros.html" class="ai-btn-link">👥 Conocer al equipo</a>`
     },
     {
       keywords: ["contacto", "ayuda", "telefono", "correo", "atencion", "soporte", "queja", "reclamo", "asesor"],
-      response: `Nuestro equipo de servicio al cliente está disponible **24/7**:
-• **Línea telefónica:** 01 8000 912 345 (Colombia)
-• **Correo:** soporte@senair.com
-• **Oficinas:** Aeropuerto Internacional El Dorado, Bogotá D.C.
+      response: `Nuestro equipo de servicio al cliente está disponible 24/7:
+• Línea telefónica: 01 8000 912 345 (Colombia)
+• Correo: soporte@senair.com
+• Oficinas: Aeropuerto Internacional El Dorado, Bogotá D.C.
 <a href="contacto.html" class="ai-btn-link">📞 Ir a la página de Contacto</a>`
     },
     {
       keywords: ["hola", "buen", "buenas", "que tal", "hey", "saludos", "hello"],
-      response: `¡Hola! 👋 Qué gusto saludarte. Soy **AeroBot**, la inteligencia artificial de **SENAIR**. 
+      response: `¡Hola! 👋 Qué gusto saludarte. Soy AeroBot, la inteligencia artificial de SENAIR. 
 ¿En qué te puedo asesorar hoy? Puedo ayudarte a consultar vuelos, conocer nuestras cuotas de pago, equipaje permitido, acumular millas o darte detalles sobre tus reservas.`
     },
     {
       keywords: ["gracias", "muchas gracias", "ok", "vale", "perfecto", "listo", "entendido"],
-      response: `¡Con el mayor gusto! ✈️ En **SENAIR** estamos para hacer tus viajes más sencillos y placenteros. Si tienes alguna otra duda, aquí estaré disponible 24/7.`
+      response: `¡Con el mayor gusto! ✈️ En SENAIR estamos para hacer tus viajes más sencillos y placenteros. Si tienes alguna otra duda, aquí estaré disponible 24/7.`
+    }
+  ];
+
+  const KNOWLEDGE_EN = [
+    {
+      keywords: ["route", "flight", "destination", "bogota", "medellin", "cali", "cartagena", "schedule", "price", "cost", "how much"],
+      response: `At SENAIR we operate key domestic routes across Colombia with direct flights and comfortable connections:
+• Bogotá (BOG) ⇄ Medellín (MDE): from $159,000 COP
+• Bogotá (BOG) ⇄ Cartagena (CTG): from $189,000 COP
+• Medellín (MDE) ⇄ Bogotá (BOG): from $169,000 COP
+• Cali (CLO) ⇄ Cartagena (CTG): from $249,000 COP
+
+All fares include taxes and airport fees. Would you like to check flights now?
+<a href="vuelos.html" class="ai-btn-link">✈️ View available flights</a>`
+    },
+    {
+      keywords: ["installment", "financing", "interest", "pay", "payment", "card", "credit", "debit", "paypal", "apple pay", "google pay"],
+      response: `Of course! At SENAIR you can pay with complete flexibility:
+• Credit cards: Split your payment into 1 to 36 monthly installments. 1 installment has zero financing interest.
+• Real-time calculation: When you choose your installments at checkout, you'll see the exact monthly fee.
+• Other payment methods: We accept PayPal, Apple Pay, Google Pay, and debit cards.
+• Electronic invoice: Upon completing payment, your official fiscal receipt with booking code is generated instantly.`
+    },
+    {
+      keywords: ["baggage", "luggage", "weight", "backpack", "carry on", "checked", "size", "dimension"],
+      response: `Our baggage policies at SENAIR are simple and clear:
+• Personal item (Free): 1 handbag or backpack up to 10 kg that fits under the seat in front of you.
+• Carry-on bag (Cabin): 1 suitcase up to 10 kg for the overhead bin (55 x 35 x 25 cm).
+• Checked baggage: Checked luggage up to 23 kg per piece.
+Have questions about sports equipment or special baggage? Feel free to ask!`
+    },
+    {
+      keywords: ["mile", "rewards", "point", "tier", "silver", "gold", "platinum", "frequent", "benefit"],
+      response: `The SENAIR Rewards program rewards your loyalty:
+• 500 welcome miles: When you create or log in to your free account.
+• 650 miles per flight: Automatically accumulated with every confirmed booking.
+• Membership tiers:
+  - Silver · Explorer (< 3,000 miles): Baggage discounts.
+  - Gold · Frequent (3,000 - 5,999 miles): Priority boarding.
+  - Platinum · Elite (6,000+ miles): VIP lounge access & complimentary upgrades.
+<a href="viajes.html" class="ai-btn-link">⭐ Check my miles</a>`
+    },
+    {
+      keywords: ["seat", "seatmap", "window", "aisle", "middle", "checkin"],
+      response: `Seat selection at SENAIR is interactive and simple:
+• During booking, you'll view the aircraft cabin layout with rows 1 to 6.
+• Choose from Window (A, F), Middle (B, E), or Aisle (C, D) seats.
+• For group travel, the system allows contiguous seats for all passengers.`
+    },
+    {
+      keywords: ["invoice", "receipt", "tax", "vat", "dian"],
+      response: `After completing your payment at checkout, the system automatically displays:
+1. Official Electronic Invoice: With fiscal number (SEN-XXXXXX), SENAIR company ID, base fare and VAT (19%) breakdown, and payment details.
+2. Print button: Print your invoice or save it directly as a PDF.
+3. Booking confirmation code: Use it for online check-in or viewing in My Trips.`
+    },
+    {
+      keywords: ["who", "developer", "creator", "team", "about", "freiner", "isabel", "jesus", "soto", "cervantes"],
+      response: `The SENAIR platform was designed and developed by a talented team:
+• Freiner: Full Stack Development & Coordination.
+• Isabel Fernández: UI/UX Design & Frontend Engineering.
+• Jesús Soto: System Architecture & Development.
+• Juan Cervantes: Systems Development & Quality Assurance.
+<a href="nosotros.html" class="ai-btn-link">👥 Meet the team</a>`
+    },
+    {
+      keywords: ["contact", "help", "support", "phone", "email", "call", "agent"],
+      response: `Our customer care team is available 24/7:
+• Phone helpline: 01 8000 912 345 (Colombia)
+• Email: soporte@senair.com
+• Main offices: El Dorado International Airport, Bogotá D.C.
+<a href="contacto.html" class="ai-btn-link">📞 Go to Contact page</a>`
+    },
+    {
+      keywords: ["hi", "hello", "good morning", "good afternoon", "hey", "greetings"],
+      response: `Hello! 👋 Great to meet you. I'm AeroBot, SENAIR's virtual AI assistant.
+How can I assist you today? I can help you search flights, explore installment plans, check baggage rules, track rewards miles, or review your bookings.`
+    },
+    {
+      keywords: ["thank", "thanks", "ok", "great", "perfect", "got it"],
+      response: `You're very welcome! ✈️ At SENAIR we're dedicated to making your travel seamless. If you need anything else, I'm here 24/7.`
     }
   ];
 
   function getAiResponse(userText) {
+    const isEn = (window.SenairI18n && window.SenairI18n.getLanguage() === "en") || /^(hi|hello|hey|flights|how|where|when|can i)/i.test(userText.trim());
+    const knowledgeBase = isEn ? KNOWLEDGE_EN : KNOWLEDGE_ES;
     const clean = userText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    for (const item of KNOWLEDGE) {
+
+    for (const item of knowledgeBase) {
       const match = item.keywords.some((kw) => {
         const cleanKw = kw.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         return clean.includes(cleanKw);
@@ -101,13 +186,25 @@ Todos los precios incluyen tasas e impuestos. ¿Deseas consultar vuelos ahora?
       if (match) return item.response;
     }
 
-    return `Entiendo tu pregunta sobre *"<b>${escapeHtml(userText.slice(0, 40))}</b>"*.
-Como asistente virtual de **SENAIR**, puedo brindarte información detallada sobre:
-• **Búsqueda y reservas de vuelos** entre Bogotá, Medellín, Cali y Cartagena.
-• **Planes de pago en cuotas** (1 a 36 cuotas sin complicaciones).
-• **Políticas de equipaje de mano y bodega**.
-• **Programa de Millas SENAIR Rewards**.
-• **Facturación electrónica y confirmación de tickets**.
+    if (isEn) {
+      return `I understand your question about "${escapeHtml(userText.slice(0, 40))}".
+As SENAIR's virtual assistant, I can provide detailed guidance on:
+• Flight search and reservations between Bogotá, Medellín, Cali, and Cartagena.
+• Flexible installment plans (1 to 36 months).
+• Carry-on and checked baggage policies.
+• The SENAIR Rewards miles program.
+• Electronic invoicing and ticket confirmations.
+
+Would you like more details on any of these topics?`;
+    }
+
+    return `Entiendo tu pregunta sobre "${escapeHtml(userText.slice(0, 40))}".
+Como asistente virtual de SENAIR, puedo brindarte información detallada sobre:
+• Búsqueda y reservas de vuelos entre Bogotá, Medellín, Cali y Cartagena.
+• Planes de pago en cuotas (1 a 36 cuotas sin complicaciones).
+• Políticas de equipaje de mano y bodega.
+• Programa de Millas SENAIR Rewards.
+• Facturación electrónica y confirmación de tickets.
 
 ¿Te gustaría que profundicemos en alguno de estos puntos?`;
   }
@@ -736,9 +833,13 @@ Como asistente virtual de **SENAIR**, puedo brindarte información detallada sob
       const bubble = document.createElement("div");
       bubble.className = "ai-msg-bubble";
 
-      // Reemplazar saltos de línea simples
+      // Reemplazar saltos de línea y eliminar asteriscos **
       if (sender === "bot") {
-        bubble.innerHTML = text.replace(/\n/g, "<br>");
+        const cleaned = text
+          .replace(/\*\*(.*?)\*\*/g, "$1")
+          .replace(/\*\*/g, "")
+          .replace(/\n/g, "<br>");
+        bubble.innerHTML = cleaned;
       } else {
         bubble.textContent = text;
       }
@@ -870,6 +971,66 @@ Como asistente virtual de **SENAIR**, puedo brindarte información detallada sob
         }
       });
     }
+
+    // Actualización de textos según idioma (ES / EN)
+    function updateChatbotLanguage(lang) {
+      const isEn = lang === "en" || (window.SenairI18n && window.SenairI18n.getLanguage() === "en");
+      const subtitle = widget.querySelector(".ai-bot-subtitle");
+      const badge = widget.querySelector(".ai-welcome-badge");
+      const welcomeP = widget.querySelector(".ai-chat-welcome p");
+      
+      if (subtitle) {
+        subtitle.textContent = isEn ? "Online · 24/7 Support" : "En línea · Atención 24/7";
+      }
+      if (badge) {
+        badge.textContent = isEn ? "✨ Intelligent Support" : "✨ Asistencia Inteligente";
+      }
+      if (welcomeP) {
+        welcomeP.innerHTML = isEn
+          ? "Hello! I am <strong>AeroBot</strong>, your virtual AI assistant at SENAIR. I'm ready to help you with flights, baggage, installment plans, and miles instantly."
+          : "¡Hola! Soy <strong>AeroBot</strong>, tu asistente virtual con IA en SENAIR. Estoy listo para ayudarte con vuelos, equipaje, cuotas de pago y millas al instante.";
+      }
+      if (chatInput) {
+        chatInput.placeholder = isEn
+          ? "Ask AeroBot about flights, installments..."
+          : "Pregúntale a AeroBot sobre vuelos, cuotas...";
+      }
+      if (clearBtn) {
+        clearBtn.title = isEn ? "Restart conversation" : "Reiniciar conversación";
+        clearBtn.setAttribute("aria-label", clearBtn.title);
+      }
+      if (closeBtn) {
+        closeBtn.title = isEn ? "Close chat" : "Cerrar chat";
+        closeBtn.setAttribute("aria-label", closeBtn.title);
+      }
+
+      if (quickChips) {
+        if (isEn) {
+          quickChips.innerHTML = `
+            <button type="button" class="ai-chip" data-query="What routes and flights are available?">✈️ Routes & flights</button>
+            <button type="button" class="ai-chip" data-query="How can I pay for my flight in installments?">💳 Pay in installments</button>
+            <button type="button" class="ai-chip" data-query="How much baggage can I bring?">🎒 Baggage allowance</button>
+            <button type="button" class="ai-chip" data-query="How does the SENAIR Rewards miles program work?">⭐ SENAIR Rewards</button>
+            <button type="button" class="ai-chip" data-query="Who are the SENAIR developers?">👥 SENAIR Team</button>
+          `;
+        } else {
+          quickChips.innerHTML = `
+            <button type="button" class="ai-chip" data-query="¿Qué rutas y vuelos tienen disponibles?">✈️ Rutas y vuelos</button>
+            <button type="button" class="ai-chip" data-query="¿Cómo puedo pagar en cuotas mi vuelo?">💳 Pago en cuotas</button>
+            <button type="button" class="ai-chip" data-query="¿Cuánto equipaje puedo llevar?">🎒 Equipaje permitido</button>
+            <button type="button" class="ai-chip" data-query="¿Cómo funciona el programa de Millas SENAIR Rewards?">⭐ Millas Rewards</button>
+            <button type="button" class="ai-chip" data-query="¿Quiénes son los desarrolladores de SENAIR?">👥 Equipo SENAIR</button>
+          `;
+        }
+      }
+    }
+
+    window.addEventListener("senair:langchange", (e) => {
+      updateChatbotLanguage(e.detail?.lang);
+    });
+
+    const initialLang = window.SenairI18n ? window.SenairI18n.getLanguage() : (localStorage.getItem("senair_lang") || "es");
+    updateChatbotLanguage(initialLang);
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && widget.classList.contains("is-open")) {

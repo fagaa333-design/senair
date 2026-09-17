@@ -583,6 +583,14 @@ document.querySelectorAll('.flip-card__form').forEach((form) => {
     });
 });
 
+// Cargar sistema de idioma (i18n)
+if (!document.querySelector('script[src*="i18n.js"]')) {
+    const i18nScript = document.createElement('script');
+    i18nScript.src = window.location.pathname.includes('/html/') ? '../js/i18n.js' : 'FRONTEND/js/i18n.js';
+    i18nScript.defer = true;
+    document.head.appendChild(i18nScript);
+}
+
 // Cargar asistente de IA (AeroBot)
 if (!document.querySelector('script[src*="ai-chatbot.js"]')) {
     const aiScript = document.createElement('script');
