@@ -1,27 +1,49 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SENAIR | En mantenimiento</title>
-    <style>
-      :root { color-scheme: light; font-family: Georgia, "Times New Roman", serif; color: #17324d; background: #f4f7f8; }
-      * { box-sizing: border-box; }
-      body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; background: linear-gradient(135deg, #eef5f7, #dcecf0); }
-      main { width: min(100%, 620px); padding: clamp(36px, 8vw, 72px); text-align: center; background: #fff; border: 1px solid rgba(23, 50, 77, 0.12); box-shadow: 0 24px 60px rgba(23, 50, 77, 0.14); }
-      .mark { display: inline-grid; width: 64px; height: 64px; margin-bottom: 24px; place-items: center; border-radius: 50%; color: #fff; background: #c41e3a; font: 700 28px/1 Arial, sans-serif; }
-      h1 { margin: 0 0 16px; font-size: clamp(32px, 6vw, 52px); line-height: 1; }
-      p { max-width: 430px; margin: 0 auto 28px; color: #536879; font: 17px/1.6 Arial, sans-serif; }
-      a { color: #c41e3a; font: 700 15px Arial, sans-serif; text-decoration: none; }
-      a:hover, a:focus-visible { text-decoration: underline; }
-    </style>
-  </head>
-  <body>
-    <main>
-      <span class="mark" aria-hidden="true">S</span>
-      <h1>En mantenimiento</h1>
-      <p>Estamos realizando algunos ajustes en SENAIR. Regresa pronto para continuar.</p>
-      <a href="../index.html">Volver al inicio</a>
-    </main>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SENAIR se encuentra en mantenimiento." />
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link rel="stylesheet" href="estilo.css" />
+  <link rel="stylesheet" href="header-shared.css" />
+  <title>SENAIR | En mantenimiento</title>
+  <style>
+    :root { --red: #c41e3a; --gold: #f4bd42; --line: rgba(8, 102, 198, .14); }
+    body { min-height: 100vh; background: #f5faff; }
+    .maintenance-page { position: relative; min-height: calc(100vh - 85px); overflow: hidden; isolation: isolate; background: radial-gradient(circle at 12% 18%, rgba(8,102,198,.08), transparent 28%), linear-gradient(135deg, #f5faff, #fff 52%, #eef7ff); }
+    .maintenance-page::before, .maintenance-page::after { position: absolute; z-index: -1; width: 32rem; height: 32rem; border: 1px solid var(--line); border-radius: 50%; content: ""; box-shadow: 0 0 0 42px rgba(8,102,198,.035), 0 0 0 84px rgba(8,102,198,.025); }
+    .maintenance-page::before { top: -19rem; right: -9rem; }
+    .maintenance-page::after { bottom: -22rem; left: -12rem; border-color: rgba(196,30,58,.12); box-shadow: 0 0 0 42px rgba(196,30,58,.03), 0 0 0 84px rgba(196,30,58,.02); }
+    .maintenance-content { display: grid; grid-template-columns: 1.1fr .9fr; align-items: center; gap: clamp(40px, 8vw, 120px); width: min(1180px, calc(100% - 40px)); min-height: calc(100vh - 85px); margin: auto; padding: 72px 0; }
+    .maintenance-copy { max-width: 610px; }
+    .maintenance-kicker { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 22px; color: var(--blue); font-size: 13px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
+    .maintenance-kicker::before { width: 34px; height: 3px; background: var(--red); content: ""; }
+    .maintenance-copy h1 { margin: 0 0 22px; color: var(--navy); font-size: clamp(44px, 7vw, 82px); line-height: .98; letter-spacing: -2px; }
+    .maintenance-copy h1 strong { color: var(--blue); }
+    .maintenance-copy p { max-width: 510px; margin: 0 0 30px; color: var(--muted); font-size: 18px; line-height: 1.7; }
+    .maintenance-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+    .maintenance-button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 24px; color: #fff; background: var(--blue); border-radius: 9px; box-shadow: 0 10px 22px rgba(8,102,198,.2); font-size: 15px; font-weight: 800; transition: .2s ease; }
+    .maintenance-button:hover, .maintenance-button:focus-visible { background: var(--navy); transform: translateY(-2px); }
+    .maintenance-note { color: var(--muted); font-size: 13px; font-weight: 700; }
+    .maintenance-visual { position: relative; display: grid; min-height: 390px; place-items: center; }
+    .maintenance-orbit { position: absolute; width: min(360px, 80vw); aspect-ratio: 1; border: 1px solid rgba(8,102,198,.18); border-radius: 50%; transform: rotate(-18deg); }
+    .maintenance-orbit::before, .maintenance-orbit::after { position: absolute; width: 14px; height: 14px; border-radius: 50%; content: ""; }
+    .maintenance-orbit::before { top: 13%; right: 13%; background: var(--gold); }
+    .maintenance-orbit::after { bottom: 15%; left: 8%; background: var(--red); }
+    .maintenance-panel { position: relative; display: grid; width: min(280px, 75vw); aspect-ratio: 1; place-items: center; color: #fff; background: linear-gradient(145deg, var(--blue), var(--navy)); border-radius: 30% 70% 62% 38% / 39% 38% 62% 61%; box-shadow: 18px 24px 0 rgba(8,102,198,.1), 0 30px 50px rgba(6,43,85,.2); transform: rotate(7deg); }
+    .maintenance-panel::before { position: absolute; inset: 20px; border: 1px solid rgba(255,255,255,.3); border-radius: inherit; content: ""; }
+    .maintenance-panel-content { position: relative; text-align: center; transform: rotate(-7deg); }
+    .maintenance-panel-content span { display: block; margin-bottom: 10px; color: #bfe2ff; font-size: 12px; font-weight: 800; letter-spacing: 2px; }
+    .maintenance-panel-content strong { display: block; font-size: 62px; line-height: .9; }
+    .maintenance-panel-content small { display: block; margin-top: 14px; font-size: 13px; font-weight: 700; }
+    @media (max-width: 850px) { .maintenance-content { grid-template-columns: 1fr; min-height: auto; padding: 76px 0 90px; } .maintenance-copy { max-width: 680px; margin: auto; text-align: center; } .maintenance-kicker, .maintenance-actions { justify-content: center; } .maintenance-copy p { margin-right: auto; margin-left: auto; } .maintenance-visual { min-height: 320px; } }
+    @media (max-width: 560px) { .maintenance-content { width: min(100% - 28px, 1180px); padding-top: 56px; } .maintenance-copy h1 { font-size: clamp(42px, 15vw, 64px); letter-spacing: -1px; } .maintenance-copy p { font-size: 16px; } .maintenance-visual { min-height: 280px; } }
+  </style>
+</head>
+<body>
+  <div class="topbar"><div class="container topbar-content"><span>Viaja con tranquilidad. Atencion 24/7.</span><div class="topbar-links"><a href="contacto.html">Ayuda</a></div></div></div>
+  <header><div class="container navbar"><a href="index.html" class="logo" aria-label="Inicio de SENAIR"><img class="logo-imagen" src="logo.png" alt="" />SENAIR</a><nav aria-label="Navegacion principal"><a href="index.html#vuelos">Vuelos</a><a href="destinos.html">Destinos</a><a href="ofertas.html">Ofertas</a><a href="contacto.html">Contacto</a></nav><a href="login.html" class="Btn login-link"><span class="text">Cerrar sesion</span></a></div></header>
+  <main class="maintenance-page"><div class="maintenance-content"><section class="maintenance-copy" aria-labelledby="maintenanceTitle"><span class="maintenance-kicker">Estamos preparando tu proxima ruta</span><h1 id="maintenanceTitle">En <strong>mantenimiento.</strong></h1><p>Estamos haciendo algunos ajustes para que tu experiencia SENAIR sea mas rapida, clara y comoda. Volveremos a estar disponibles muy pronto.</p><div class="maintenance-actions"><a class="maintenance-button" href="index.html">Volver al inicio</a><span class="maintenance-note">Gracias por tu paciencia.</span></div></section><div class="maintenance-visual" aria-hidden="true"><div class="maintenance-orbit"></div><div class="maintenance-panel"><div class="maintenance-panel-content"><span>SENAIR</span><strong>✈</strong><small>Pronto despegamos</small></div></div></div></div></main>
+</body>
 </html>
