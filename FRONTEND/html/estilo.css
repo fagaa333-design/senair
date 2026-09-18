@@ -1578,11 +1578,11 @@ section {
 }
 
 .inspiration-nav-btn:hover {
-    background: var(--red);
+    background: var(--blue);
     color: var(--white);
-    border-color: var(--red);
+    border-color: var(--blue);
     transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(196, 30, 58, .28);
+    box-shadow: 0 6px 18px rgba(8, 102, 198, .28);
 }
 
 .inspiration-nav-btn:active {
@@ -1629,7 +1629,7 @@ section {
 .inspiration-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 20px 42px rgba(6, 43, 85, .15);
-    border-color: rgba(196, 30, 58, 0.35);
+    border-color: rgba(8, 102, 198, 0.35);
 }
 
 .inspiration-card-image-wrap {
@@ -1671,12 +1671,26 @@ section {
     background-image: url("../assets/images/Cartagena.jpg");
 }
 
+.inspiration-madrid .inspiration-card-image {
+    background-image: url("https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=900&q=85");
+}
+
+.inspiration-medellin .inspiration-card-image,
 .inspiration-eje .inspiration-card-image {
     background-image: url("../assets/images/Medellin.jpg");
 }
 
+.inspiration-miami .inspiration-card-image {
+    background-image: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=85");
+}
+
+.inspiration-santa-marta .inspiration-card-image,
 .inspiration-san-andres .inspiration-card-image {
     background-image: url("../assets/images/Santa%20Marta.jpg");
+}
+
+.inspiration-paris .inspiration-card-image {
+    background-image: url("https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=85");
 }
 
 .inspiration-bogota .inspiration-card-image {
@@ -1698,7 +1712,7 @@ section {
     color: var(--blue);
     font-size: 11px;
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
 }
 
@@ -1723,12 +1737,12 @@ section {
     justify-content: space-between;
     width: 100%;
     margin-top: 18px;
-    padding: 11px 16px;
-    background: #f2f6fa;
+    padding: 12px 18px;
+    background: #edf5fc;
     color: var(--navy);
-    border: 1px solid #dce5ef;
+    border: 1.5px solid #d0e2f2;
     border-radius: 10px;
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 700;
     cursor: pointer;
     transition: all .25s ease;
@@ -1738,12 +1752,19 @@ section {
     transition: transform .25s ease;
 }
 
-.inspiration-card:hover .inspiration-book-btn,
-.inspiration-book-btn:hover {
-    background: var(--red);
+.inspiration-card:hover .inspiration-book-btn {
+    background: var(--blue);
     color: var(--white);
-    border-color: var(--red);
-    box-shadow: 0 4px 16px rgba(196, 30, 58, .28);
+    border-color: var(--blue);
+    box-shadow: 0 4px 16px rgba(8, 102, 198, .25);
+}
+
+.inspiration-book-btn:hover {
+    background: var(--navy) !important;
+    color: var(--white) !important;
+    border-color: var(--navy) !important;
+    box-shadow: 0 6px 20px rgba(6, 43, 85, .32) !important;
+    transform: translateY(-2px);
 }
 
 .inspiration-card:hover .inspiration-book-btn svg,
@@ -1772,7 +1793,7 @@ section {
 
 .inspiration-dot.active {
     width: 26px;
-    background: var(--red);
+    background: var(--blue);
 }
 
 .inspiration-footer {
@@ -1802,14 +1823,14 @@ section {
 
 @keyframes flightSearchPulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(196, 30, 58, 0.45), 0 24px 60px rgba(6, 43, 85, .12);
+        box-shadow: 0 0 0 0 rgba(8, 102, 198, 0.5), 0 24px 60px rgba(6, 43, 85, .12);
     }
     50% {
-        box-shadow: 0 0 0 10px rgba(196, 30, 58, 0.18), 0 28px 65px rgba(6, 43, 85, .22);
+        box-shadow: 0 0 0 10px rgba(8, 102, 198, 0.18), 0 28px 65px rgba(6, 43, 85, .22);
         transform: scale(1.008);
     }
     100% {
-        box-shadow: 0 0 0 0 rgba(196, 30, 58, 0), 0 24px 60px rgba(6, 43, 85, .12);
+        box-shadow: 0 0 0 0 rgba(8, 102, 198, 0), 0 24px 60px rgba(6, 43, 85, .12);
     }
 }
 
