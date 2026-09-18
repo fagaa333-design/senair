@@ -153,38 +153,7 @@ async function renderReservations() {
           <div><dt>Reserva</dt><dd>${escapeHtml(String(reservation.id).slice(-6).toUpperCase())}</dd></div>
         </dl>
       </div>
-      <div class="reservation-actions">
-        <button class="remove-reservation-button" type="button">Quitar de Mis viajes</button>
-      </div>
     `;
-
-    const removeBtn = card.querySelector(".remove-reservation-button");
-    removeBtn.addEventListener("click", async () => {
-      removeBtn.disabled = true;
-      removeBtn.textContent = "Quitando...";
-      try {
-        const delRes = await fetch(`/api/reservations/${encodeURIComponent(reservation.id)}`, {
-          method: "DELETE",
-          credentials: "include",
-        });
-        if (delRes.ok) {
-          if (userEmail) {
-            const cached = JSON.parse(window.sessionStorage.getItem(`senairReservations_${userEmail}`) || "[]");
-            const updated = cached.filter((r) => String(r.id) !== String(reservation.id));
-            window.sessionStorage.setItem(`senairReservations_${userEmail}`, JSON.stringify(updated));
-          }
-          await renderReservations();
-        } else {
-          alert("No se pudo quitar el vuelo de Mis viajes. Inténtalo de nuevo.");
-          removeBtn.disabled = false;
-          removeBtn.textContent = "Quitar de Mis viajes";
-        }
-      } catch {
-        alert("Error de conexión al intentar quitar el vuelo.");
-        removeBtn.disabled = false;
-        removeBtn.textContent = "Quitar de Mis viajes";
-      }
-    });
 
     reservationsGrid.append(card);
   });
@@ -204,11 +173,7 @@ function renderTrips() {
     const card = document.createElement("article");
     card.className = "trip-card";
     card.dataset.id = favorite.id;
-    card.innerHTML = `<div class="destination-image ${escapeHtml(favorite.imageClass)}"></div><div class="trip-content"><div class="trip-meta"><span>${escapeHtml(favorite.meta?.[0] || "Destino SENAIR")}</span><span>${escapeHtml(favorite.meta?.[1] || "Disponible")}</span></div><h3>${escapeHtml(favorite.name)}</h3><p>${escapeHtml(favorite.description)}</p><div class="trip-footer"><strong>${escapeHtml(favorite.price)}</strong><a href="index.html#vuelos">Buscar vuelo <span aria-hidden="true">→</span></a></div><button class="remove-trip" type="button">Quitar de Mis viajes</button></div>`;
-    card.querySelector(".remove-trip").addEventListener("click", () => {
-      window.localStorage.setItem(favoritesStorageKey, JSON.stringify(getFavorites().filter((item) => item.id !== favorite.id)));
-      renderTrips();
-    });
+    card.innerHTML = `<div class="destination-image ${escapeHtml(favorite.imageClass)}"></div><div class="trip-content"><div class="trip-meta"><span>${escapeHtml(favorite.meta?.[0] || "Destino SENAIR")}</span><span>${escapeHtml(favorite.meta?.[1] || "Disponible")}</span></div><h3>${escapeHtml(favorite.name)}</h3><p>${escapeHtml(favorite.description)}</p><div class="trip-footer"><strong>${escapeHtml(favorite.price)}</strong><a href="index.html#vuelos">Buscar vuelo <span aria-hidden="true">→</span></a></div></div>`;
     tripsGrid.append(card);
   });
 }

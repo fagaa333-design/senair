@@ -222,10 +222,10 @@ app.post("/register", authLimiter, async (request, response) => {
   const email = String(request.body.email || "").trim().toLowerCase();
   const password = String(request.body.password || "");
 
-  if (name.length < 2 || !/^\S+@\S+\.\S+$/.test(email)) {
+  if (name.length < 2 || !/^\S+@\S+\.\S+$/.test(email) || email.length > 190) {
     return response.status(400).json({ success: false, message: "Revisa tu nombre y correo." });
   }
-  if (!PASSWORD_REGEX.test(password)) {
+  if (!PASSWORD_REGEX.test(password) || password.length > 128) {
     return response.status(400).json({ success: false, message: PASSWORD_MESSAGE });
   }
 
@@ -254,7 +254,7 @@ app.post("/login", authLimiter, async (request, response) => {
   const email = String(request.body.email || "").trim().toLowerCase();
   const password = String(request.body.password || "");
 
-  if (!email || !password) {
+  if (!email || !password || email.length > 190 || password.length > 128) {
     return response.status(400).json({ success: false, message: "Email y contraseña requeridos." });
   }
 
