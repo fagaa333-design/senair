@@ -599,5 +599,27 @@ if (!document.querySelector('script[src*="ai-chatbot.js"]')) {
     document.head.appendChild(aiScript);
 }
 
+// Animación de entrada progresiva para las tarjetas de Inspiración
+const inspirationSection = document.querySelector(".inspiration-section");
+if (inspirationSection) {
+    inspirationSection.classList.add("js-anim");
+    if ("IntersectionObserver" in window) {
+        const inspirationObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    inspirationSection.classList.add("is-visible");
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.15,
+            rootMargin: "0px 0px -40px 0px"
+        });
+        inspirationObserver.observe(inspirationSection);
+    } else {
+        inspirationSection.classList.add("is-visible");
+    }
+}
+
 })();
 
