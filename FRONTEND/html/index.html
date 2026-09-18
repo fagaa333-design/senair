@@ -729,43 +729,112 @@
       <section class="inspiration-section" id="inspiracion">
         <div class="container">
           <div class="section-heading inspiration-heading">
-            <div>
+            <div class="inspiration-title-wrap">
               <span class="eyebrow eyebrow-blue">Ideas para tu próxima escapada</span>
               <h2>Inspírate para tu próximo viaje</h2>
+              <p>Historias, sabores y paisajes colombianos que ya están esperando por ti.</p>
             </div>
-            <p>Historias, sabores y paisajes colombianos que ya están esperando por ti.</p>
+            <div class="inspiration-nav-controls" aria-label="Controles del carrusel">
+              <button type="button" class="inspiration-nav-btn prev" id="inspirationPrev" aria-label="Destino anterior">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+              <button type="button" class="inspiration-nav-btn next" id="inspirationNext" aria-label="Siguiente destino">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </div>
           </div>
 
-          <div class="inspiration-grid">
-            <article class="inspiration-card inspiration-cartagena">
-              <div class="inspiration-card-image"></div>
-              <div class="inspiration-card-content">
-                <span>01 / Caribe</span>
-                <h3>Cartagena</h3>
-                <p>Historia, playas y calles llenas de color.</p>
-              </div>
-            </article>
+          <div class="inspiration-slider-wrapper">
+            <div class="inspiration-track" id="inspirationTrack">
+              
+              <article class="inspiration-card inspiration-cartagena" data-destination="Cartagena (CTG)" role="button" tabindex="0" aria-label="Elegir Cartagena">
+                <div class="inspiration-card-image-wrap">
+                  <div class="inspiration-card-image"></div>
+                  <span class="inspiration-price-badge">Desde $189.000 COP</span>
+                </div>
+                <div class="inspiration-card-content">
+                  <span>01 / Caribe</span>
+                  <h3>Cartagena</h3>
+                  <p>Historia colonial, playas y calles llenas de magia y color.</p>
+                  <button type="button" class="inspiration-book-btn" data-destination="Cartagena (CTG)">
+                    <span>Reservar vuelo</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                </div>
+              </article>
 
-            <article class="inspiration-card inspiration-eje">
-              <div class="inspiration-card-image"></div>
-              <div class="inspiration-card-content">
-                <span>02 / Montaña</span>
-                <h3>Eje Cafetero</h3>
-                <p>Naturaleza, café y paisajes increíbles.</p>
-              </div>
-            </article>
+              <article class="inspiration-card inspiration-eje" data-destination="Medellín (MDE)" role="button" tabindex="0" aria-label="Elegir Medellín">
+                <div class="inspiration-card-image-wrap">
+                  <div class="inspiration-card-image"></div>
+                  <span class="inspiration-price-badge">Desde $175.000 COP</span>
+                </div>
+                <div class="inspiration-card-content">
+                  <span>02 / Montaña</span>
+                  <h3>Medellín</h3>
+                  <p>Naturaleza, innovación y la ciudad de la eterna primavera.</p>
+                  <button type="button" class="inspiration-book-btn" data-destination="Medellín (MDE)">
+                    <span>Reservar vuelo</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                </div>
+              </article>
 
-            <article class="inspiration-card inspiration-san-andres">
-              <div class="inspiration-card-image"></div>
-              <div class="inspiration-card-content">
-                <span>03 / Isla</span>
-                <h3>San Andrés</h3>
-                <p>El mar de siete colores te espera.</p>
-              </div>
-            </article>
+              <article class="inspiration-card inspiration-san-andres" data-destination="Santa Marta (SMR)" role="button" tabindex="0" aria-label="Elegir Santa Marta">
+                <div class="inspiration-card-image-wrap">
+                  <div class="inspiration-card-image"></div>
+                  <span class="inspiration-price-badge">Desde $195.000 COP</span>
+                </div>
+                <div class="inspiration-card-content">
+                  <span>03 / Caribe & Sierra</span>
+                  <h3>Santa Marta</h3>
+                  <p>Playas doradas, bahías cristalinas y la Sierra Nevada.</p>
+                  <button type="button" class="inspiration-book-btn" data-destination="Santa Marta (SMR)">
+                    <span>Reservar vuelo</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                </div>
+              </article>
+
+              <article class="inspiration-card inspiration-bogota" data-destination="Bogotá (BOG)" role="button" tabindex="0" aria-label="Elegir Bogotá">
+                <div class="inspiration-card-image-wrap">
+                  <div class="inspiration-card-image"></div>
+                  <span class="inspiration-price-badge">Desde $149.000 COP</span>
+                </div>
+                <div class="inspiration-card-content">
+                  <span>04 / Altiplano</span>
+                  <h3>Bogotá</h3>
+                  <p>Cultura, museos, gastronomía y el pulso vibrante de la capital.</p>
+                  <button type="button" class="inspiration-book-btn" data-destination="Bogotá (BOG)">
+                    <span>Reservar vuelo</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                </div>
+              </article>
+
+              <article class="inspiration-card inspiration-cali" data-destination="Cali (CLO)" role="button" tabindex="0" aria-label="Elegir Cali">
+                <div class="inspiration-card-image-wrap">
+                  <div class="inspiration-card-image"></div>
+                  <span class="inspiration-price-badge">Desde $165.000 COP</span>
+                </div>
+                <div class="inspiration-card-content">
+                  <span>05 / Valle del Cauca</span>
+                  <h3>Cali</h3>
+                  <p>La capital de la salsa, calidez de su gente y brisa inolvidable.</p>
+                  <button type="button" class="inspiration-book-btn" data-destination="Cali (CLO)">
+                    <span>Reservar vuelo</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                </div>
+              </article>
+
+            </div>
           </div>
 
-          <a class="inspiration-cta" href="destinos.html">Descubrir destinos <span aria-hidden="true">→</span></a>
+          <div class="inspiration-dots" id="inspirationDots" aria-label="Indicadores del carrusel"></div>
+
+          <div class="inspiration-footer">
+            <a class="inspiration-cta" href="destinos.html">Descubrir todos los destinos <span aria-hidden="true">→</span></a>
+          </div>
         </div>
       </section>
 

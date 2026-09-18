@@ -599,5 +599,163 @@ if (!document.querySelector('script[src*="ai-chatbot.js"]')) {
     document.head.appendChild(aiScript);
 }
 
+// ── Carrusel interactivo y selección directa de destinos en Inspiración ──
+const inspirationTrack = document.getElementById("inspirationTrack");
+if (inspirationTrack) {
+    const prevBtn = document.getElementById("inspirationPrev");
+    const nextBtn = document.getElementById("inspirationNext");
+    const dotsContainer = document.getElementById("inspirationDots");
+    const cards = Array.from(inspirationTrack.querySelectorAll(".inspiration-card"));
+
+    // Calcular desplazamiento por tarjeta
+    const getCardScrollStep = () => {
+        const firstCard = cards[0];
+        if (!firstCard) return 320;
+        const style = window.getComputedStyle(inspirationTrack);
+        const gap = parseFloat(style.columnGap || style.gap) || 22;
+        return firstCard.offsetWidth + gap;
+    };
+
+    // Navegación con botones
+    if (prevBtn) {
+        prevBtn.addEventListener("click", () => {
+            const step = getCardScrollStep();
+            inspirationTrack.scrollBy({ left: -step, behavior: "smooth" });
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener("click", () => {
+            const step = getCardScrollStep();
+            const maxScroll = inspirationTrack.scrollWidth - inspirationTrack.clientWidth - 10;
+            if (inspirationTrack.scrollLeft >= maxScroll) {
+                inspirationTrack.scrollTo({ left: 0, behavior: "smooth" });
+            } else {
+                inspirationTrack.scrollBy({ left: step, behavior: "smooth" });
+            }
+        });
+    }
+
+    // Generar indicadores (dots)
+    if (dotsContainer && cards.length > 0) {
+        dotsContainer.innerHTML = "";
+        cards.forEach((_, idx) => {
+            const dot = document.createElement("button");
+            dot.type = "button";
+            dot.className = `inspiration-dot ${idx === 0 ? "active" : ""}`;
+            dot.setAttribute("aria-label", `Ir al destino ${idx + 1}`);
+            dot.addEventListener("click", () => {
+                const step = getCardScrollStep();
+                inspirationTrack.scrollTo({ left: idx * step, behavior: "smooth" });
+            });
+            dotsContainer.appendChild(dot);
+        });
+
+        // Actualizar dot activo al scrollear
+        let scrollTicking = false;
+        inspirationTrack.addEventListener("scroll", () => {
+            if (!scrollTicking) {
+                window.requestAnimationFrame(() => {
+                    const step = getCardScrollStep();
+                    const activeIndex = Math.min(
+                        cards.length - 1,
+                        Math.max(0, Math.round(inspirationTrack.scrollLeft / step))
+                    );
+                    dotsContainer.querySelectorAll(".inspiration-dot").forEach((dot, i) => {
+                        dot.classList.toggle("active", i === activeIndex);
+                    });
+                    scrollTicking = false;
+                });
+                scrollTicking = true;
+            }
+        }, { passive: true });
+    }
+
+    // Autoplay sutil (se pausa al interactuar o con prefers-reduced-motion)
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let autoplayTimer = null;
+
+    const startAutoplay = () => {
+        if (prefersReducedMotion || autoplayTimer) return;
+        autoplayTimer = setInterval(() => {
+            const step = getCardScrollStep();
+            const maxScroll = inspirationTrack.scrollWidth - inspirationTrack.clientWidth - 10;
+            if (inspirationTrack.scrollLeft >= maxScroll) {
+                inspirationTrack.scrollTo({ left: 0, behavior: "smooth" });
+            } else {
+                inspirationTrack.scrollBy({ left: step, behavior: "smooth" });
+            }
+        }, 5500);
+    };
+
+    const stopAutoplay = () => {
+        if (autoplayTimer) {
+            clearInterval(autoplayTimer);
+            autoplayTimer = null;
+        }
+    };
+
+    inspirationTrack.addEventListener("mouseenter", stopAutoplay);
+    inspirationTrack.addEventListener("mouseleave", startAutoplay);
+    inspirationTrack.addEventListener("touchstart", stopAutoplay, { passive: true });
+    inspirationTrack.addEventListener("touchend", () => {
+        setTimeout(startAutoplay, 3000);
+    }, { passive: true });
+
+    startAutoplay();
+
+    // Conexión directa: Al hacer clic en una tarjeta o su botón, autoselecciona el destino en el buscador
+    const handleSelectDestination = (destValue) => {
+        if (!destValue) return;
+
+        // Si Choices está disponible para el destino (airportChoices[1])
+        if (typeof airportChoices !== "undefined" && airportChoices && airportChoices[1]) {
+            airportChoices[1].removeActiveItems();
+            airportChoices[1].setChoiceByValue(destValue);
+        } else {
+            const destSelect = document.getElementById("destination");
+            if (destSelect) {
+                destSelect.value = destValue;
+                destSelect.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+        }
+
+        // Scroll suave hacia el buscador de vuelos
+        const targetSearch = document.getElementById("flightSearch") || document.getElementById("vuelos") || document.getElementById("flightForm");
+        if (targetSearch) {
+            targetSearch.scrollIntoView({ behavior: "smooth", block: "center" });
+
+            // Efecto visual pulsante para destacar que se preseleccionó el destino
+            targetSearch.classList.remove("form-highlight-pulse");
+            void targetSearch.offsetWidth;
+            targetSearch.classList.add("form-highlight-pulse");
+            setTimeout(() => targetSearch.classList.remove("form-highlight-pulse"), 2000);
+
+            // Enfocar fecha de salida si aún no está seleccionada
+            const departureInput = document.getElementById("departure");
+            const departureTrigger = document.getElementById("departureTrigger");
+            if (departureTrigger && (!departureInput || !departureInput.value)) {
+                setTimeout(() => {
+                    departureTrigger.focus();
+                }, 600);
+            }
+        }
+    };
+
+    cards.forEach((card) => {
+        const destination = card.dataset.destination;
+        card.addEventListener("click", () => {
+            handleSelectDestination(destination);
+        });
+
+        card.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleSelectDestination(destination);
+            }
+        });
+    });
+}
+
 })();
 

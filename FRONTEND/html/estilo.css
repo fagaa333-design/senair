@@ -1527,33 +1527,127 @@ section {
 }
 
 .inspiration-heading {
-    align-items: end;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 24px;
 }
 
-.inspiration-grid {
-    display: grid;
-    grid-template-columns: 1.15fr 1fr 1fr;
-    gap: 18px;
+.inspiration-title-wrap {
+    max-width: 680px;
+}
+
+.inspiration-nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.inspiration-nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    color: var(--navy);
+    cursor: pointer;
+    transition: all .25s ease;
+    box-shadow: 0 4px 12px rgba(6, 43, 85, .06);
+}
+
+.inspiration-nav-btn:hover {
+    background: var(--red);
+    color: var(--white);
+    border-color: var(--red);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(196, 30, 58, .28);
+}
+
+.inspiration-nav-btn:active {
+    transform: scale(0.94);
+}
+
+.inspiration-slider-wrapper {
+    position: relative;
+    margin: 0 -6px;
+}
+
+.inspiration-track {
+    display: flex;
+    gap: 22px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 10px 6px 20px 6px;
+}
+
+.inspiration-track::-webkit-scrollbar {
+    display: none;
 }
 
 .inspiration-card {
+    flex: 0 0 calc((100% - 44px) / 3);
+    min-width: 290px;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     background: var(--white);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    box-shadow: 0 12px 30px rgba(6, 43, 85, .08);
-    transition: transform .25s ease, box-shadow .25s ease;
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(6, 43, 85, .07);
+    transition: transform .3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .3s ease, border-color .3s ease;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
 }
 
 .inspiration-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 18px 34px rgba(6, 43, 85, .16);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 42px rgba(6, 43, 85, .15);
+    border-color: rgba(196, 30, 58, 0.35);
+}
+
+.inspiration-card-image-wrap {
+    position: relative;
+    height: 235px;
+    overflow: hidden;
 }
 
 .inspiration-card-image {
-    height: 235px;
+    width: 100%;
+    height: 100%;
     background-position: center;
     background-size: cover;
+    transition: transform .5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.inspiration-card:hover .inspiration-card-image {
+    transform: scale(1.08);
+}
+
+.inspiration-price-badge {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(6, 43, 85, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #ffffff;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 6px 13px;
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+    letter-spacing: 0.3px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .inspiration-cartagena .inspiration-card-image {
@@ -1568,8 +1662,19 @@ section {
     background-image: url("../assets/images/Santa%20Marta.jpg");
 }
 
+.inspiration-bogota .inspiration-card-image {
+    background-image: url("../assets/images/Bogota.jpg");
+}
+
+.inspiration-cali .inspiration-card-image {
+    background-image: url("../assets/images/Cali.jpg");
+}
+
 .inspiration-card-content {
-    padding: 20px 22px 23px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 22px 22px 20px;
 }
 
 .inspiration-card-content > span {
@@ -1588,27 +1693,111 @@ section {
 }
 
 .inspiration-card-content p {
+    flex-grow: 1;
     margin-top: 7px;
     color: var(--muted);
     font-size: 14px;
+    line-height: 1.45;
+}
+
+.inspiration-book-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 18px;
+    padding: 11px 16px;
+    background: #f2f6fa;
+    color: var(--navy);
+    border: 1px solid #dce5ef;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .25s ease;
+}
+
+.inspiration-book-btn svg {
+    transition: transform .25s ease;
+}
+
+.inspiration-card:hover .inspiration-book-btn,
+.inspiration-book-btn:hover {
+    background: var(--red);
+    color: var(--white);
+    border-color: var(--red);
+    box-shadow: 0 4px 16px rgba(196, 30, 58, .28);
+}
+
+.inspiration-card:hover .inspiration-book-btn svg,
+.inspiration-book-btn:hover svg {
+    transform: translateX(4px);
+}
+
+.inspiration-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.inspiration-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #d0dce8;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all .3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.inspiration-dot.active {
+    width: 26px;
+    background: var(--red);
+}
+
+.inspiration-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
 }
 
 .inspiration-cta {
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    margin-top: 28px;
-    padding: 13px 20px;
+    padding: 13px 24px;
     color: var(--white);
     background: var(--blue);
     border-radius: 999px;
     font-weight: 700;
-    transition: background .2s ease, transform .2s ease;
+    transition: background .2s ease, transform .2s ease, box-shadow .2s ease;
+    box-shadow: 0 4px 14px rgba(6, 43, 85, .15);
 }
 
 .inspiration-cta:hover {
     background: var(--navy);
     transform: translateX(3px);
+    box-shadow: 0 6px 20px rgba(6, 43, 85, .25);
+}
+
+@keyframes flightSearchPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(196, 30, 58, 0.45), 0 24px 60px rgba(6, 43, 85, .12);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(196, 30, 58, 0.18), 0 28px 65px rgba(6, 43, 85, .22);
+        transform: scale(1.008);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(196, 30, 58, 0), 0 24px 60px rgba(6, 43, 85, .12);
+    }
+}
+
+.form-highlight-pulse {
+    animation: flightSearchPulse 0.85s cubic-bezier(0.22, 1, 0.36, 1) 2;
 }
 
 .travel-experience {
@@ -2251,12 +2440,9 @@ footer li:hover {
         grid-template-rows: 220px 220px;
     }
 
-    .inspiration-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .inspiration-card:first-child {
-        grid-column: 1 / -1;
+    .inspiration-card {
+        flex: 0 0 calc((100% - 20px) / 2);
+        min-width: 270px;
     }
 
     .travel-experience-layout {
@@ -2409,17 +2595,23 @@ footer li:hover {
         padding: 70px 0;
     }
 
-    .inspiration-grid,
-    .travel-experience-layout {
-        grid-template-columns: 1fr;
+    .inspiration-heading {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
     }
 
-    .inspiration-card:first-child {
-        grid-column: auto;
+    .inspiration-nav-controls {
+        align-self: flex-end;
     }
 
-    .inspiration-card-image {
-        height: 210px;
+    .inspiration-card {
+        flex: 0 0 85%;
+        min-width: 260px;
+    }
+
+    .inspiration-card-image-wrap {
+        height: 200px;
     }
 
     .travel-experience-image {
