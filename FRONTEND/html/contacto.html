@@ -45,6 +45,7 @@
             <div class="contact-field"><label for="contactTopic">Motivo de contacto</label><select id="contactTopic" name="topic" required><option value="" selected disabled>Selecciona una opción</option><option>Ayuda con una reserva</option><option>Consulta sobre vuelos</option><option>Equipaje y documentación</option><option>Sugerencia o comentario</option></select></div>
             <div class="contact-field"><label for="contactCode">Código de reserva <span>(opcional)</span></label><input id="contactCode" name="code" type="text" placeholder="Ejemplo: AB12CD" /></div>
             <div class="contact-field full"><label for="contactText">Mensaje</label><textarea id="contactText" name="message" placeholder="Escribe aquí tu mensaje" required></textarea></div>
+            <label class="contact-consent"><input type="checkbox" name="dataConsent" required /><span>Autoriza usar sus datos para responder a esta solicitud.</span></label>
             <button class="contact-submit" type="submit">Enviar mensaje</button>
             <p class="contact-message" id="contactMessage" role="status"></p>
           </form>
