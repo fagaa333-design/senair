@@ -1462,80 +1462,125 @@ section {
     min-height: 200px;
     overflow: hidden;
     color: var(--white);
-    background-position: center;
-    background-size: cover;
-    border-radius: 14px;
+    background-color: var(--navy);
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(6, 43, 85, 0.08);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+    user-select: none;
+}
+
+.destination:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 42px rgba(6, 43, 85, 0.22);
 }
 
 .destination:first-child {
     grid-row: span 2;
 }
 
+.destination::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 0;
+}
+
+.destination:hover::before {
+    transform: scale(1.08);
+}
+
 .destination::after {
     position: absolute;
     inset: 0;
     content: "";
-    background: linear-gradient(transparent 35%, rgba(0, 24, 52, 0.88));
+    background: linear-gradient(180deg, rgba(3, 29, 58, 0.02) 0%, rgba(3, 29, 58, 0.38) 42%, rgba(3, 29, 58, 0.88) 100%);
+    transition: background 0.4s ease;
+    z-index: 1;
 }
 
-.destination-cartagena,
+.destination:hover::after {
+    background: linear-gradient(180deg, rgba(3, 29, 58, 0.1) 0%, rgba(3, 29, 58, 0.46) 38%, rgba(6, 43, 85, 0.94) 100%);
+}
+
+.destination-cartagena::before,
 .offer-cartagena {
-    background-image:url(../assets/images/Cartagena.jpg);
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    background-image: url("../assets/images/Cartagena.jpg");
 }
 
-.destination-medellin {
-    background-image: url(../assets/images/Medellin.jpg);
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+.destination-medellin::before {
+    background-image: url("../assets/images/Medellin.jpg");
 }
 
-.destination-bogota {
-    background-image: url(../assets/images/Bogota.jpg);
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+.destination-bogota::before {
+    background-image: url("../assets/images/Bogota.jpg");
 }
 
-.destination-santamarta {
-    background-image: url(../assets/images/Santa%20Marta.jpg);
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+.destination-santamarta::before {
+    background-image: url("../assets/images/Santa%20Marta.jpg");
 }
 
-.destination-cali {
-    background-image: url(../assets/images/Cali.jpg);
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+.destination-cali::before {
+    background-image: url("../assets/images/Cali.jpg");
 }
 
 .destination-info {
     position: absolute;
-    z-index: 1;
-    right: 20px;
-    bottom: 18px;
-    left: 20px;
+    z-index: 2;
+    right: 22px;
+    bottom: 20px;
+    left: 22px;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.destination:hover .destination-info {
+    transform: translateY(-4px);
 }
 
 .destination-info h3 {
-    font-size: 22px;
+    font-size: 23px;
+    font-weight: 800;
+    line-height: 1.1;
+    text-shadow: 0 2px 10px rgba(0, 15, 35, 0.45);
 }
 
 .destination-info p {
-    color: #d5edff;
+    color: #dbeaff;
     font-size: 13px;
+    margin-top: 4px;
+    text-shadow: 0 1px 6px rgba(0, 15, 35, 0.45);
 }
 
 .destination-info strong {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     margin-top: 10px;
     color: var(--white);
     font-size: 14px;
+    font-weight: 700;
+    transition: color 0.25s ease;
+}
+
+.destination:hover .destination-info strong {
+    color: #92cdff;
+}
+
+.destination-info strong::after {
+    content: "→";
+    display: inline-block;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.destination:hover .destination-info strong::after {
+    opacity: 1;
+    transform: translateX(3px);
 }
 
 .inspiration-section {

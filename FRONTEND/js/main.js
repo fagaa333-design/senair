@@ -755,6 +755,21 @@ if (inspirationTrack) {
             }
         });
     });
+
+    // Conectar también las tarjetas de la sección "¿A dónde quieres ir?"
+    document.querySelectorAll(".destination[data-destination]").forEach((card) => {
+        const destination = card.dataset.destination;
+        card.addEventListener("click", () => {
+            handleSelectDestination(destination);
+        });
+
+        card.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleSelectDestination(destination);
+            }
+        });
+    });
 }
 
 // Inicializar video de fondo del hero
