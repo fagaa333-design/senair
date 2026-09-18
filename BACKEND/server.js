@@ -52,6 +52,7 @@ async function initializeDatabase() {
       name TEXT NOT NULL,
       email TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'user',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
     `CREATE TABLE IF NOT EXISTS flights (
@@ -87,6 +88,12 @@ async function initializeDatabase() {
       args: flight,
     })),
   ], "write");
+
+  const usersColumns = await db.execute({ sql: "PRAGMA table_info(users)", args: [] });
+  const hasRoleColumn = usersColumns.rows.some((column) => column.name === "role");
+  if (!hasRoleColumn) {
+    await db.execute({ sql: "ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'", args: [] });
+  }
 }
 
 async function createRouteFlights(origin, destination, date) {
@@ -245,14 +252,21 @@ app.post("/login", authLimiter, async (request, response) => {
   }
 
   try {
-    const result = await db.execute({ sql: "SELECT id, name, email, password FROM users WHERE email = ?", args: [email] });
+    const result = await db.execute({ sql: "SELECT id, name, email, password, role FROM users WHERE email = ?", args: [email] });
     const user = result.rows[0];
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return response.status(401).json({ success: false, message: "Credenciales inválidas." });
     }
-    const token = signToken({ id: user.id, email: user.email, name: user.name });
+    const isAdmin = user.role === "admin";
+    const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role });
     setAuthCookie(response, token);
-    return response.json({ success: true, name: user.name, email: user.email, redirect: "/html/index.html" });
+    return response.json({
+      success: true,
+      name: user.name,
+      email: user.email,
+      isAdmin,
+      redirect: isAdmin ? "/html/mantenimiento.html" : "/html/index.html",
+    });
   } catch {
     return response.status(500).json({ success: false, message: "Error interno del servidor." });
   }

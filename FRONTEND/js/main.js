@@ -115,7 +115,8 @@ async function submitAuthForm(form, isRegistration) {
         window.sessionStorage.setItem(authStorageKey, "true");
         window.sessionStorage.setItem("senairUserName", String(name || "Usuario"));
         window.sessionStorage.setItem("senairUserEmail", String(formData.get("email") || ""));
-        window.location.href = new URL("../index.html", window.location.href).href;
+        const redirect = result.isAdmin ? "mantenimiento.html" : "../index.html";
+        window.location.href = new URL(redirect, window.location.href).href;
     } catch {
         window.alert("No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.");
     }

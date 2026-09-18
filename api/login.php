@@ -11,7 +11,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') {
 }
 
 try {
-    $statement = database()->prepare('SELECT name, email, password FROM users WHERE email = :email LIMIT 1');
+    $statement = database()->prepare('SELECT name, email, password, role FROM users WHERE email = :email LIMIT 1');
     $statement->execute([':email' => $email]);
     $user = $statement->fetch();
 
@@ -19,11 +19,13 @@ try {
         jsonResponse(['success' => false, 'message' => 'Credenciales inválidas.'], 401);
     }
 
+    $isAdmin = ($user['role'] ?? 'user') === 'admin';
     jsonResponse([
         'success' => true,
         'name' => $user['name'],
         'email' => $user['email'],
-        'redirect' => '../FRONTEND/html/index.html',
+        'isAdmin' => $isAdmin,
+        'redirect' => $isAdmin ? '../FRONTEND/html/mantenimiento.html' : '../FRONTEND/html/index.html',
     ]);
 } catch (PDOException) {
     jsonResponse(['success' => false, 'message' => 'Error de base de datos.'], 500);
