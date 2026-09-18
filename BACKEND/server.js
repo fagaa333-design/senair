@@ -22,6 +22,8 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
   : [`http://localhost:${PORT}`, `http://127.0.0.1:${PORT}`];
 const FRONTEND_ROOT = path.resolve(__dirname, "../FRONTEND");
 const DB_FILE = path.resolve(__dirname, "../database/senair.db");
+const ADMIN_EMAIL = "freinergudino@gmail.com";
+const ADMIN_PASSWORD_HASH = "$2a$10$kQI.a68cNlgCeaYAK3IcjOg4yQHjfJHj49TnjbXtvUMyikIGgbEKS";
 const app = express();
 
 if (!process.env.JWT_SECRET && IS_PRODUCTION) {
@@ -94,6 +96,11 @@ async function initializeDatabase() {
   if (!hasRoleColumn) {
     await db.execute({ sql: "ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'", args: [] });
   }
+
+  await db.execute({
+    sql: "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'admin') ON CONFLICT(email) DO UPDATE SET name = excluded.name, password = excluded.password, role = 'admin'",
+    args: ["Administrador", ADMIN_EMAIL, ADMIN_PASSWORD_HASH],
+  });
 }
 
 async function createRouteFlights(origin, destination, date) {
@@ -257,7 +264,7 @@ app.post("/login", authLimiter, async (request, response) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return response.status(401).json({ success: false, message: "Credenciales inválidas." });
     }
-    const isAdmin = user.role === "admin";
+    const isAdmin = user.email === ADMIN_EMAIL && user.role === "admin";
     const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role });
     setAuthCookie(response, token);
     return response.json({
