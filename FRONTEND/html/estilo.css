@@ -490,16 +490,33 @@ nav:not(.mobile-nav) a.active {
 .hero {
     position: relative;
     isolation: isolate;
+    overflow: hidden;
     min-height: 500px;
     padding: 72px 0 90px;
     color: var(--white);
     background-color: var(--navy);
-    background-image:
-    linear-gradient(90deg, rgba(3, 29, 58, 0.92) 0%, rgba(3, 29, 58, 0.74) 42%, rgba(3, 29, 58, 0.18) 100%),
-    url("pexels-lora-rikky-247863707-30973548.jpg");
-    background-position: center, center 62%;
-    background-repeat: no-repeat;
-    background-size: cover;
+}
+
+.hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    z-index: -2;
+    pointer-events: none;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(3, 29, 58, 0.92) 0%, rgba(3, 29, 58, 0.74) 42%, rgba(3, 29, 58, 0.22) 100%);
+    z-index: -1;
+    pointer-events: none;
 }
 
 .hero-content {
@@ -2486,6 +2503,10 @@ footer li:hover {
     
     .hero {
         padding: 55px 0 70px;
+    }
+
+    .hero-overlay {
+        background: linear-gradient(180deg, rgba(3, 29, 58, 0.92) 0%, rgba(3, 29, 58, 0.78) 45%, rgba(3, 29, 58, 0.94) 100%);
     }
 
     .quick-link-card {

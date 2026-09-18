@@ -757,5 +757,13 @@ if (inspirationTrack) {
     });
 }
 
+// Inicializar video de fondo del hero
+const heroVideo = document.getElementById("heroVideo");
+if (heroVideo) {
+    heroVideo.muted = true;
+    heroVideo.defaultMuted = true;
+    heroVideo.play().catch(() => {});
+}
+
 })();
 
