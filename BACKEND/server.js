@@ -23,7 +23,7 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
 const FRONTEND_ROOT = path.resolve(__dirname, "../FRONTEND");
 const DB_FILE = path.resolve(__dirname, "../database/senair.db");
 const ADMIN_EMAIL = "freinergudino@gmail.com";
-const ADMIN_PASSWORD_HASH = "$2a$10$kQI.a68cNlgCeaYAK3IcjOg4yQHjfJHj49TnjbXtvUMyikIGgbEKS";
+const ADMIN_PASSWORD_HASH = "$2a$10$eYPbqbntzyhXSw.DaCj7rOzfnCf6upji2528VBQ0RNVCTke3CzAoS";
 const app = express();
 
 if (!process.env.JWT_SECRET && IS_PRODUCTION) {
@@ -118,7 +118,7 @@ async function createRouteFlights(origin, destination, date) {
 /* ── Auth helpers ─────────────────────────────────────────────── */
 
 function signToken(user) {
-  return jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+  return jwt.sign({ id: user.id, email: user.email, name: user.name, role: user.role || "user" }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
 }
 
 function setAuthCookie(response, token) {
@@ -142,6 +142,24 @@ function requireAuth(request, response, next) {
   } catch {
     response.clearCookie("senair_token", { path: "/" });
     return response.status(401).json({ success: false, message: "Tu sesión expiró. Inicia sesión de nuevo." });
+  }
+}
+
+function requireAdmin(request, response, next) {
+  const token = request.cookies?.senair_token;
+  if (!token) {
+    return response.status(401).json({ success: false, message: "No autorizado. Inicia sesión como administrador." });
+  }
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.email !== ADMIN_EMAIL || decoded.role !== "admin") {
+      return response.status(403).json({ success: false, message: "Acceso denegado. Se requieren permisos de administrador." });
+    }
+    request.user = decoded;
+    next();
+  } catch {
+    response.clearCookie("senair_token", { path: "/" });
+    return response.status(401).json({ success: false, message: "Sesión expirada. Inicia sesión de nuevo." });
   }
 }
 
@@ -415,6 +433,236 @@ app.delete("/api/reservations/:id", requireAuth, async (request, response) => {
   } catch {
     return response.status(500).json({ success: false, message: "No se pudo eliminar la reserva." });
   }
+});
+
+/* ── Admin Endpoints ─────────────────────────────────────────── */
+
+let isMaintenanceModeActive = false;
+
+app.get(["/admin", "/admin.html", "/html/admin.html"], (request, response) => response.redirect("/html/mantenimiento.html"));
+
+app.get("/api/admin/check", requireAdmin, (request, response) => {
+  response.json({
+    success: true,
+    user: {
+      name: request.user.name,
+      email: request.user.email,
+      role: request.user.role,
+    },
+  });
+});
+
+app.get("/api/admin/stats", requireAdmin, async (request, response) => {
+  try {
+    const [usersCountRes, flightsCountRes, reservationsRes, recentRes] = await Promise.all([
+      db.execute({ sql: "SELECT COUNT(*) AS total FROM users", args: [] }),
+      db.execute({ sql: "SELECT COUNT(*) AS total FROM flights", args: [] }),
+      db.execute({ sql: "SELECT COUNT(*) AS total, COALESCE(SUM(price), 0) AS total_revenue FROM reservations", args: [] }),
+      db.execute({
+        sql: "SELECT r.id, r.origin, r.destination, r.seat, r.price, r.created_at, u.name AS user_name, u.email AS user_email FROM reservations r LEFT JOIN users u ON r.user_id = u.id ORDER BY r.created_at DESC LIMIT 5",
+        args: []
+      }),
+    ]);
+
+    const totalUsers = Number(usersCountRes.rows[0]?.total || 0);
+    const totalFlights = Number(flightsCountRes.rows[0]?.total || 0);
+    const totalReservations = Number(reservationsRes.rows[0]?.total || 0);
+    const totalRevenue = Number(reservationsRes.rows[0]?.total_revenue || 0);
+
+    response.json({
+      success: true,
+      stats: {
+        totalUsers,
+        totalFlights,
+        totalReservations,
+        totalRevenue,
+      },
+      recentReservations: recentRes.rows.map((row) => ({ ...row })),
+      maintenanceMode: isMaintenanceModeActive,
+    });
+  } catch (error) {
+    console.error("Error al obtener estadísticas de admin:", error);
+    response.status(500).json({ success: false, message: "Error al calcular estadísticas." });
+  }
+});
+
+app.get("/api/admin/flights", requireAdmin, async (request, response) => {
+  try {
+    const result = await db.execute({
+      sql: `SELECT f.*, COUNT(r.id) AS bookings_count
+            FROM flights f
+            LEFT JOIN reservations r ON f.id = r.flight_id
+            GROUP BY f.id
+            ORDER BY f.departure_date DESC, f.departure_time ASC`,
+      args: [],
+    });
+    response.json({ success: true, flights: result.rows.map((row) => ({ ...row })) });
+  } catch (error) {
+    console.error("Error al consultar vuelos de admin:", error);
+    response.status(500).json({ success: false, message: "Error al obtener vuelos." });
+  }
+});
+
+app.post("/api/admin/flights", requireAdmin, async (request, response) => {
+  const origin = String(request.body.origin || "").trim();
+  const destination = String(request.body.destination || "").trim();
+  const departureDate = String(request.body.departureDate || "").trim();
+  const departureTime = String(request.body.departureTime || "").trim();
+  const arrivalTime = String(request.body.arrivalTime || "").trim();
+  const price = Number(request.body.price);
+  const airline = String(request.body.airline || "SENAIR").trim();
+  const stops = Number(request.body.stops || 0);
+
+  if (!origin || !destination || origin === destination || !/^\d{4}-\d{2}-\d{2}$/.test(departureDate) || !/^\d{2}:\d{2}$/.test(departureTime) || !/^\d{2}:\d{2}$/.test(arrivalTime) || !Number.isInteger(price) || price < 0 || !Number.isInteger(stops) || stops < 0) {
+    return response.status(400).json({ success: false, message: "Datos de vuelo inválidos o incompletos." });
+  }
+
+  try {
+    const result = await db.execute({
+      sql: "INSERT INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      args: [origin, destination, departureDate, departureTime, arrivalTime, price, airline, stops],
+    });
+    response.status(201).json({ success: true, id: Number(result.lastInsertRowid), message: "Vuelo creado con éxito." });
+  } catch (error) {
+    if (error.code === "SQLITE_CONSTRAINT") {
+      return response.status(409).json({ success: false, message: "Ya existe un vuelo programado en esa fecha, hora y ruta." });
+    }
+    response.status(500).json({ success: false, message: "Error al guardar el vuelo." });
+  }
+});
+
+app.put("/api/admin/flights/:id", requireAdmin, async (request, response) => {
+  const flightId = Number.parseInt(request.params.id, 10);
+  if (!flightId) return response.status(400).json({ success: false, message: "ID de vuelo inválido." });
+
+  const origin = String(request.body.origin || "").trim();
+  const destination = String(request.body.destination || "").trim();
+  const departureDate = String(request.body.departureDate || "").trim();
+  const departureTime = String(request.body.departureTime || "").trim();
+  const arrivalTime = String(request.body.arrivalTime || "").trim();
+  const price = Number(request.body.price);
+  const airline = String(request.body.airline || "SENAIR").trim();
+  const stops = Number(request.body.stops || 0);
+
+  if (!origin || !destination || origin === destination || !/^\d{4}-\d{2}-\d{2}$/.test(departureDate) || !/^\d{2}:\d{2}$/.test(departureTime) || !/^\d{2}:\d{2}$/.test(arrivalTime) || !Number.isInteger(price) || price < 0) {
+    return response.status(400).json({ success: false, message: "Datos de actualización inválidos." });
+  }
+
+  try {
+    const result = await db.execute({
+      sql: "UPDATE flights SET origin = ?, destination = ?, departure_date = ?, departure_time = ?, arrival_time = ?, price = ?, airline = ?, stops = ? WHERE id = ?",
+      args: [origin, destination, departureDate, departureTime, arrivalTime, price, airline, stops, flightId],
+    });
+    if (result.rowsAffected === 0) {
+      return response.status(404).json({ success: false, message: "Vuelo no encontrado." });
+    }
+    response.json({ success: true, message: "Vuelo actualizado correctamente." });
+  } catch (error) {
+    if (error.code === "SQLITE_CONSTRAINT") {
+      return response.status(409).json({ success: false, message: "Conflicto con otro vuelo existente en ese horario." });
+    }
+    response.status(500).json({ success: false, message: "Error al actualizar vuelo." });
+  }
+});
+
+app.delete("/api/admin/flights/:id", requireAdmin, async (request, response) => {
+  const flightId = Number.parseInt(request.params.id, 10);
+  if (!flightId) return response.status(400).json({ success: false, message: "ID de vuelo inválido." });
+
+  try {
+    const result = await db.execute({
+      sql: "DELETE FROM flights WHERE id = ?",
+      args: [flightId],
+    });
+    if (result.rowsAffected === 0) {
+      return response.status(404).json({ success: false, message: "Vuelo no encontrado." });
+    }
+    response.json({ success: true, message: "Vuelo eliminado del sistema." });
+  } catch (error) {
+    response.status(500).json({ success: false, message: "Error al eliminar el vuelo." });
+  }
+});
+
+app.get("/api/admin/reservations", requireAdmin, async (request, response) => {
+  try {
+    const result = await db.execute({
+      sql: `SELECT r.*, u.name AS user_name, u.email AS user_email
+            FROM reservations r
+            LEFT JOIN users u ON r.user_id = u.id
+            ORDER BY r.created_at DESC`,
+      args: [],
+    });
+    response.json({ success: true, reservations: result.rows.map((row) => ({ ...row })) });
+  } catch (error) {
+    response.status(500).json({ success: false, message: "Error al obtener reservas." });
+  }
+});
+
+app.delete("/api/admin/reservations/:id", requireAdmin, async (request, response) => {
+  const reservationId = Number.parseInt(request.params.id, 10);
+  if (!reservationId) return response.status(400).json({ success: false, message: "ID de reserva inválido." });
+
+  try {
+    const result = await db.execute({
+      sql: "DELETE FROM reservations WHERE id = ?",
+      args: [reservationId],
+    });
+    if (result.rowsAffected === 0) {
+      return response.status(404).json({ success: false, message: "Reserva no encontrada." });
+    }
+    response.json({ success: true, message: "Reserva cancelada y eliminada con éxito." });
+  } catch (error) {
+    response.status(500).json({ success: false, message: "Error al cancelar la reserva." });
+  }
+});
+
+app.get("/api/admin/users", requireAdmin, async (request, response) => {
+  try {
+    const result = await db.execute({
+      sql: `SELECT u.id, u.name, u.email, u.role, u.created_at, COUNT(r.id) AS reservations_count
+            FROM users u
+            LEFT JOIN reservations r ON u.id = r.user_id
+            GROUP BY u.id
+            ORDER BY u.created_at DESC`,
+      args: [],
+    });
+    response.json({ success: true, users: result.rows.map((row) => ({ ...row })) });
+  } catch (error) {
+    response.status(500).json({ success: false, message: "Error al obtener lista de usuarios." });
+  }
+});
+
+app.delete("/api/admin/users/:id", requireAdmin, async (request, response) => {
+  const userId = Number.parseInt(request.params.id, 10);
+  if (!userId) return response.status(400).json({ success: false, message: "ID de usuario inválido." });
+
+  try {
+    const userRes = await db.execute({ sql: "SELECT email FROM users WHERE id = ?", args: [userId] });
+    const targetUser = userRes.rows[0];
+    if (!targetUser) return response.status(404).json({ success: false, message: "Usuario no encontrado." });
+
+    if (targetUser.email === ADMIN_EMAIL) {
+      return response.status(403).json({ success: false, message: "No es posible eliminar la cuenta del Administrador principal." });
+    }
+
+    await db.execute({ sql: "DELETE FROM users WHERE id = ?", args: [userId] });
+    response.json({ success: true, message: "Usuario y sus reservas eliminados con éxito." });
+  } catch (error) {
+    response.status(500).json({ success: false, message: "Error al eliminar usuario." });
+  }
+});
+
+app.get("/api/admin/maintenance", requireAdmin, (request, response) => {
+  response.json({ success: true, active: isMaintenanceModeActive });
+});
+
+app.post("/api/admin/maintenance", requireAdmin, (request, response) => {
+  isMaintenanceModeActive = Boolean(request.body.active);
+  response.json({
+    success: true,
+    active: isMaintenanceModeActive,
+    message: isMaintenanceModeActive ? "Modo mantenimiento ACTIVADO." : "Modo mantenimiento DESACTIVADO.",
+  });
 });
 
 /* ── 404 ──────────────────────────────────────────────────────── */
