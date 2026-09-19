@@ -1,0 +1,252 @@
+/* ═════════════════════════════════════════════════════════════════════════
+   SENAIR — Estilos de Tema Claro / Oscuro (Light & Dark Theme)
+   Conserva el azul de marca (--blue: #0866c6) y transforma los fondos blancos
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* ── Botón de alternancia de tema (al lado de ES | EN) ────────── */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  vertical-align: middle;
+  padding: 0;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.08);
+}
+
+.theme-toggle-btn .theme-icon-moon {
+  display: block;
+}
+
+.theme-toggle-btn .theme-icon-sun {
+  display: none;
+}
+
+.theme-toggle-btn.is-dark .theme-icon-moon {
+  display: none;
+}
+
+.theme-toggle-btn.is-dark .theme-icon-sun {
+  display: block;
+  color: #fbbf24;
+}
+
+/* ── Reglas del Modo Oscuro ───────────────────────────────────── */
+[data-theme="dark"],
+body.dark-theme {
+  --white: #111d30;
+  --bg: #09111e;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --border: #1e2e47;
+  --card-bg: #111d30;
+  --navy: #eef4fc;
+  --navy-dark: #081220;
+  --sky: #15243c;
+  --line: rgba(255, 255, 255, 0.1);
+  color-scheme: dark;
+}
+
+[data-theme="dark"] body,
+body.dark-theme {
+  background-color: #09111e !important;
+  color: #e2e8f0 !important;
+}
+
+/* Header, Navbar & Topbar */
+[data-theme="dark"] header,
+[data-theme="dark"] .navbar,
+[data-theme="dark"] .checkout-header,
+[data-theme="dark"] .admin-header {
+  background: #0d1726 !important;
+  border-bottom: 1px solid #1a2b42 !important;
+}
+
+[data-theme="dark"] .topbar {
+  background: #060c17 !important;
+  border-bottom: 1px solid #142236 !important;
+}
+
+[data-theme="dark"] nav a,
+[data-theme="dark"] .admin-brand-title strong,
+[data-theme="dark"] .brand {
+  color: #f1f5f9 !important;
+}
+
+/* Tarjetas y Contenedores */
+[data-theme="dark"] .search-card,
+[data-theme="dark"] .flight-search-container,
+[data-theme="dark"] .destination,
+[data-theme="dark"] .trip-card,
+[data-theme="dark"] .benefit,
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .offer-card,
+[data-theme="dark"] .info-card,
+[data-theme="dark"] .checkout-step,
+[data-theme="dark"] .trip-summary,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .admin-section,
+[data-theme="dark"] .admin-nav-tabs,
+[data-theme="dark"] .maintenance-card,
+[data-theme="dark"] .aircraft,
+[data-theme="dark"] .confirmation,
+[data-theme="dark"] .faq-card,
+[data-theme="dark"] .contact-form-card,
+[data-theme="dark"] .invoice-card,
+[data-theme="dark"] .account-dropdown {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Inputs, Selects y Textareas */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea,
+[data-theme="dark"] .search-box input,
+[data-theme="dark"] .choices__inner {
+  background-color: #0c1524 !important;
+  border-color: #243752 !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #64748b !important;
+}
+
+[data-theme="dark"] .choices__list--dropdown {
+  background: #0d1726 !important;
+  border-color: #243752 !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .choices__list--dropdown .choices__item--selectable.is-highlighted {
+  background: #1a2d48 !important;
+}
+
+/* Títulos y Textos */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] strong,
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .stat-value {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] p,
+[data-theme="dark"] span,
+[data-theme="dark"] label,
+[data-theme="dark"] .section-desc,
+[data-theme="dark"] .stat-label,
+[data-theme="dark"] .stat-sub {
+  color: #94a3b8;
+}
+
+/* Tablas en Modo Oscuro */
+[data-theme="dark"] .admin-table th {
+  background: #0a1322 !important;
+  border-bottom: 2px solid #1e2e47 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .admin-table td {
+  border-bottom: 1px solid #172439 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .admin-table tbody tr:hover {
+  background-color: #15243c !important;
+}
+
+/* Modales y Alertas */
+[data-theme="dark"] .admin-modal,
+[data-theme="dark"] .modal,
+[data-theme="dark"] .senair-alert-box,
+[data-theme="dark"] .recovery-dialog {
+  background: #101c2e !important;
+  border: 1px solid #233752 !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .admin-modal-header,
+[data-theme="dark"] .admin-modal-footer {
+  background: #0b1422 !important;
+  border-color: #1e2e47 !important;
+}
+
+[data-theme="dark"] .senair-alert-close,
+[data-theme="dark"] .admin-modal-close {
+  background: #16243a !important;
+  color: #cbd5e1 !important;
+}
+
+/* Pantalla de Carga (Loading Screen con blackair.mp4) */
+[data-theme="dark"] .loading-screen,
+html:has(.loading-screen),
+body:has(.loading-screen),
+.loading-screen {
+  background: #000000 !important;
+}
+
+.loading-video {
+  background: #000000 !important;
+}
+
+/* Footer */
+[data-theme="dark"] footer {
+  background: #060c17 !important;
+  border-top: 1px solid #142236 !important;
+}
+
+[data-theme="dark"] .copyright {
+  color: #64748b !important;
+}
+
+/* ── EL AZUL DE MARCA SE MANTIENE VIBRANTE ───────────────────── */
+[data-theme="dark"] .btn-primary,
+[data-theme="dark"] .pay-button,
+[data-theme="dark"] .btn-login,
+[data-theme="dark"] .search-btn,
+[data-theme="dark"] .admin-tab-btn.active,
+[data-theme="dark"] .admin-badge {
+  background: var(--blue) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark"] .btn-icon {
+  background: #132136 !important;
+  border-color: #243650 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .btn-secondary:hover,
+[data-theme="dark"] .btn-icon:hover {
+  background: #1a2b44 !important;
+  border-color: var(--blue) !important;
+}
+
+[data-theme="dark"] a {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] a:hover {
+  color: #7dd3fc;
+}

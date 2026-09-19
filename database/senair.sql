@@ -1,3 +1,5 @@
+CREATE DATABASE IF NOT EXISTS senair CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE senair;
 -- =============================================================================
 -- BASE DE DATOS: SENAIR
 -- Proyecto: Sistema Web de Vuelos y Reservas SENAIR
@@ -5,11 +7,31 @@
 -- Descripción: Estructura relacional completa e independiente con datos de prueba.
 -- =============================================================================
 
+CREATE TABLE IF NOT EXISTS users (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    email VARCHAR(190) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 -- 1. CREACIÓN DE LA BASE DE DATOS
 CREATE DATABASE IF NOT EXISTS `senair`
   DEFAULT CHARACTER SET utf8mb4
   DEFAULT COLLATE utf8mb4_unicode_ci;
 
+    CREATE TABLE IF NOT EXISTS flights (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        origin VARCHAR(120) NOT NULL,
+        destination VARCHAR(120) NOT NULL,
+        departure_date DATE NOT NULL,
+        departure_time TIME NOT NULL,
+        arrival_time TIME NOT NULL,
+        price INT UNSIGNED NOT NULL,
+        airline VARCHAR(80) NOT NULL DEFAULT 'SENAIR',
+        stops TINYINT UNSIGNED NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (origin, destination, departure_date, departure_time)
+    );
 USE `senair`;
 
 -- Desactivar temporalmente revisión de claves foráneas para recreación limpia
@@ -25,14 +47,13 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- -----------------------------------------------------------------------------
 -- TABLA: users
--- Guarda la información de pasajeros y administradores del sistema.
+-- Guarda la información de las personas que crean una cuenta en la plataforma.
 -- -----------------------------------------------------------------------------
 CREATE TABLE `users` (
     `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del usuario',
     `name` VARCHAR(120) NOT NULL COMMENT 'Nombre completo del pasajero o titular',
     `email` VARCHAR(191) NOT NULL UNIQUE COMMENT 'Correo electrónico único para inicio de sesión',
     `password` VARCHAR(255) NOT NULL COMMENT 'Hash seguro de la contraseña (bcrypt)',
-    `role` VARCHAR(20) NOT NULL DEFAULT 'user' COMMENT 'Rol del usuario (user | admin)',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro en el sistema'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -86,13 +107,12 @@ CREATE TABLE `reservations` (
 -- 3. DATOS DE PRUEBA (SEED DATA PARA PROBAR EN MYSQL)
 -- =============================================================================
 
--- Inserción de usuarios de prueba (incluyendo la cuenta del Administrador oficial)
--- Contraseña admin Fg1042465135 hasheada con bcrypt
--- Contraseña pasajeros demo: Password123! hasheada con bcrypt
-INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`) VALUES
-(1, 'Administrador SENAIR', 'freinergudino@gmail.com', '$2a$10$kQI.a68cNlgCeaYAK3IcjOg4yQHjfJHj49TnjbXtvUMyikIGgbEKS', 'admin'),
-(2, 'Carlos Gómez', 'carlos@senair.com', '$2a$10$7EqJtq98hPqEX7fNZaFWoO3w6X.FmRzHk5R9lHk0B5uN9qCq9.G2e', 'user'),
-(3, 'Laura Restrepo', 'laura@senair.com', '$2a$10$7EqJtq98hPqEX7fNZaFWoO3w6X.FmRzHk5R9lHk0B5uN9qCq9.G2e', 'user');
+-- Inserción de usuarios de prueba
+-- Nota: La contraseña encriptada corresponde a 'Password123!' hasheada con bcrypt
+INSERT INTO `users` (`id`, `name`, `email`, `password`) VALUES
+(1, 'Carlos Gómez', 'carlos@senair.com', '$2a$10$7EqJtq98hPqEX7fNZaFWoO3w6X.FmRzHk5R9lHk0B5uN9qCq9.G2e'),
+(2, 'Laura Restrepo', 'laura@senair.com', '$2a$10$7EqJtq98hPqEX7fNZaFWoO3w6X.FmRzHk5R9lHk0B5uN9qCq9.G2e'),
+(3, 'Andrés Felipe', 'andres@senair.com', '$2a$10$7EqJtq98hPqEX7fNZaFWoO3w6X.FmRzHk5R9lHk0B5uN9qCq9.G2e');
 
 -- Inserción de vuelos demo (rutas nacionales SENAIR)
 INSERT INTO `flights` (`id`, `origin`, `destination`, `departure_date`, `departure_time`, `arrival_time`, `price`, `airline`, `stops`) VALUES
@@ -107,6 +127,21 @@ INSERT INTO `flights` (`id`, `origin`, `destination`, `departure_date`, `departu
 
 -- Inserción de reservas de ejemplo vinculadas a usuarios y vuelos
 INSERT INTO `reservations` (`id`, `user_id`, `flight_id`, `origin`, `destination`, `departure_date`, `departure_time`, `arrival_time`, `seat`, `price`, `airline`) VALUES
-(1, 2, 1, 'Bogotá (BOG)', 'Medellín (MDE)', '2026-09-12', '06:30:00', '07:25:00', '4A', 159000, 'SENAIR'),
-(2, 2, 3, 'Bogotá (BOG)', 'Cartagena (CTG)', '2026-09-12', '09:10:00', '10:35:00', '7F', 189000, 'SENAIR'),
-(3, 3, 4, 'Medellín (MDE)', 'Bogotá (BOG)', '2026-09-12', '18:20:00', '19:15:00', '12C', 169000, 'SENAIR');
+(1, 1, 1, 'Bogotá (BOG)', 'Medellín (MDE)', '2026-09-12', '06:30:00', '07:25:00', '4A', 159000, 'SENAIR'),
+(2, 1, 3, 'Bogotá (BOG)', 'Cartagena (CTG)', '2026-09-12', '09:10:00', '10:35:00', '7F', 189000, 'SENAIR'),
+(3, 2, 4, 'Medellín (MDE)', 'Bogotá (BOG)', '2026-09-12', '18:20:00', '19:15:00', '12C', 169000, 'SENAIR');
+
+-- =============================================================================
+-- 4. CONSULTAS ÚTILES DE EJEMPLO
+-- =============================================================================
+
+-- A. Consultar todas las reservas de un usuario con sus datos:
+-- SELECT r.id, u.name AS pasajero, u.email, r.origin, r.destination, r.departure_date, r.departure_time, r.seat, r.price
+-- FROM reservations r
+-- INNER JOIN users u ON r.user_id = u.id
+-- WHERE u.id = 1;
+
+-- B. Buscar vuelos disponibles entre dos ciudades en una fecha:
+-- SELECT * FROM flights
+-- WHERE origin = 'Bogotá (BOG)' AND destination = 'Medellín (MDE)' AND departure_date = '2026-09-12'
+-- ORDER BY departure_time ASC;

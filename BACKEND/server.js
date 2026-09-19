@@ -645,9 +645,12 @@ app.delete("/api/admin/users/:id", requireAdmin, async (request, response) => {
       return response.status(403).json({ success: false, message: "No es posible eliminar la cuenta del Administrador principal." });
     }
 
+    // Eliminar primero las reservas asociadas para no violar la restricción de clave foránea
+    await db.execute({ sql: "DELETE FROM reservations WHERE user_id = ?", args: [userId] });
     await db.execute({ sql: "DELETE FROM users WHERE id = ?", args: [userId] });
     response.json({ success: true, message: "Usuario y sus reservas eliminados con éxito." });
   } catch (error) {
+    console.error("Error al eliminar usuario:", error);
     response.status(500).json({ success: false, message: "Error al eliminar usuario." });
   }
 });

@@ -592,6 +592,14 @@ if (!document.querySelector('script[src*="i18n.js"]')) {
     document.head.appendChild(i18nScript);
 }
 
+// Cargar sistema de modo claro / oscuro (Theme)
+if (!document.querySelector('script[src*="theme.js"]')) {
+    const themeScript = document.createElement('script');
+    themeScript.src = window.location.pathname.includes('/html/') ? '../js/theme.js' : 'FRONTEND/js/theme.js';
+    themeScript.defer = true;
+    document.head.appendChild(themeScript);
+}
+
 // Cargar asistente de IA (AeroBot)
 if (!document.querySelector('script[src*="ai-chatbot.js"]')) {
     const aiScript = document.createElement('script');

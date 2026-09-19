@@ -396,9 +396,9 @@
   }
 
   window.adminDeleteUser = async function (id) {
-    const user = allUsers.find((u) => u.id === id);
+    const user = allUsers.find((u) => Number(u.id) === Number(id));
     const userName = user ? user.name : `Usuario #${id}`;
-    if (!confirm(`¿Eliminar la cuenta de ${userName}? Esta acción no se puede deshacer.`)) return;
+    if (!confirm(`¿Deseas eliminar la cuenta de ${userName}? Se eliminarán también todas sus reservas asociadas.`)) return;
 
     try {
       const res = await fetch(`/api/admin/users/${id}`, {
@@ -413,7 +413,9 @@
       showToast("Usuario eliminado con éxito", "success");
       await loadUsers();
       await loadStats();
-    } catch {
+      await loadReservations();
+    } catch (err) {
+      console.error("Error al eliminar usuario:", err);
       showToast("Error de conexión al eliminar usuario", "error");
     }
   };
@@ -586,3 +588,4 @@
     await Promise.all([loadStats(), loadFlights(), loadReservations(), loadUsers()]);
   });
 })();
+
