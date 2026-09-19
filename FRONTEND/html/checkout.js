@@ -222,6 +222,18 @@ if (!selectedFlight) {
         } else if (selectedSeats.length < passengerCount) {
           selectedSeats.push(seat);
           button.classList.add("selected");
+        } else if (passengerCount === 1) {
+          const prevSeat = selectedSeats[0];
+          const prevBtn = Array.from(seatMap.querySelectorAll(".seat-button")).find(b => b.textContent.trim() === prevSeat);
+          if (prevBtn) prevBtn.classList.remove("selected");
+          selectedSeats[0] = seat;
+          button.classList.add("selected");
+        } else {
+          const oldestSeat = selectedSeats.shift();
+          const oldestBtn = Array.from(seatMap.querySelectorAll(".seat-button")).find(b => b.textContent.trim() === oldestSeat);
+          if (oldestBtn) oldestBtn.classList.remove("selected");
+          selectedSeats.push(seat);
+          button.classList.add("selected");
         }
         document.getElementById("selectedSeat").textContent = selectedSeats.length ? selectedSeats.join(", ") : "Sin seleccionar";
         updatePayButtons();
