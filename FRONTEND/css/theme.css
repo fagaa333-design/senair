@@ -135,19 +135,24 @@
   opacity: 1;
 }
 
-/* ── Reglas del Modo Oscuro (Solo cuando data-theme="dark") ──── */
+/* ═════════════════════════════════════════════════════════════════════════
+   REGLAS DEL MODO OSCURO (Activas solo cuando [data-theme="dark"])
+   ═════════════════════════════════════════════════════════════════════════ */
 [data-theme="dark"],
 body.dark-theme {
   --white: #111d30;
   --bg: #09111e;
+  --bg-color: #09111e;
+  --light: #09111e;
   --text: #e2e8f0;
+  --ink: #e2e8f0;
   --muted: #94a3b8;
   --border: #1e2e47;
-  --card-bg: #111d30;
-  --navy: #eef4fc;
-  --navy-dark: #081220;
-  --sky: #15243c;
   --line: rgba(255, 255, 255, 0.1);
+  --card-bg: #111d30;
+  --navy: #0c1726;         /* Tono azul noche oscuro para fondos, nunca blanco */
+  --navy-dark: #060c17;
+  --sky: #132238;
   color-scheme: dark;
 }
 
@@ -157,42 +162,624 @@ body.dark-theme {
   color: #e2e8f0 !important;
 }
 
+[data-theme="dark"] main,
+[data-theme="dark"] .page-shell,
+[data-theme="dark"] .container {
+  color: #e2e8f0;
+}
+
 /* Header, Navbar & Topbar */
 [data-theme="dark"] header,
+[data-theme="dark"] .site-header,
 [data-theme="dark"] .navbar,
 [data-theme="dark"] .checkout-header,
 [data-theme="dark"] .admin-header {
-  background: #0d1726 !important;
+  background: #0b1424 !important;
   border-bottom: 1px solid #1a2b42 !important;
 }
 
-[data-theme="dark"] .topbar {
+[data-theme="dark"] .topbar,
+[data-theme="dark"] .topline {
   background: #060c17 !important;
   border-bottom: 1px solid #142236 !important;
 }
 
+[data-theme="dark"] .desktop-nav,
 [data-theme="dark"] nav a,
-[data-theme="dark"] .admin-brand-title strong,
-[data-theme="dark"] .brand {
+[data-theme="dark"] .brand,
+[data-theme="dark"] .admin-brand-title strong {
   color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .mobile-nav {
+  background: #0d1726 !important;
+  border: 1px solid #1a2b42 !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .mobile-nav a {
+  color: #e2e8f0 !important;
+  border-bottom: 1px solid #18273d !important;
+}
+
+/* ── Secciones Principales de index.html ──────────────────────── */
+
+/* 1. Quick Links Cards */
+[data-theme="dark"] .quick-link-card {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .quick-link-card h3 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .quick-link-card p {
+  color: #94a3b8 !important;
+}
+
+/* 2. Sección Descubre Colombia (Destinations) */
+[data-theme="dark"] .destinations,
+[data-theme="dark"] #destinos {
+  background: #09111e !important;
+}
+
+[data-theme="dark"] .destination-grid .destination {
+  background-color: #111d30 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 3. Sección Destinos Internacionales (#ofertas) */
+[data-theme="dark"] #ofertas {
+  background: #09111e !important;
+}
+
+[data-theme="dark"] .destinations-cards-grid .international-card {
+  background: #111d30 !important;
+  border: 1px solid #1e2e47 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme="dark"] .destinations-cards-grid .international-card > .text {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .destinations-cards-grid .international-card > .text .h3 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .destinations-cards-grid .international-card > .text .p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .destinations-cards-grid .international-card .save {
+  background: #17253b !important;
+  border: 1px solid #253954 !important;
+}
+
+[data-theme="dark"] .destinations-cards-grid .international-card .save svg path {
+  stroke: #94a3b8 !important;
+}
+
+[data-theme="dark"] .destinations-cards-grid .international-card > .text .icon-box {
+  background: var(--blue) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .destinations-cards-grid .international-card > .text .icon-box .span {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .destinations-cards-grid .international-card > .text .icon-box svg path {
+  fill: #ffffff !important;
+}
+
+/* 4. Sección Inspírate (.inspiration-section) */
+[data-theme="dark"] .inspiration-section,
+[data-theme="dark"] #inspiracion {
+  background: #09111e !important;
+}
+
+[data-theme="dark"] .inspiration-heading h2 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .inspiration-heading p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .inspiration-card {
+  background: #111d30 !important;
+  border: 1px solid #1e2e47 !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .inspiration-card-content h3 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .inspiration-card-content p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .inspiration-book-btn {
+  background: #17253b !important;
+  border: 1px solid #253954 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .inspiration-card:hover .inspiration-book-btn {
+  background: var(--blue) !important;
+  color: #ffffff !important;
+  border-color: var(--blue) !important;
+}
+
+/* 5. Sección Tu viaje, a tu manera (.travel-experience) */
+[data-theme="dark"] .travel-experience,
+[data-theme="dark"] #experiencia {
+  background: #0c1524 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .travel-experience-copy h2 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .travel-experience-copy > p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .travel-experience-copy .eyebrow {
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .benefit-item h3 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .benefit-item p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .benefit-icon {
+  background: #15243c !important;
+  color: #38bdf8 !important;
+}
+
+/* 6. Sección Newsletter */
+[data-theme="dark"] .newsletter {
+  background: #09111e !important;
+}
+
+[data-theme="dark"] .newsletter-box {
+  background: #111d30 !important;
+  border: 1px solid #1e2e47 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .newsletter-box h2 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .newsletter-box p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .newsletter-form input {
+  background: #09111e !important;
+  border: 1px solid #233752 !important;
+  color: #f8fafc !important;
+}
+
+/* ── Página destinos.html ────────────────────────────────────── */
+[data-theme="dark"] .explore-section {
+  background: #09111e !important;
+}
+
+[data-theme="dark"] .planning-section {
+  background: #0c1524 !important;
+}
+
+[data-theme="dark"] .destination-tools {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+}
+
+[data-theme="dark"] .search-field input {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .filter-button {
+  background: transparent !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .filter-button:hover,
+[data-theme="dark"] .filter-button.active {
+  background: var(--blue) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .destination-card {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .destination-content h3 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .destination-content p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .card-footer strong {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .hero-route,
+[data-theme="dark"] .hero-ticket {
+  background: #111d30 !important;
+  color: #f8fafc !important;
+  border: 1px solid #1e2e47 !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme="dark"] .route-footer span,
+[data-theme="dark"] .route-price {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .route-price {
+  border-top-color: #1e2e47 !important;
+}
+
+[data-theme="dark"] .card-tag,
+[data-theme="dark"] .offer-tag {
+  background: #15243c !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .save-button,
+[data-theme="dark"] .save-offer {
+  background: #15243c !important;
+  border: 1px solid #243854 !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .planning-list > div {
+  border-color: #1e2e47 !important;
+}
+
+[data-theme="dark"] .planning-list strong {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .planning-list p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .empty-state,
+[data-theme="dark"] .loading-state {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+  color: #94a3b8 !important;
+}
+
+/* ── Página vuelos.html ──────────────────────────────────────── */
+[data-theme="dark"] .results-section {
+  background: #09111e !important;
+}
+
+[data-theme="dark"] .search-summary {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+}
+
+[data-theme="dark"] .summary-route {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .summary-date {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .filters-panel {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+}
+
+[data-theme="dark"] .filters-panel > strong {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .sort-button {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .sort-button.active,
+[data-theme="dark"] .sort-button:hover {
+  background: #172840 !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .flight-card {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .flight-times strong,
+[data-theme="dark"] .flight-price > strong {
+  color: #f8fafc !important;
+}
+
+/* ── Página ofertas.html ─────────────────────────────────────── */
+[data-theme="dark"] .offer-tools {
+  background: #09111e !important;
+}
+
+[data-theme="dark"] .comfort-strip,
+[data-theme="dark"] .newsletter-section {
+  background: #09111e !important;
+}
+
+[data-theme="dark"] .comfort-layout h2 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .comfort-layout p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .newsletter-card {
+  background: #111d30 !important;
+  border: 1px solid #1e2e47 !important;
+}
+
+[data-theme="dark"] .newsletter-card h2 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .newsletter-card input {
+  background: #0a1322 !important;
+  border: 1px solid #233752 !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .offer-card {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .offer-content h3 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .offer-content p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .offer-footer b {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .ticket-route,
+[data-theme="dark"] .ticket-place strong {
+  color: #f8fafc !important;
+}
+
+/* ── Página contacto.html ────────────────────────────────────── */
+[data-theme="dark"] .contact-main {
+  background: #09111e !important;
+}
+
+[data-theme="dark"] .contact-card {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .contact-card h2 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .contact-card > p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .contact-detail {
+  background: #0c1524 !important;
+  border-color: #1e2e47 !important;
+}
+
+[data-theme="dark"] .contact-detail strong {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .contact-detail span {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .faq-section {
+  background: #0c1524 !important;
+  border: 1px solid #1e2e47 !important;
+}
+
+[data-theme="dark"] .faq-section h2 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .faq-item {
+  background: #15243c !important;
+  border-color: #243854 !important;
+}
+
+[data-theme="dark"] .faq-item h3 {
+  color: #f8fafc !important;
+}
+
+/* ── Página nosotros.html ────────────────────────────────────── */
+[data-theme="dark"] .about-grid article {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .about-grid article h3 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .about-grid article p {
+  color: #94a3b8 !important;
+}
+
+/* ── Página viajes.html ──────────────────────────────────────── */
+[data-theme="dark"] .trips-main {
+  background: #09111e !important;
+}
+
+[data-theme="dark"] .trips-toolbar h2 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .trips-search {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .trip-card {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+}
+
+[data-theme="dark"] .trip-content h3 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .trip-content p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .trips-empty,
+[data-theme="dark"] .reservations-empty {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .reservation-card {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+  color: #e2e8f0 !important;
+}
+
+/* ── Página login.html ───────────────────────────────────────── */
+[data-theme="dark"] .login-section {
+  background: #09111e !important;
+}
+
+[data-theme="dark"] .flip-card__front,
+[data-theme="dark"] .flip-card__back {
+  background: #111d30 !important;
+  border: 2px solid #1e2e47 !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .heading {
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .input,
+[data-theme="dark"] .flip-card__input {
+  background-color: #0c1524 !important;
+  border-color: #243752 !important;
+  color: #f8fafc !important;
+}
+
+/* ── Página checkout.html ────────────────────────────────────── */
+[data-theme="dark"] .checkout-shell {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .checkout-intro h1 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .checkout-step,
+[data-theme="dark"] .trip-summary,
+[data-theme="dark"] .checkout-card,
+[data-theme="dark"] .summary-card,
+[data-theme="dark"] .card-inner,
+[data-theme="dark"] .summary-card-inner {
+  background: #111d30 !important;
+  border-color: #1e2e47 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .step-heading h2,
+[data-theme="dark"] .trip-summary h2 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .aircraft {
+  background: #0c1524 !important;
+  border-color: #1e2e47 !important;
+}
+
+[data-theme="dark"] .seat-button {
+  background: #15243c !important;
+  border-color: var(--blue) !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .seat-button.occupied {
+  background: #1e2e47 !important;
+  border-color: #1e2e47 !important;
+  color: #475569 !important;
+}
+
+[data-theme="dark"] .input_field,
+[data-theme="dark"] .form-grid input {
+  background-color: #0c1524 !important;
+  border-color: #243752 !important;
+  color: #f8fafc !important;
+}
+
+/* ── Títulos y Textos Generales ──────────────────────────────── */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] strong,
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .stat-value {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] p,
+[data-theme="dark"] label,
+[data-theme="dark"] .section-desc,
+[data-theme="dark"] .stat-label,
+[data-theme="dark"] .stat-sub {
+  color: #94a3b8;
 }
 
 /* Tarjetas y Contenedores */
 [data-theme="dark"] .search-card,
 [data-theme="dark"] .flight-search-container,
-[data-theme="dark"] .destination,
-[data-theme="dark"] .trip-card,
 [data-theme="dark"] .benefit,
 [data-theme="dark"] .feature-card,
-[data-theme="dark"] .offer-card,
 [data-theme="dark"] .info-card,
-[data-theme="dark"] .checkout-step,
-[data-theme="dark"] .trip-summary,
 [data-theme="dark"] .stat-card,
 [data-theme="dark"] .admin-section,
 [data-theme="dark"] .admin-nav-tabs,
 [data-theme="dark"] .maintenance-card,
-[data-theme="dark"] .aircraft,
 [data-theme="dark"] .confirmation,
 [data-theme="dark"] .faq-card,
 [data-theme="dark"] .contact-form-card,
@@ -228,26 +815,6 @@ body.dark-theme {
 
 [data-theme="dark"] .choices__list--dropdown .choices__item--selectable.is-highlighted {
   background: #1a2d48 !important;
-}
-
-/* Títulos y Textos */
-[data-theme="dark"] h1,
-[data-theme="dark"] h2,
-[data-theme="dark"] h3,
-[data-theme="dark"] h4,
-[data-theme="dark"] strong,
-[data-theme="dark"] .section-title,
-[data-theme="dark"] .stat-value {
-  color: #f8fafc !important;
-}
-
-[data-theme="dark"] p,
-[data-theme="dark"] span,
-[data-theme="dark"] label,
-[data-theme="dark"] .section-desc,
-[data-theme="dark"] .stat-label,
-[data-theme="dark"] .stat-sub {
-  color: #94a3b8;
 }
 
 /* Tablas en Modo Oscuro */
@@ -290,7 +857,8 @@ body.dark-theme {
 }
 
 /* Footer */
-[data-theme="dark"] footer {
+[data-theme="dark"] footer,
+[data-theme="dark"] .site-footer {
   background: #060c17 !important;
   border-top: 1px solid #142236 !important;
 }
@@ -305,7 +873,9 @@ body.dark-theme {
 [data-theme="dark"] .btn-login,
 [data-theme="dark"] .search-btn,
 [data-theme="dark"] .admin-tab-btn.active,
-[data-theme="dark"] .admin-badge {
+[data-theme="dark"] .admin-badge,
+[data-theme="dark"] .primary-button,
+[data-theme="dark"] .inspiration-cta {
   background: var(--blue) !important;
   color: #ffffff !important;
 }
