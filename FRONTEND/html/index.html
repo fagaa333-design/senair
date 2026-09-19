@@ -38,10 +38,21 @@
             <span class="lang-sep">|</span>
             <button type="button" class="lang-btn" data-lang="en" title="English">EN</button>
           </div>
-          <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Cambiar tema" title="Modo Claro/Oscuro">
-            <svg class="theme-icon-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-            <svg class="theme-icon-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-          </button>
+          <label class="switch theme-switch" aria-label="Cambiar modo claro / oscuro" title="Modo Claro / Oscuro">
+            <input checked="true" id="checkbox" class="theme-checkbox" type="checkbox" />
+            <span class="slider">
+              <div class="star star_1"></div>
+              <div class="star star_2"></div>
+              <div class="star star_3"></div>
+              <svg viewBox="0 0 16 16" class="cloud_1 cloud">
+                <path
+                  transform="matrix(.77976 0 0 .78395-299.99-418.63)"
+                  fill="#fff"
+                  d="m391.84 540.91c-.421-.329-.949-.524-1.523-.524-1.351 0-2.451 1.084-2.485 2.435-1.395.526-2.388 1.88-2.388 3.466 0 1.874 1.385 3.423 3.182 3.667v.034h12.73v-.006c1.775-.104 3.182-1.584 3.182-3.395 0-1.747-1.309-3.186-2.994-3.379.007-.106.011-.214.011-.322 0-2.707-2.271-4.901-5.072-4.901-2.073 0-3.856 1.202-4.643 2.925"
+                ></path>
+              </svg>
+            </span>
+          </label>
         </div>
       </div>
     </div>

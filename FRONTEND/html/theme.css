@@ -1,49 +1,141 @@
 /* ═════════════════════════════════════════════════════════════════════════
-   SENAIR — Estilos de Tema Claro / Oscuro (Light & Dark Theme)
+   SENAIR — Switch de Modo Claro / Oscuro con animación de Sol, Luna y Nubes
    Conserva el azul de marca (--blue: #0866c6) y transforma los fondos blancos
    ═════════════════════════════════════════════════════════════════════════ */
 
-/* ── Botón de alternancia de tema (al lado de ES | EN) ────────── */
-.theme-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
+/* ── Switch Sol / Luna (Theme Switch) ────────────────────────── */
+.theme-switch,
+.switch:has(input.theme-checkbox),
+.switch:has(input#checkbox) {
+  font-size: 11px;
+  position: relative;
+  display: inline-block;
+  width: 4em;
+  height: 2.2em;
+  border-radius: 30px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   margin-left: 8px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 50%;
-  color: #ffffff;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   vertical-align: middle;
-  padding: 0;
+  flex-shrink: 0;
+  cursor: pointer;
 }
 
-.theme-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.08);
+/* Hide default HTML checkbox */
+.theme-switch input,
+.switch:has(input.theme-checkbox) input,
+.switch:has(input#checkbox) input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
 }
 
-.theme-toggle-btn .theme-icon-moon {
-  display: block;
+/* The slider */
+.theme-switch .slider,
+.switch:has(input.theme-checkbox) .slider,
+.switch:has(input#checkbox) .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #2a2a2a;
+  transition: 0.4s;
+  border-radius: 30px;
+  overflow: hidden;
 }
 
-.theme-toggle-btn .theme-icon-sun {
-  display: none;
+.theme-switch .slider:before,
+.switch:has(input.theme-checkbox) .slider:before,
+.switch:has(input#checkbox) .slider:before {
+  position: absolute;
+  content: "";
+  height: 1.2em;
+  width: 1.2em;
+  border-radius: 20px;
+  left: 0.5em;
+  bottom: 0.5em;
+  transition: 0.4s;
+  transition-timing-function: cubic-bezier(0.81, -0.04, 0.38, 1.5);
+  box-shadow: inset 8px -4px 0px 0px #fff;
 }
 
-.theme-toggle-btn.is-dark .theme-icon-moon {
-  display: none;
+.theme-switch input:checked + .slider,
+.switch:has(input.theme-checkbox) input:checked + .slider,
+.switch:has(input#checkbox) input:checked + .slider {
+  background-color: #00a6ff;
 }
 
-.theme-toggle-btn.is-dark .theme-icon-sun {
-  display: block;
-  color: #fbbf24;
+.theme-switch input:checked + .slider:before,
+.switch:has(input.theme-checkbox) input:checked + .slider:before,
+.switch:has(input#checkbox) input:checked + .slider:before {
+  transform: translateX(1.8em);
+  box-shadow: inset 15px -4px 0px 15px #ffcf48;
 }
 
-/* ── Reglas del Modo Oscuro ───────────────────────────────────── */
+.theme-switch .star,
+.switch:has(input.theme-checkbox) .star,
+.switch:has(input#checkbox) .star {
+  background-color: #fff;
+  border-radius: 50%;
+  position: absolute;
+  width: 5px;
+  transition: all 0.4s;
+  height: 5px;
+}
+
+.theme-switch .star_1,
+.switch:has(input.theme-checkbox) .star_1,
+.switch:has(input#checkbox) .star_1 {
+  left: 2.5em;
+  top: 0.5em;
+}
+
+.theme-switch .star_2,
+.switch:has(input.theme-checkbox) .star_2,
+.switch:has(input#checkbox) .star_2 {
+  left: 2.2em;
+  top: 1.2em;
+}
+
+.theme-switch .star_3,
+.switch:has(input.theme-checkbox) .star_3,
+.switch:has(input#checkbox) .star_3 {
+  left: 3em;
+  top: 0.9em;
+}
+
+.theme-switch input:checked ~ .slider .star,
+.theme-switch input:checked + .slider .star,
+.switch:has(input.theme-checkbox) input:checked ~ .slider .star,
+.switch:has(input.theme-checkbox) input:checked + .slider .star,
+.switch:has(input#checkbox) input:checked ~ .slider .star,
+.switch:has(input#checkbox) input:checked + .slider .star {
+  opacity: 0;
+}
+
+.theme-switch .cloud,
+.switch:has(input.theme-checkbox) .cloud,
+.switch:has(input#checkbox) .cloud {
+  width: 3.5em;
+  position: absolute;
+  bottom: -1.4em;
+  left: -1.1em;
+  opacity: 0;
+  transition: all 0.4s;
+}
+
+.theme-switch input:checked ~ .slider .cloud,
+.theme-switch input:checked + .slider .cloud,
+.switch:has(input.theme-checkbox) input:checked ~ .slider .cloud,
+.switch:has(input.theme-checkbox) input:checked + .slider .cloud,
+.switch:has(input#checkbox) input:checked ~ .slider .cloud,
+.switch:has(input#checkbox) input:checked + .slider .cloud {
+  opacity: 1;
+}
+
+/* ── Reglas del Modo Oscuro (Solo cuando data-theme="dark") ──── */
 [data-theme="dark"],
 body.dark-theme {
   --white: #111d30;
@@ -195,18 +287,6 @@ body.dark-theme {
 [data-theme="dark"] .admin-modal-close {
   background: #16243a !important;
   color: #cbd5e1 !important;
-}
-
-/* Pantalla de Carga (Loading Screen con blackair.mp4) */
-[data-theme="dark"] .loading-screen,
-html:has(.loading-screen),
-body:has(.loading-screen),
-.loading-screen {
-  background: #000000 !important;
-}
-
-.loading-video {
-  background: #000000 !important;
 }
 
 /* Footer */

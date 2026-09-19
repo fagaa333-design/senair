@@ -1,20 +1,31 @@
 /**
  * ═════════════════════════════════════════════════════════════════════════
- * SENAIR — Controlador de Tema Claro / Oscuro (Light & Dark Mode)
- * Permite alternar entre modo claro y oscuro, ubicado al lado del selector
- * de idioma (ES | EN), conservando el azul de la marca y oscureciendo el blanco.
+ * SENAIR — Controlador de Modo Claro / Oscuro con Switch Sol-Luna
+ * El modo predeterminado es SIEMPRE CLARO (Light Mode).
+ * Solo se activa el modo oscuro cuando el usuario activa el switch.
  * ═════════════════════════════════════════════════════════════════════════
  */
 
 (() => {
   "use strict";
 
-  const STORAGE_KEY = "senair_theme";
+  const STORAGE_KEY = "senair_theme_mode";
+
+  // Limpiar cualquier residuo de la clave anterior que forzó modo oscuro automáticamente
+  try {
+    if (localStorage.getItem("senair_theme") === "dark" && !localStorage.getItem(STORAGE_KEY)) {
+      localStorage.removeItem("senair_theme");
+    }
+  } catch (e) {}
 
   function getPreferredTheme() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "dark" || saved === "light") return saved;
-    return (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      // Por defecto es SIEMPRE 'light', a menos que el usuario lo haya puesto explícitamente en 'dark'
+      return saved === "dark" ? "dark" : "light";
+    } catch (e) {
+      return "light";
+    }
   }
 
   function applyTheme(theme) {
@@ -25,68 +36,106 @@
       document.documentElement.removeAttribute("data-theme");
       if (document.body) document.body.classList.remove("dark-theme");
     }
-    updateButtons(theme);
+    updateSwitches(theme);
   }
 
-  function updateButtons(theme) {
-    document.querySelectorAll(".theme-toggle-btn").forEach((btn) => {
-      const isDark = theme === "dark";
-      btn.classList.toggle("is-dark", isDark);
-      btn.setAttribute("aria-label", isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
-      btn.setAttribute("title", isDark ? "Modo Claro" : "Modo Oscuro");
+  function updateSwitches(theme) {
+    const isLight = theme === "light";
+    document.querySelectorAll(".theme-checkbox, input#checkbox, input#themeCheckbox").forEach((input) => {
+      input.checked = isLight;
     });
   }
+
+  window.setSenairTheme = function (theme) {
+    try {
+      localStorage.setItem(STORAGE_KEY, theme);
+    } catch (e) {}
+    applyTheme(theme);
+  };
 
   window.toggleSenairTheme = function () {
     const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
     const next = current === "dark" ? "light" : "dark";
-    localStorage.setItem(STORAGE_KEY, next);
-    applyTheme(next);
+    window.setSenairTheme(next);
   };
 
-  // Aplicar inmediatamente para evitar flash de fondo blanco
+  // Aplicar inmediatamente al iniciar (evitando flash de pantalla)
   const initialTheme = getPreferredTheme();
   if (initialTheme === "dark") {
     document.documentElement.setAttribute("data-theme", "dark");
+  } else {
+    document.documentElement.removeAttribute("data-theme");
   }
 
-  function createThemeButton(isDark) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = `theme-toggle-btn ${isDark ? "is-dark" : ""}`;
-    btn.setAttribute("aria-label", isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
-    btn.setAttribute("title", isDark ? "Modo Claro" : "Modo Oscuro");
-    btn.innerHTML = `
-      <svg class="theme-icon-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-      <svg class="theme-icon-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+  function createThemeSwitch(isLight) {
+    const label = document.createElement("label");
+    label.className = "switch theme-switch";
+    label.setAttribute("aria-label", "Cambiar entre modo claro y modo oscuro");
+    label.setAttribute("title", isLight ? "Cambiar a modo oscuro" : "Cambiar a modo claro");
+    label.innerHTML = `
+      <input ${isLight ? 'checked="true"' : ''} class="theme-checkbox" id="checkbox" type="checkbox" />
+      <span class="slider">
+        <div class="star star_1"></div>
+        <div class="star star_2"></div>
+        <div class="star star_3"></div>
+        <svg viewBox="0 0 16 16" class="cloud_1 cloud">
+          <path
+            transform="matrix(.77976 0 0 .78395-299.99-418.63)"
+            fill="#fff"
+            d="m391.84 540.91c-.421-.329-.949-.524-1.523-.524-1.351 0-2.451 1.084-2.485 2.435-1.395.526-2.388 1.88-2.388 3.466 0 1.874 1.385 3.423 3.182 3.667v.034h12.73v-.006c1.775-.104 3.182-1.584 3.182-3.395 0-1.747-1.309-3.186-2.994-3.379.007-.106.011-.214.011-.322 0-2.707-2.271-4.901-5.072-4.901-2.073 0-3.856 1.202-4.643 2.925"
+          ></path>
+        </svg>
+      </span>
     `;
-    btn.addEventListener("click", window.toggleSenairTheme);
-    return btn;
+
+    const input = label.querySelector("input");
+    input.addEventListener("change", (e) => {
+      const targetTheme = e.target.checked ? "light" : "dark";
+      window.setSenairTheme(targetTheme);
+    });
+
+    return label;
   }
 
-  function injectThemeButtons() {
-    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  function injectThemeSwitches() {
+    const isLight = document.documentElement.getAttribute("data-theme") !== "dark";
+
     document.querySelectorAll(".lang-switch").forEach((langSwitch) => {
       const nextEl = langSwitch.nextElementSibling;
-      if (nextEl && nextEl.classList.contains("theme-toggle-btn")) return;
-      const btn = createThemeButton(isDark);
-      langSwitch.after(btn);
+      if (nextEl && (nextEl.classList.contains("theme-switch") || nextEl.classList.contains("theme-toggle-btn"))) {
+        if (nextEl.classList.contains("theme-toggle-btn")) {
+          const sw = createThemeSwitch(isLight);
+          nextEl.replaceWith(sw);
+        }
+        return;
+      }
+      const sw = createThemeSwitch(isLight);
+      langSwitch.after(sw);
+    });
+
+    // Enlazar cualquier switch estático en el DOM
+    document.querySelectorAll(".theme-switch input, input#checkbox, input#themeCheckbox").forEach((input) => {
+      input.checked = isLight;
+      input.onchange = (e) => {
+        const targetTheme = e.target.checked ? "light" : "dark";
+        window.setSenairTheme(targetTheme);
+      };
     });
   }
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
       applyTheme(getPreferredTheme());
-      injectThemeButtons();
+      injectThemeSwitches();
     });
   } else {
     applyTheme(getPreferredTheme());
-    injectThemeButtons();
+    injectThemeSwitches();
   }
 
   const observer = new MutationObserver(() => {
-    if (document.querySelector(".lang-switch:not(+ .theme-toggle-btn)")) {
-      injectThemeButtons();
+    if (document.querySelector(".lang-switch:not(+ .theme-switch)")) {
+      injectThemeSwitches();
     }
   });
   observer.observe(document.documentElement, { childList: true, subtree: true });
