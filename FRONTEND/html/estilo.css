@@ -54,12 +54,11 @@
     height: min(280px, 70vw);
     max-width: 280px;
     max-height: 280px;
-    background: transparent;
+    background: transparent !important;
     object-fit: cover;
     object-position: center;
     clip-path: inset(0 2px 0 0);
-    opacity: 0;
-    transition: opacity 0.25s ease;
+    opacity: 1;
 }
 
 .loading-video.is-ready {
@@ -1872,6 +1871,176 @@ section {
     transform: translateX(3px);
     box-shadow: 0 6px 20px rgba(6, 43, 85, .25);
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   Animación Coreografiada de Entrada: Inspírate para tu próximo viaje
+   Orden final visual: [ CARD 1 (Izq) ] [ CARD 3 (Centro) ] [ CARD 2 (Der) ]
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Reorganización de orden flex: 
+   Card 1 (Cartagena) -> 1
+   Card 3 (Medellín)  -> 2
+   Card 2 (Madrid)    -> 3
+   Resto              -> 4, 5, 6... */
+.inspiration-track .inspiration-card:nth-child(1) { order: 1; }
+.inspiration-track .inspiration-card:nth-child(3) { order: 2; }
+.inspiration-track .inspiration-card:nth-child(2) { order: 3; }
+.inspiration-track .inspiration-card:nth-child(4) { order: 4; }
+.inspiration-track .inspiration-card:nth-child(5) { order: 5; }
+.inspiration-track .inspiration-card:nth-child(6) { order: 6; }
+
+/* Estado inicial cuando JS prepara la animación */
+.inspiration-track.animate-ready .inspiration-card {
+    opacity: 0;
+    will-change: transform, opacity;
+}
+
+/* En pantallas de escritorio (>= 901px): animación 1 por 1 con cruce hacia el centro */
+@media (min-width: 901px) {
+    /* 1. Primera card: entra al centro y luego se desplaza a la izquierda */
+    .inspiration-track.animate-in .inspiration-card:nth-child(1) {
+        animation: inspiration-card-1 1.25s cubic-bezier(0.25, 1, 0.5, 1) forwards 0.05s;
+    }
+
+    /* 2. Segunda card: entra al centro y luego se desplaza a la derecha */
+    .inspiration-track.animate-in .inspiration-card:nth-child(2) {
+        animation: inspiration-card-2 1.25s cubic-bezier(0.25, 1, 0.5, 1) forwards 1.1s;
+    }
+
+    /* 3. Tercera card: entra hacia el centro y se queda en el centro */
+    .inspiration-track.animate-in .inspiration-card:nth-child(3) {
+        animation: inspiration-card-3 0.9s cubic-bezier(0.25, 1, 0.5, 1) forwards 2.15s;
+    }
+
+    /* Tarjetas restantes (4 en adelante): entrada suave al finalizar las 3 principales */
+    .inspiration-track.animate-in .inspiration-card:nth-child(n+4) {
+        animation: inspiration-card-rest 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards 2.75s;
+    }
+}
+
+/* En pantallas móviles o tablets (<= 900px): entrada suave secuencial sin overflow lateral */
+@media (max-width: 900px) {
+    .inspiration-track.animate-in .inspiration-card:nth-child(1) {
+        animation: inspiration-card-mobile 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards 0.05s;
+    }
+
+    .inspiration-track.animate-in .inspiration-card:nth-child(3) {
+        animation: inspiration-card-mobile 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards 0.35s;
+    }
+
+    .inspiration-track.animate-in .inspiration-card:nth-child(2) {
+        animation: inspiration-card-mobile 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards 0.65s;
+    }
+
+    .inspiration-track.animate-in .inspiration-card:nth-child(n+4) {
+        animation: inspiration-card-mobile 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards 0.95s;
+    }
+}
+
+/* Al terminar la animación, se estabiliza todo para habilitar :hover y scrolling fluido */
+.inspiration-track.animation-done .inspiration-card {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none;
+    will-change: auto;
+}
+
+/* Respeto a preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+    .inspiration-track .inspiration-card,
+    .inspiration-track.animate-ready .inspiration-card,
+    .inspiration-track.animate-in .inspiration-card {
+        opacity: 1 !important;
+        animation: none !important;
+        transform: none !important;
+    }
+}
+
+/* Keyframes Card 1: Slot 1 (Izq). Centro está a +(100% + 22px). */
+@keyframes inspiration-card-1 {
+    0% {
+        opacity: 0;
+        transform: translateX(calc(100% + 22px + 70px)) scale(0.96);
+    }
+    20% {
+        opacity: 1;
+    }
+    45% {
+        opacity: 1;
+        transform: translateX(calc(100% + 22px)) scale(1);
+    }
+    58% {
+        opacity: 1;
+        transform: translateX(calc(100% + 22px)) scale(1);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* Keyframes Card 2: Slot 3 (Der). Centro está a -(100% - 22px). */
+@keyframes inspiration-card-2 {
+    0% {
+        opacity: 0;
+        transform: translateX(calc(-100% - 22px - 70px)) scale(0.96);
+    }
+    20% {
+        opacity: 1;
+    }
+    45% {
+        opacity: 1;
+        transform: translateX(calc(-100% - 22px)) scale(1);
+    }
+    58% {
+        opacity: 1;
+        transform: translateX(calc(-100% - 22px)) scale(1);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* Keyframes Card 3: Slot 2 (Centro). Entra al centro y se queda en el centro. */
+@keyframes inspiration-card-3 {
+    0% {
+        opacity: 0;
+        transform: translateY(45px) scale(0.92);
+    }
+    35% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Keyframes tarjetas restantes */
+@keyframes inspiration-card-rest {
+    0% {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Keyframes versión móvil */
+@keyframes inspiration-card-mobile {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 
 @keyframes flightSearchPulse {
     0% {

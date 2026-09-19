@@ -200,17 +200,10 @@ let loadingClosed = false;
 
 // Sincronizar video de carga según el modo claro / oscuro activo
 if (loadingVideo) {
+    loadingVideo.classList.add("is-ready");
     const isDark = document.documentElement.getAttribute("data-theme") === "dark";
     const source = loadingVideo.querySelector("source");
     const currentSrc = source ? source.getAttribute("src") : "";
-    
-    const showVideo = () => loadingVideo.classList.add("is-ready");
-    if (loadingVideo.readyState >= 2) {
-        showVideo();
-    } else {
-        loadingVideo.addEventListener("loadeddata", showVideo, { once: true });
-        loadingVideo.addEventListener("playing", showVideo, { once: true });
-    }
 
     if (isDark && !currentSrc.includes("blackair")) {
         loadingVideo.innerHTML = `
@@ -639,13 +632,38 @@ if (!document.querySelector('script[src*="ai-chatbot.js"]')) {
     document.head.appendChild(aiScript);
 }
 
-// ── Carrusel interactivo y selección directa de destinos en Inspiración ──
+// ── Carrusel interactivo y animación coreografiada en Inspiración ──
 const inspirationTrack = document.getElementById("inspirationTrack");
 if (inspirationTrack) {
     const prevBtn = document.getElementById("inspirationPrev");
     const nextBtn = document.getElementById("inspirationNext");
     const dotsContainer = document.getElementById("inspirationDots");
-    const cards = Array.from(inspirationTrack.querySelectorAll(".inspiration-card"));
+    const cards = Array.from(inspirationTrack.querySelectorAll(".inspiration-card")).sort((a, b) => {
+        const orderA = parseInt(window.getComputedStyle(a).order) || 0;
+        const orderB = parseInt(window.getComputedStyle(b).order) || 0;
+        return orderA - orderB;
+    });
+
+    // Activar animación coreografiada al hacer scroll y entrar en pantalla
+    inspirationTrack.classList.add("animate-ready");
+    const inspirationSection = document.getElementById("inspiracion") || inspirationTrack.closest(".inspiration-section");
+    if (inspirationSection && "IntersectionObserver" in window) {
+        const inspirationObserver = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    inspirationTrack.classList.add("animate-in");
+                    obs.unobserve(entry.target);
+                    window.setTimeout(() => {
+                        inspirationTrack.classList.add("animation-done");
+                    }, 3400);
+                }
+            });
+        }, { threshold: 0.18 });
+        inspirationObserver.observe(inspirationSection);
+    } else {
+        inspirationTrack.classList.add("animate-in");
+        inspirationTrack.classList.add("animation-done");
+    }
 
     // Calcular desplazamiento por tarjeta
     const getCardScrollStep = () => {
