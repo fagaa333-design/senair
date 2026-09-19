@@ -1640,47 +1640,221 @@ section {
     transform: scale(0.94);
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   Carrusel Circular 3D / Coverflow: Inspírate para tu próximo viaje
+   Rotación cilíndrica infinita, perspectiva 3D y paso fluido con flechas
+   ══════════════════════════════════════════════════════════════════ */
+
 .inspiration-slider-wrapper {
     position: relative;
-    margin: 0 -6px;
+    width: 100%;
+    margin: 10px auto 0;
+    perspective: 1300px;
+    perspective-origin: 50% 50%;
+    overflow: hidden;
+    padding: 16px 0 34px;
 }
 
 .inspiration-track {
+    position: relative;
+    width: 100%;
+    height: 520px;
     display: flex;
-    gap: 22px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding: 10px 6px 20px 6px;
-}
-
-.inspiration-track::-webkit-scrollbar {
-    display: none;
+    justify-content: center;
+    align-items: center;
+    transform-style: preserve-3d;
+    user-select: none;
+    outline: none;
 }
 
 .inspiration-card {
-    flex: 0 0 calc((100% - 44px) / 3);
-    min-width: 290px;
-    scroll-snap-align: start;
+    position: absolute;
+    width: min(370px, 84vw);
+    max-width: 380px;
+    height: 485px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     background: var(--white);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: 0 10px 28px rgba(6, 43, 85, .07);
-    transition: transform .3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .3s ease, border-color .3s ease;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(6, 43, 85, .08);
+    transition: transform 0.65s cubic-bezier(0.25, 1, 0.35, 1), 
+                opacity 0.65s cubic-bezier(0.25, 1, 0.35, 1), 
+                filter 0.65s ease, 
+                box-shadow 0.65s ease,
+                border-color 0.35s ease;
     cursor: pointer;
     user-select: none;
-    position: relative;
+    pointer-events: none;
+    opacity: 0;
+    will-change: transform, opacity;
 }
 
-.inspiration-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 42px rgba(6, 43, 85, .15);
+/* 1. Tarjeta Activa (Centro / Frontal) */
+.inspiration-card.is-active {
+    transform: translateX(0) translateZ(0) scale(1) rotateY(0deg);
+    opacity: 1;
+    z-index: 10;
+    pointer-events: auto;
+    filter: none;
+    box-shadow: 0 24px 60px rgba(6, 43, 85, 0.22);
     border-color: rgba(8, 102, 198, 0.35);
+}
+
+.inspiration-card.is-active:hover {
+    transform: translateX(0) translateZ(18px) scale(1.02) rotateY(0deg);
+    box-shadow: 0 32px 70px rgba(6, 43, 85, 0.28);
+}
+
+/* 2. Tarjeta Siguiente (Derecha - Perspectiva Circular) */
+.inspiration-card.is-next {
+    transform: translateX(min(360px, 76%)) translateZ(-150px) scale(0.85) rotateY(-20deg);
+    opacity: 0.72;
+    z-index: 5;
+    pointer-events: auto;
+    filter: brightness(0.92) contrast(0.96);
+    box-shadow: 0 14px 35px rgba(6, 43, 85, 0.12);
+}
+
+.inspiration-card.is-next:hover {
+    transform: translateX(min(360px, 76%)) translateZ(-110px) scale(0.88) rotateY(-15deg);
+    opacity: 0.92;
+    filter: brightness(0.98);
+}
+
+/* 3. Tarjeta Anterior (Izquierda - Perspectiva Circular) */
+.inspiration-card.is-prev {
+    transform: translateX(max(-360px, -76%)) translateZ(-150px) scale(0.85) rotateY(20deg);
+    opacity: 0.72;
+    z-index: 5;
+    pointer-events: auto;
+    filter: brightness(0.92) contrast(0.96);
+    box-shadow: 0 14px 35px rgba(6, 43, 85, 0.12);
+}
+
+.inspiration-card.is-prev:hover {
+    transform: translateX(max(-360px, -76%)) translateZ(-110px) scale(0.88) rotateY(15deg);
+    opacity: 0.92;
+    filter: brightness(0.98);
+}
+
+/* 4. Tarjetas secundarias preparadas en el círculo */
+.inspiration-card.is-far-next {
+    transform: translateX(min(560px, 110%)) translateZ(-300px) scale(0.68) rotateY(-32deg);
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.inspiration-card.is-far-prev {
+    transform: translateX(max(-560px, -110%)) translateZ(-300px) scale(0.68) rotateY(32deg);
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* 5. Tarjetas ocultas al fondo del cilindro */
+.inspiration-card.is-hidden {
+    transform: translateX(0) translateZ(-400px) scale(0.52) rotateY(0deg);
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Soporte Modo Oscuro */
+[data-theme="dark"] .inspiration-card {
+    background: #0d1b2a;
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .inspiration-card.is-active {
+    box-shadow: 0 25px 65px rgba(0, 0, 0, 0.65);
+    border-color: rgba(8, 102, 198, 0.5);
+}
+
+[data-theme="dark"] .inspiration-card.is-next,
+[data-theme="dark"] .inspiration-card.is-prev {
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.45);
+    filter: brightness(0.85);
+}
+
+[data-theme="dark"] .inspiration-card.is-next:hover,
+[data-theme="dark"] .inspiration-card.is-prev:hover {
+    filter: brightness(0.95);
+}
+
+/* Adaptación responsive para pantallas medianas y móviles */
+@media (max-width: 768px) {
+    .inspiration-slider-wrapper {
+        perspective: 1000px;
+        padding: 12px 0 20px;
+    }
+
+    .inspiration-track {
+        height: 495px;
+    }
+
+    .inspiration-card {
+        width: min(320px, 84vw);
+        height: 465px;
+    }
+
+    .inspiration-card.is-next {
+        transform: translateX(62%) translateZ(-110px) scale(0.84) rotateY(-16deg);
+        opacity: 0.52;
+    }
+
+    .inspiration-card.is-prev {
+        transform: translateX(-62%) translateZ(-110px) scale(0.84) rotateY(16deg);
+        opacity: 0.52;
+    }
+
+    .inspiration-card.is-far-next {
+        transform: translateX(105%) translateZ(-220px) scale(0.65);
+        opacity: 0;
+    }
+
+    .inspiration-card.is-far-prev {
+        transform: translateX(-105%) translateZ(-220px) scale(0.65);
+        opacity: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .inspiration-track {
+        height: 465px;
+    }
+
+    .inspiration-card {
+        width: min(290px, 86vw);
+        height: 440px;
+    }
+
+    .inspiration-card-image-wrap {
+        height: 190px !important;
+    }
+
+    .inspiration-card-content {
+        padding: 16px 16px 14px !important;
+    }
+
+    .inspiration-card.is-next {
+        transform: translateX(58%) translateZ(-90px) scale(0.8) rotateY(-12deg);
+        opacity: 0.42;
+    }
+
+    .inspiration-card.is-prev {
+        transform: translateX(-58%) translateZ(-90px) scale(0.8) rotateY(12deg);
+        opacity: 0.42;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .inspiration-card {
+        transition: none !important;
+    }
 }
 
 .inspiration-card-image-wrap {
@@ -1871,176 +2045,6 @@ section {
     transform: translateX(3px);
     box-shadow: 0 6px 20px rgba(6, 43, 85, .25);
 }
-
-/* ══════════════════════════════════════════════════════════════════
-   Animación Coreografiada de Entrada: Inspírate para tu próximo viaje
-   Orden final visual: [ CARD 1 (Izq) ] [ CARD 3 (Centro) ] [ CARD 2 (Der) ]
-   ══════════════════════════════════════════════════════════════════ */
-
-/* Reorganización de orden flex: 
-   Card 1 (Cartagena) -> 1
-   Card 3 (Medellín)  -> 2
-   Card 2 (Madrid)    -> 3
-   Resto              -> 4, 5, 6... */
-.inspiration-track .inspiration-card:nth-child(1) { order: 1; }
-.inspiration-track .inspiration-card:nth-child(3) { order: 2; }
-.inspiration-track .inspiration-card:nth-child(2) { order: 3; }
-.inspiration-track .inspiration-card:nth-child(4) { order: 4; }
-.inspiration-track .inspiration-card:nth-child(5) { order: 5; }
-.inspiration-track .inspiration-card:nth-child(6) { order: 6; }
-
-/* Estado inicial cuando JS prepara la animación */
-.inspiration-track.animate-ready .inspiration-card {
-    opacity: 0;
-    will-change: transform, opacity;
-}
-
-/* En pantallas de escritorio (>= 901px): animación 1 por 1 con cruce hacia el centro */
-@media (min-width: 901px) {
-    /* 1. Primera card: entra al centro y luego se desplaza a la izquierda */
-    .inspiration-track.animate-in .inspiration-card:nth-child(1) {
-        animation: inspiration-card-1 1.25s cubic-bezier(0.25, 1, 0.5, 1) forwards 0.05s;
-    }
-
-    /* 2. Segunda card: entra al centro y luego se desplaza a la derecha */
-    .inspiration-track.animate-in .inspiration-card:nth-child(2) {
-        animation: inspiration-card-2 1.25s cubic-bezier(0.25, 1, 0.5, 1) forwards 1.1s;
-    }
-
-    /* 3. Tercera card: entra hacia el centro y se queda en el centro */
-    .inspiration-track.animate-in .inspiration-card:nth-child(3) {
-        animation: inspiration-card-3 0.9s cubic-bezier(0.25, 1, 0.5, 1) forwards 2.15s;
-    }
-
-    /* Tarjetas restantes (4 en adelante): entrada suave al finalizar las 3 principales */
-    .inspiration-track.animate-in .inspiration-card:nth-child(n+4) {
-        animation: inspiration-card-rest 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards 2.75s;
-    }
-}
-
-/* En pantallas móviles o tablets (<= 900px): entrada suave secuencial sin overflow lateral */
-@media (max-width: 900px) {
-    .inspiration-track.animate-in .inspiration-card:nth-child(1) {
-        animation: inspiration-card-mobile 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards 0.05s;
-    }
-
-    .inspiration-track.animate-in .inspiration-card:nth-child(3) {
-        animation: inspiration-card-mobile 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards 0.35s;
-    }
-
-    .inspiration-track.animate-in .inspiration-card:nth-child(2) {
-        animation: inspiration-card-mobile 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards 0.65s;
-    }
-
-    .inspiration-track.animate-in .inspiration-card:nth-child(n+4) {
-        animation: inspiration-card-mobile 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards 0.95s;
-    }
-}
-
-/* Al terminar la animación, se estabiliza todo para habilitar :hover y scrolling fluido */
-.inspiration-track.animation-done .inspiration-card {
-    opacity: 1 !important;
-    animation: none !important;
-    transform: none;
-    will-change: auto;
-}
-
-/* Respeto a preferencia de movimiento reducido */
-@media (prefers-reduced-motion: reduce) {
-    .inspiration-track .inspiration-card,
-    .inspiration-track.animate-ready .inspiration-card,
-    .inspiration-track.animate-in .inspiration-card {
-        opacity: 1 !important;
-        animation: none !important;
-        transform: none !important;
-    }
-}
-
-/* Keyframes Card 1: Slot 1 (Izq). Centro está a +(100% + 22px). */
-@keyframes inspiration-card-1 {
-    0% {
-        opacity: 0;
-        transform: translateX(calc(100% + 22px + 70px)) scale(0.96);
-    }
-    20% {
-        opacity: 1;
-    }
-    45% {
-        opacity: 1;
-        transform: translateX(calc(100% + 22px)) scale(1);
-    }
-    58% {
-        opacity: 1;
-        transform: translateX(calc(100% + 22px)) scale(1);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-}
-
-/* Keyframes Card 2: Slot 3 (Der). Centro está a -(100% - 22px). */
-@keyframes inspiration-card-2 {
-    0% {
-        opacity: 0;
-        transform: translateX(calc(-100% - 22px - 70px)) scale(0.96);
-    }
-    20% {
-        opacity: 1;
-    }
-    45% {
-        opacity: 1;
-        transform: translateX(calc(-100% - 22px)) scale(1);
-    }
-    58% {
-        opacity: 1;
-        transform: translateX(calc(-100% - 22px)) scale(1);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-}
-
-/* Keyframes Card 3: Slot 2 (Centro). Entra al centro y se queda en el centro. */
-@keyframes inspiration-card-3 {
-    0% {
-        opacity: 0;
-        transform: translateY(45px) scale(0.92);
-    }
-    35% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-/* Keyframes tarjetas restantes */
-@keyframes inspiration-card-rest {
-    0% {
-        opacity: 0;
-        transform: translateY(25px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Keyframes versión móvil */
-@keyframes inspiration-card-mobile {
-    0% {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 
 @keyframes flightSearchPulse {
     0% {

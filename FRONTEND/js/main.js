@@ -632,118 +632,187 @@ if (!document.querySelector('script[src*="ai-chatbot.js"]')) {
     document.head.appendChild(aiScript);
 }
 
-// ── Carrusel interactivo y animación coreografiada en Inspiración ──
+// ── Conexión directa: Al hacer clic en una tarjeta o botón, autoselecciona destino en el buscador ──
+const handleSelectDestination = (destValue) => {
+    if (!destValue) return;
+
+    // Si Choices está disponible para el destino (airportChoices[1])
+    if (typeof airportChoices !== "undefined" && airportChoices && airportChoices[1]) {
+        airportChoices[1].removeActiveItems();
+        airportChoices[1].setChoiceByValue(destValue);
+    } else {
+        const destSelect = document.getElementById("destination");
+        if (destSelect) {
+            destSelect.value = destValue;
+            destSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+    }
+
+    // Scroll suave hacia el buscador de vuelos
+    const targetSearch = document.getElementById("flightSearch") || document.getElementById("vuelos") || document.getElementById("flightForm");
+    if (targetSearch) {
+        targetSearch.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        // Efecto visual pulsante para destacar que se preseleccionó el destino
+        targetSearch.classList.remove("form-highlight-pulse");
+        void targetSearch.offsetWidth;
+        targetSearch.classList.add("form-highlight-pulse");
+        setTimeout(() => targetSearch.classList.remove("form-highlight-pulse"), 2000);
+
+        // Enfocar fecha de salida si aún no está seleccionada
+        const departureInput = document.getElementById("departure");
+        const departureTrigger = document.getElementById("departureTrigger");
+        if (departureTrigger && (!departureInput || !departureInput.value)) {
+            setTimeout(() => {
+                departureTrigger.focus();
+            }, 600);
+        }
+    }
+};
+
+// ── Carrusel Circular 3D / Coverflow para "Inspírate para tu próximo viaje" ──
 const inspirationTrack = document.getElementById("inspirationTrack");
 if (inspirationTrack) {
     const prevBtn = document.getElementById("inspirationPrev");
     const nextBtn = document.getElementById("inspirationNext");
     const dotsContainer = document.getElementById("inspirationDots");
-    const cards = Array.from(inspirationTrack.querySelectorAll(".inspiration-card")).sort((a, b) => {
-        const orderA = parseInt(window.getComputedStyle(a).order) || 0;
-        const orderB = parseInt(window.getComputedStyle(b).order) || 0;
-        return orderA - orderB;
-    });
+    const cards = Array.from(inspirationTrack.querySelectorAll(".inspiration-card"));
+    const totalCards = cards.length;
+    let currentIndex = 0;
 
-    // Activar animación coreografiada al hacer scroll y entrar en pantalla
-    inspirationTrack.classList.add("animate-ready");
-    const inspirationSection = document.getElementById("inspiracion") || inspirationTrack.closest(".inspiration-section");
-    if (inspirationSection && "IntersectionObserver" in window) {
-        const inspirationObserver = new IntersectionObserver((entries, obs) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    inspirationTrack.classList.add("animate-in");
-                    obs.unobserve(entry.target);
-                    window.setTimeout(() => {
-                        inspirationTrack.classList.add("animation-done");
-                    }, 3400);
-                }
-            });
-        }, { threshold: 0.18 });
-        inspirationObserver.observe(inspirationSection);
-    } else {
-        inspirationTrack.classList.add("animate-in");
-        inspirationTrack.classList.add("animation-done");
-    }
+    // Actualiza las posiciones 3D en el anillo circular
+    const updateCircularCarousel = (targetIndex) => {
+        currentIndex = ((targetIndex % totalCards) + totalCards) % totalCards;
 
-    // Calcular desplazamiento por tarjeta
-    const getCardScrollStep = () => {
-        const firstCard = cards[0];
-        if (!firstCard) return 320;
-        const style = window.getComputedStyle(inspirationTrack);
-        const gap = parseFloat(style.columnGap || style.gap) || 22;
-        return firstCard.offsetWidth + gap;
-    };
+        cards.forEach((card, idx) => {
+            // Distancia modular con respecto a la tarjeta activa
+            let diff = (idx - currentIndex) % totalCards;
+            if (diff < -Math.floor(totalCards / 2)) diff += totalCards;
+            if (diff > Math.floor((totalCards - 1) / 2)) diff -= totalCards;
 
-    // Navegación con botones
-    if (prevBtn) {
-        prevBtn.addEventListener("click", () => {
-            const step = getCardScrollStep();
-            inspirationTrack.scrollBy({ left: -step, behavior: "smooth" });
-        });
-    }
+            // Limpiar clases posicionales
+            card.classList.remove("is-active", "is-next", "is-prev", "is-far-next", "is-far-prev", "is-hidden");
 
-    if (nextBtn) {
-        nextBtn.addEventListener("click", () => {
-            const step = getCardScrollStep();
-            const maxScroll = inspirationTrack.scrollWidth - inspirationTrack.clientWidth - 10;
-            if (inspirationTrack.scrollLeft >= maxScroll) {
-                inspirationTrack.scrollTo({ left: 0, behavior: "smooth" });
+            if (diff === 0) {
+                card.classList.add("is-active");
+                card.setAttribute("aria-hidden", "false");
+                card.tabIndex = 0;
+            } else if (diff === 1) {
+                card.classList.add("is-next");
+                card.setAttribute("aria-hidden", "false");
+                card.tabIndex = 0;
+            } else if (diff === -1) {
+                card.classList.add("is-prev");
+                card.setAttribute("aria-hidden", "false");
+                card.tabIndex = 0;
+            } else if (diff === 2) {
+                card.classList.add("is-far-next");
+                card.setAttribute("aria-hidden", "true");
+                card.tabIndex = -1;
+            } else if (diff === -2) {
+                card.classList.add("is-far-prev");
+                card.setAttribute("aria-hidden", "true");
+                card.tabIndex = -1;
             } else {
-                inspirationTrack.scrollBy({ left: step, behavior: "smooth" });
+                card.classList.add("is-hidden");
+                card.setAttribute("aria-hidden", "true");
+                card.tabIndex = -1;
             }
         });
-    }
 
-    // Generar indicadores (dots)
-    if (dotsContainer && cards.length > 0) {
+        // Actualizar dots indicadores
+        if (dotsContainer) {
+            dotsContainer.querySelectorAll(".inspiration-dot").forEach((dot, idx) => {
+                dot.classList.toggle("active", idx === currentIndex);
+            });
+        }
+    };
+
+    // Navegación con flechas (rotación circular continua)
+    const nextCard = () => updateCircularCarousel(currentIndex + 1);
+    const prevCard = () => updateCircularCarousel(currentIndex - 1);
+
+    if (nextBtn) nextBtn.addEventListener("click", nextCard);
+    if (prevBtn) prevBtn.addEventListener("click", prevCard);
+
+    // Generar dots interactivos
+    if (dotsContainer && totalCards > 0) {
         dotsContainer.innerHTML = "";
         cards.forEach((_, idx) => {
             const dot = document.createElement("button");
             dot.type = "button";
             dot.className = `inspiration-dot ${idx === 0 ? "active" : ""}`;
-            dot.setAttribute("aria-label", `Ir al destino ${idx + 1}`);
-            dot.addEventListener("click", () => {
-                const step = getCardScrollStep();
-                inspirationTrack.scrollTo({ left: idx * step, behavior: "smooth" });
-            });
+            dot.setAttribute("aria-label", `Ver destino ${idx + 1}`);
+            dot.addEventListener("click", () => updateCircularCarousel(idx));
             dotsContainer.appendChild(dot);
         });
-
-        // Actualizar dot activo al scrollear
-        let scrollTicking = false;
-        inspirationTrack.addEventListener("scroll", () => {
-            if (!scrollTicking) {
-                window.requestAnimationFrame(() => {
-                    const step = getCardScrollStep();
-                    const activeIndex = Math.min(
-                        cards.length - 1,
-                        Math.max(0, Math.round(inspirationTrack.scrollLeft / step))
-                    );
-                    dotsContainer.querySelectorAll(".inspiration-dot").forEach((dot, i) => {
-                        dot.classList.toggle("active", i === activeIndex);
-                    });
-                    scrollTicking = false;
-                });
-                scrollTicking = true;
-            }
-        }, { passive: true });
     }
 
-    // Autoplay sutil (se pausa al interactuar o con prefers-reduced-motion)
+    // Interacción al hacer clic en las tarjetas del carrusel
+    cards.forEach((card, idx) => {
+        card.addEventListener("click", (e) => {
+            // Si no es la tarjeta central activa, rotar el carrusel para centrarla
+            if (idx !== currentIndex) {
+                e.preventDefault();
+                e.stopPropagation();
+                updateCircularCarousel(idx);
+                return;
+            }
+
+            // Si es la activa, reservar o seleccionar destino
+            const destination = card.dataset.destination;
+            handleSelectDestination(destination);
+        });
+
+        card.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                if (idx !== currentIndex) {
+                    updateCircularCarousel(idx);
+                } else {
+                    handleSelectDestination(card.dataset.destination);
+                }
+            }
+        });
+    });
+
+    // Soporte táctil / swipe en celulares y tablets
+    let touchStartX = 0;
+    let touchEndX = 0;
+    inspirationTrack.addEventListener("touchstart", (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        stopAutoplay();
+    }, { passive: true });
+
+    inspirationTrack.addEventListener("touchend", (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diffX = touchEndX - touchStartX;
+        if (Math.abs(diffX) > 40) {
+            if (diffX < 0) nextCard();
+            else prevCard();
+        }
+        setTimeout(startAutoplay, 3500);
+    }, { passive: true });
+
+    // Navegación con teclado cuando el track está enfocado
+    inspirationTrack.tabIndex = 0;
+    inspirationTrack.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            prevCard();
+        } else if (e.key === "ArrowRight") {
+            e.preventDefault();
+            nextCard();
+        }
+    });
+
+    // Autoplay suave continuo
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let autoplayTimer = null;
 
     const startAutoplay = () => {
         if (prefersReducedMotion || autoplayTimer) return;
-        autoplayTimer = setInterval(() => {
-            const step = getCardScrollStep();
-            const maxScroll = inspirationTrack.scrollWidth - inspirationTrack.clientWidth - 10;
-            if (inspirationTrack.scrollLeft >= maxScroll) {
-                inspirationTrack.scrollTo({ left: 0, behavior: "smooth" });
-            } else {
-                inspirationTrack.scrollBy({ left: step, behavior: "smooth" });
-            }
-        }, 5500);
+        autoplayTimer = setInterval(nextCard, 5500);
     };
 
     const stopAutoplay = () => {
@@ -755,80 +824,26 @@ if (inspirationTrack) {
 
     inspirationTrack.addEventListener("mouseenter", stopAutoplay);
     inspirationTrack.addEventListener("mouseleave", startAutoplay);
-    inspirationTrack.addEventListener("touchstart", stopAutoplay, { passive: true });
-    inspirationTrack.addEventListener("touchend", () => {
-        setTimeout(startAutoplay, 3000);
-    }, { passive: true });
 
+    // Inicializar carrusel en la primera tarjeta
+    updateCircularCarousel(0);
     startAutoplay();
-
-    // Conexión directa: Al hacer clic en una tarjeta o su botón, autoselecciona el destino en el buscador
-    const handleSelectDestination = (destValue) => {
-        if (!destValue) return;
-
-        // Si Choices está disponible para el destino (airportChoices[1])
-        if (typeof airportChoices !== "undefined" && airportChoices && airportChoices[1]) {
-            airportChoices[1].removeActiveItems();
-            airportChoices[1].setChoiceByValue(destValue);
-        } else {
-            const destSelect = document.getElementById("destination");
-            if (destSelect) {
-                destSelect.value = destValue;
-                destSelect.dispatchEvent(new Event("change", { bubbles: true }));
-            }
-        }
-
-        // Scroll suave hacia el buscador de vuelos
-        const targetSearch = document.getElementById("flightSearch") || document.getElementById("vuelos") || document.getElementById("flightForm");
-        if (targetSearch) {
-            targetSearch.scrollIntoView({ behavior: "smooth", block: "center" });
-
-            // Efecto visual pulsante para destacar que se preseleccionó el destino
-            targetSearch.classList.remove("form-highlight-pulse");
-            void targetSearch.offsetWidth;
-            targetSearch.classList.add("form-highlight-pulse");
-            setTimeout(() => targetSearch.classList.remove("form-highlight-pulse"), 2000);
-
-            // Enfocar fecha de salida si aún no está seleccionada
-            const departureInput = document.getElementById("departure");
-            const departureTrigger = document.getElementById("departureTrigger");
-            if (departureTrigger && (!departureInput || !departureInput.value)) {
-                setTimeout(() => {
-                    departureTrigger.focus();
-                }, 600);
-            }
-        }
-    };
-
-    cards.forEach((card) => {
-        const destination = card.dataset.destination;
-        card.addEventListener("click", () => {
-            handleSelectDestination(destination);
-        });
-
-        card.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleSelectDestination(destination);
-            }
-        });
-    });
-
-    // Conectar también las tarjetas de la sección "¿A dónde quieres ir?"
-    document.querySelectorAll(".destination[data-destination]").forEach((card) => {
-        const destination = card.dataset.destination;
-        card.addEventListener("click", () => {
-            handleSelectDestination(destination);
-        });
-
-        card.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleSelectDestination(destination);
-            }
-        });
-    });
 }
+
+// Conectar también las tarjetas de la sección "¿A dónde quieres ir?"
+document.querySelectorAll(".destination[data-destination]").forEach((card) => {
+    const destination = card.dataset.destination;
+    card.addEventListener("click", () => {
+        handleSelectDestination(destination);
+    });
+
+    card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleSelectDestination(destination);
+        }
+    });
+});
 
 // Inicializar video de fondo del hero
 const heroVideo = document.getElementById("heroVideo");
