@@ -54,10 +54,16 @@
     height: min(280px, 70vw);
     max-width: 280px;
     max-height: 280px;
-    background: #000;
+    background: transparent;
     object-fit: cover;
     object-position: center;
     clip-path: inset(0 2px 0 0);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.loading-video.is-ready {
+    opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {

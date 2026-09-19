@@ -900,3 +900,23 @@ body.dark-theme {
 [data-theme="dark"] a:hover {
   color: #7dd3fc;
 }
+
+/* ── Pantalla de Carga y Video ── */
+.loading-video {
+  background: transparent !important;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.loading-video.is-ready {
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .loading-screen {
+  background: #000000 !important;
+}
+
+[data-theme="dark"] .loading-video {
+  background: transparent !important;
+}
+
