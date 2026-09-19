@@ -1092,3 +1092,302 @@ body.dark-theme {
   background: transparent !important;
 }
 
+/* ── Buscador de Vuelos (Hero Panel) en Modo Oscuro ──────────── */
+[data-theme="dark"] .search-panel,
+body.dark-theme .search-panel {
+  background: #0b1424 !important;
+  border: 1px solid #1e2f47 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Pestañas: Ida y vuelta / Solo ida */
+[data-theme="dark"] .search-tabs,
+body.dark-theme .search-tabs {
+  background: #09121f !important;
+  border: 1px solid #1e2f47 !important;
+}
+
+[data-theme="dark"] .search-tab,
+body.dark-theme .search-tab {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .search-tab:hover,
+body.dark-theme .search-tab:hover {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .search-tab.active,
+body.dark-theme .search-tab.active {
+  color: #ffffff !important;
+  background: #0866c6 !important;
+  border-color: #0866c6 !important;
+  box-shadow: 0 4px 14px rgba(8, 102, 198, 0.45) !important;
+}
+
+/* Contenedores de Campos (Origen, Destino, Salida, Regreso, Pasajeros) */
+[data-theme="dark"] .route-group,
+body.dark-theme .route-group,
+[data-theme="dark"] .date-group,
+body.dark-theme .date-group,
+[data-theme="dark"] .passengers-field,
+body.dark-theme .passengers-field {
+  background: #0f1a2c !important;
+  border-color: #1e314b !important;
+}
+
+[data-theme="dark"] .route-group:focus-within,
+body.dark-theme .route-group:focus-within,
+[data-theme="dark"] .date-group:focus-within,
+body.dark-theme .date-group:focus-within,
+[data-theme="dark"] .passengers-field:focus-within,
+body.dark-theme .passengers-field:focus-within {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
+}
+
+[data-theme="dark"] .route-field:last-child,
+body.dark-theme .route-field:last-child,
+[data-theme="dark"] .date-field + .date-field,
+body.dark-theme .date-field + .date-field {
+  border-left-color: #1e314b !important;
+}
+
+/* Etiquetas e Íconos */
+[data-theme="dark"] .field label,
+body.dark-theme .field label,
+[data-theme="dark"] .passengers-label,
+body.dark-theme .passengers-label {
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="dark"] .field-icon,
+body.dark-theme .field-icon {
+  color: #38bdf8 !important;
+}
+
+/* Botón Intercambiar Ruta ↔ */
+[data-theme="dark"] .swap-route,
+body.dark-theme .swap-route {
+  color: #38bdf8 !important;
+  background: #111e32 !important;
+  border-color: #243b5e !important;
+}
+
+[data-theme="dark"] .swap-route:hover,
+body.dark-theme .swap-route:hover {
+  color: #ffffff !important;
+  background: #0866c6 !important;
+  border-color: #0866c6 !important;
+}
+
+/* Textos de Inputs, Fechas y Pasajeros */
+[data-theme="dark"] .field input,
+body.dark-theme .field input,
+[data-theme="dark"] .field select,
+body.dark-theme .field select,
+[data-theme="dark"] .choices__inner,
+body.dark-theme .choices__inner,
+[data-theme="dark"] .choices__list--single .choices__item,
+body.dark-theme .choices__list--single .choices__item {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .choices__placeholder,
+body.dark-theme .choices__placeholder,
+[data-theme="dark"] .date-trigger,
+body.dark-theme .date-trigger {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .date-trigger.has-value,
+body.dark-theme .date-trigger.has-value,
+[data-theme="dark"] .passengers-trigger strong,
+body.dark-theme .passengers-trigger strong {
+  color: #f8fafc !important;
+}
+
+/* Desplegable Choices en Modo Oscuro */
+[data-theme="dark"] .choices__list--dropdown,
+body.dark-theme .choices__list--dropdown {
+  background: #0f1a2c !important;
+  border: 1px solid #1e314b !important;
+  color: #f8fafc !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .choices__list--dropdown::before,
+body.dark-theme .choices__list--dropdown::before {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .choices__list--dropdown .choices__input,
+body.dark-theme .choices__list--dropdown .choices__input {
+  color: #f8fafc !important;
+  background: #09121f !important;
+  border: 1px solid #1e314b !important;
+}
+
+[data-theme="dark"] .choices__list--dropdown .choices__item--choice,
+body.dark-theme .choices__list--dropdown .choices__item--choice {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .choices__list--dropdown .choices__item--choice.is-highlighted,
+body.dark-theme .choices__list--dropdown .choices__item--choice.is-highlighted {
+  color: #ffffff !important;
+  background: #0866c6 !important;
+}
+
+/* Calendario en Modo Oscuro */
+[data-theme="dark"] .calendar-menu,
+body.dark-theme .calendar-menu {
+  background: #0f1a2c !important;
+  border: 1px solid #1e314b !important;
+  color: #f8fafc !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .calendar-kicker,
+body.dark-theme .calendar-kicker,
+[data-theme="dark"] .calendar-weekdays,
+body.dark-theme .calendar-weekdays {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .calendar-header h2,
+body.dark-theme .calendar-header h2,
+[data-theme="dark"] .calendar-navigation strong,
+body.dark-theme .calendar-navigation strong {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .calendar-close,
+body.dark-theme .calendar-close,
+[data-theme="dark"] .calendar-navigation button,
+body.dark-theme .calendar-navigation button {
+  color: #f8fafc !important;
+  background: #152438 !important;
+  border-color: #243b5e !important;
+}
+
+[data-theme="dark"] .calendar-day,
+body.dark-theme .calendar-day {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .calendar-day:hover,
+body.dark-theme .calendar-day:hover,
+[data-theme="dark"] .calendar-day.is-selected,
+body.dark-theme .calendar-day.is-selected {
+  color: #ffffff !important;
+  background: #0866c6 !important;
+}
+
+/* Modal de Pasajeros en Modo Oscuro */
+[data-theme="dark"] .passenger-menu,
+body.dark-theme .passenger-menu {
+  background: #0f1a2c !important;
+  border: 1px solid #1e314b !important;
+  color: #f8fafc !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .passenger-menu h2,
+body.dark-theme .passenger-menu h2,
+[data-theme="dark"] .passenger-row strong,
+body.dark-theme .passenger-row strong {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .passenger-row small,
+body.dark-theme .passenger-row small {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .passenger-counter output,
+body.dark-theme .passenger-counter output {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .counter-button,
+body.dark-theme .counter-button {
+  color: #f8fafc !important;
+  background: #152438 !important;
+  border-color: #243b5e !important;
+}
+
+[data-theme="dark"] .passenger-notice,
+body.dark-theme .passenger-notice {
+  background: #0c2738 !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .passenger-notice a,
+body.dark-theme .passenger-notice a {
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .passenger-confirm,
+body.dark-theme .passenger-confirm {
+  background: #0866c6 !important;
+  color: #ffffff !important;
+}
+
+/* ── Menú de Cuenta en Header (Modo Oscuro) ───────────────────── */
+[data-theme="dark"] .account-trigger,
+body.dark-theme .account-trigger {
+  color: #f8fafc !important;
+  background: #0f1a2c !important;
+  border-color: #1e314b !important;
+}
+
+[data-theme="dark"] .account-trigger:hover,
+body.dark-theme .account-trigger:hover {
+  background: #152438 !important;
+  border-color: #243b5e !important;
+}
+
+[data-theme="dark"] .account-trigger-name,
+body.dark-theme .account-trigger-name {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .account-dropdown,
+body.dark-theme .account-dropdown {
+  background: #0f1a2c !important;
+  border-color: #1e314b !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .account-summary,
+body.dark-theme .account-summary {
+  border-bottom-color: #1e314b !important;
+}
+
+[data-theme="dark"] .account-name,
+body.dark-theme .account-name {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .account-email,
+body.dark-theme .account-email {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .account-dropdown a,
+body.dark-theme .account-dropdown a,
+[data-theme="dark"] .account-dropdown button,
+body.dark-theme .account-dropdown button {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .account-dropdown a:hover,
+body.dark-theme .account-dropdown a:hover,
+[data-theme="dark"] .account-dropdown button:hover,
+body.dark-theme .account-dropdown button:hover {
+  color: #38bdf8 !important;
+  background: #152438 !important;
+}
+

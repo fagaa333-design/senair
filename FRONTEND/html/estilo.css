@@ -653,9 +653,9 @@ h1 {
 
 .search-grid {
     display: grid;
-    grid-template-columns: minmax(330px, 2.1fr) minmax(250px, 1.35fr) minmax(145px, 0.7fr) auto;
+    grid-template-columns: minmax(280px, 2fr) minmax(230px, 1.4fr) minmax(130px, 0.9fr) minmax(130px, 180px);
     gap: 14px;
-    align-items: stretch;
+    align-items: center;
 }
 
 .route-group,
@@ -1239,10 +1239,13 @@ body:has(.choices.is-open)::before {
 #bbbbb.button {
     all: unset;
     position: relative;
-    top: 7px;
-    display: block;
-    width: min(100%, 190px);
-    height: 56px;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 180px;
+    height: 64px;
     margin: 0 auto;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -1267,6 +1270,8 @@ body:has(.choices.is-open)::before {
 #bbbbb .button-outer {
     position: relative;
     z-index: 1;
+    width: 100%;
+    height: 100%;
     border-radius: inherit;
     transition: box-shadow 300ms ease;
     box-shadow: 0 .05em .05em -.01em rgba(5, 5, 5, 1),
@@ -1284,10 +1289,11 @@ body:has(.choices.is-open)::before {
     position: relative;
     z-index: 1;
     display: flex;
-    height: 56px;
+    width: 100%;
+    height: 100%;
     align-items: center;
     justify-content: center;
-    padding: 1em 1.5em;
+    padding: 0 1.5em;
     overflow: hidden;
     border-radius: inherit;
     background-image: linear-gradient(135deg, #e6e6e6, #b4b4b4);
@@ -2651,6 +2657,39 @@ footer li:hover {
     margin-top: 20px;
 }
 
+@media (max-width: 1150px) {
+    .search-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 14px;
+    }
+
+    .route-group {
+        grid-column: span 2;
+    }
+
+    .date-group {
+        grid-column: 1;
+    }
+
+    .passengers-field {
+        grid-column: 2;
+    }
+
+    #bbbbb.button,
+    .search-button {
+        grid-column: span 2;
+        width: 100%;
+        max-width: 320px;
+        height: 56px;
+        margin: 6px auto 0;
+        top: 0;
+    }
+
+    #bbbbb .button-inner {
+        height: 56px;
+    }
+}
+
 @media (max-width: 850px) {
     nav {
         display: none;
@@ -2680,6 +2719,10 @@ footer li:hover {
     .date-group {
         grid-column: span 2;
     }
+
+    .passengers-field {
+        grid-column: span 2;
+    }
     
     .quick-link-card {
         flex: 0 0 clamp(180px, 20vw, 240px);
@@ -2694,8 +2737,18 @@ footer li:hover {
         font-size: 11px;
     }
     
+    #bbbbb.button,
     .search-button {
         grid-column: span 2;
+        width: 100%;
+        max-width: 320px;
+        height: 56px;
+        margin: 6px auto 0;
+        top: 0;
+    }
+
+    #bbbbb .button-inner {
+        height: 56px;
     }
     
     .destination-grid {
@@ -2771,6 +2824,17 @@ footer li:hover {
     .footer-grid,
     .destination-grid {
         grid-template-columns: 1fr;
+    }
+
+    .route-group,
+    .date-group,
+    .passengers-field,
+    #bbbbb.button,
+    .search-button {
+        grid-column: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 6px 0 0 !important;
     }
 
     .search-panel {
