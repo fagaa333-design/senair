@@ -815,13 +815,153 @@ body.dark-theme {
 [data-theme="dark"] .confirmation,
 [data-theme="dark"] .faq-card,
 [data-theme="dark"] .contact-form-card,
-[data-theme="dark"] .invoice-card,
 [data-theme="dark"] .account-dropdown {
   background: #111d30 !important;
   border-color: #1e2e47 !important;
   color: #e2e8f0 !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
 }
+
+/* ── Factura Electrónica en Modo Oscuro ── */
+[data-theme="dark"] .invoice-card {
+  background: #0d1726 !important;
+  border-color: #1e314b !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .invoice-company {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .invoice-company-sub {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .invoice-badge {
+  background: #13243d !important;
+  color: #60a5fa !important;
+  border-color: #1e3a63 !important;
+}
+
+[data-theme="dark"] .invoice-number {
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .invoice-date {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .invoice-divider {
+  border-top-color: #1e314b !important;
+}
+
+[data-theme="dark"] .invoice-parties {
+  background: #111e32 !important;
+  border-color: #1e314b !important;
+}
+
+[data-theme="dark"] .party-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .party-name {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .party-code {
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .party-sub {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .invoice-table-wrapper {
+  border-color: #1e314b !important;
+}
+
+[data-theme="dark"] .invoice-table th {
+  background: #09121f !important;
+  color: #94a3b8 !important;
+  border-bottom-color: #1e314b !important;
+}
+
+[data-theme="dark"] .invoice-table td {
+  background: #0d1726 !important;
+  color: #f1f5f9 !important;
+  border-bottom-color: #162438 !important;
+}
+
+[data-theme="dark"] .invoice-table td.font-bold,
+[data-theme="dark"] .invoice-table td#invoiceBasePrice {
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .invoice-subtext {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .invoice-notes p {
+  background: #111e32 !important;
+  color: #cbd5e1 !important;
+  border-left-color: #0866c6 !important;
+}
+
+[data-theme="dark"] .total-row {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .total-row strong {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .total-row.total-highlight {
+  color: #f8fafc !important;
+  border-top-color: #1e314b !important;
+}
+
+[data-theme="dark"] .total-row.total-highlight strong,
+[data-theme="dark"] .total-row.total-highlight #invoiceGrandTotal {
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .invoice-actions {
+  border-top-color: #1e314b !important;
+}
+
+[data-theme="dark"] .btn-print-invoice {
+  background: #152744 !important;
+  color: #38bdf8 !important;
+  border: 1px solid #233e6b !important;
+}
+
+[data-theme="dark"] .btn-print-invoice:hover {
+  background: #1c355e !important;
+  color: #ffffff !important;
+  border-color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .confirmation h2 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .confirmation p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .confirmation-btn.secondary {
+  background: #15243c !important;
+  border-color: #233752 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .confirmation-btn.secondary:hover {
+  background: #1c3252 !important;
+  color: #ffffff !important;
+}
+
+
 
 /* Inputs, Selects y Textareas */
 [data-theme="dark"] input,

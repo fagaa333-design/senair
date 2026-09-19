@@ -631,8 +631,31 @@ select.input_field.installments_select:focus {
     width: 100%;
     margin: 0;
     padding: 20px;
-    box-shadow: none;
-    border: none;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #17324d !important;
+  }
+  .invoice-company,
+  .party-name,
+  .invoice-number,
+  .invoice-table th,
+  .invoice-table td.font-bold,
+  .total-row.total-highlight {
+    color: #062b55 !important;
+  }
+  .party-code,
+  .total-row.total-highlight strong,
+  .invoice-table td#invoiceBasePrice {
+    color: #0866c6 !important;
+  }
+  .invoice-parties,
+  .invoice-table th,
+  .invoice-table td,
+  .invoice-notes p {
+    background: #ffffff !important;
+    color: #17324d !important;
+    border-color: #e7edf3 !important;
   }
   .invoice-actions {
     display: none !important;
