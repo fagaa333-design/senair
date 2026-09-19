@@ -290,7 +290,7 @@ app.post("/login", authLimiter, async (request, response) => {
       name: user.name,
       email: user.email,
       isAdmin,
-      redirect: isAdmin ? "/html/mantenimiento.html" : "/html/index.html",
+      redirect: isAdmin ? "/html/admin.html" : "/html/index.html",
     });
   } catch {
     return response.status(500).json({ success: false, message: "Error interno del servidor." });

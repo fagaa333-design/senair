@@ -8,6 +8,7 @@ window.localStorage.removeItem(authStorageKey);
 const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
 const accountName = window.sessionStorage.getItem("senairUserName") || "Usuario";
 const accountEmail = window.sessionStorage.getItem("senairUserEmail") || "";
+const isAdmin = accountEmail.toLowerCase().trim() === "freinergudino@gmail.com" || window.sessionStorage.getItem("senairUserRole") === "admin";
 
 const hamburgerBtn = document.querySelector(".hamburger");
 const mobileNavEl = document.getElementById("mobileNav");
@@ -46,6 +47,17 @@ document.querySelectorAll(".mobile-logout-link").forEach((element) => {
     element.hidden = !isAuthenticated;
 });
 
+document.querySelectorAll('.mobile-nav a[href="viajes.html"], .mobile-nav a[href="admin.html"]').forEach((link) => {
+    link.hidden = !isAuthenticated;
+    if (isAdmin) {
+        link.href = "admin.html";
+        link.textContent = "Dashboard Administrador";
+    } else {
+        link.href = "viajes.html";
+        link.textContent = "Mis viajes";
+    }
+});
+
 document.querySelectorAll("[data-account-menu]").forEach((menu) => {
     menu.hidden = !isAuthenticated;
     menu.querySelectorAll(".account-trigger-name, .account-name").forEach((element) => {
@@ -57,6 +69,16 @@ document.querySelectorAll("[data-account-menu]").forEach((menu) => {
     const initial = accountName.trim().charAt(0).toUpperCase() || "U";
     menu.querySelectorAll(".account-avatar").forEach((element) => {
         element.textContent = initial;
+    });
+
+    menu.querySelectorAll('a[href="viajes.html"], a[href="admin.html"]').forEach((link) => {
+        if (isAdmin) {
+            link.href = "admin.html";
+            link.textContent = "Dashboard Administrador";
+        } else {
+            link.href = "viajes.html";
+            link.textContent = "Mis viajes";
+        }
     });
 
     const trigger = menu.querySelector(".account-trigger");
@@ -74,6 +96,7 @@ document.querySelectorAll("[data-logout]").forEach((button) => {
         window.sessionStorage.removeItem(authStorageKey);
         window.sessionStorage.removeItem("senairUserName");
         window.sessionStorage.removeItem("senairUserEmail");
+        window.sessionStorage.removeItem("senairUserRole");
         goToHome();
     });
 });
@@ -111,11 +134,19 @@ async function submitAuthForm(form, isRegistration) {
             return;
         }
 
+        const email = String(formData.get("email") || "").toLowerCase().trim();
+        const isAdminUser = Boolean(result.isAdmin || email === "freinergudino@gmail.com");
         const name = isRegistration ? formData.get("name") : (result.name || formData.get("email"));
+
         window.sessionStorage.setItem(authStorageKey, "true");
-        window.sessionStorage.setItem("senairUserName", String(name || "Usuario"));
+        window.sessionStorage.setItem("senairUserName", String(name || (isAdminUser ? "Administrador" : "Usuario")));
         window.sessionStorage.setItem("senairUserEmail", String(formData.get("email") || ""));
-        const redirect = result.isAdmin ? "mantenimiento.html" : "../index.html";
+        if (isAdminUser) {
+            window.sessionStorage.setItem("senairUserRole", "admin");
+        } else {
+            window.sessionStorage.removeItem("senairUserRole");
+        }
+        const redirect = isAdminUser ? "admin.html" : "../index.html";
         window.location.href = new URL(redirect, window.location.href).href;
     } catch {
         window.alert("No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.");
