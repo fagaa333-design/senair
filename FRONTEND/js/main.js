@@ -198,6 +198,29 @@ const loadingScreen = document.getElementById("loadingScreen");
 const loadingVideo = document.getElementById("loadingVideo");
 let loadingClosed = false;
 
+// Sincronizar video de carga según el modo claro / oscuro activo
+if (loadingVideo) {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    const source = loadingVideo.querySelector("source");
+    const currentSrc = source ? source.getAttribute("src") : "";
+    
+    if (isDark && !currentSrc.includes("blackair")) {
+        loadingVideo.innerHTML = `
+            <source src="../assets/videos/blackair.mp4" type="video/mp4" />
+            <source src="../assets/video/blackair.mp4" type="video/mp4" />
+        `;
+        loadingVideo.load();
+        loadingVideo.play().catch(() => {});
+    } else if (!isDark && !currentSrc.includes("carga")) {
+        loadingVideo.innerHTML = `
+            <source src="../assets/videos/carga%20air%20white.mp4" type="video/mp4" />
+            <source src="../assets/video/carga%20air%20white.mp4" type="video/mp4" />
+        `;
+        loadingVideo.load();
+        loadingVideo.play().catch(() => {});
+    }
+}
+
 function closeLoadingScreen() {
     if (loadingClosed || !loadingScreen) return;
     loadingClosed = true;

@@ -28,6 +28,29 @@
     }
   }
 
+  function syncLoadingVideo(theme) {
+    const isDark = theme === "dark";
+    const video = document.getElementById("loadingVideo");
+    if (!video) return;
+    const source = video.querySelector("source");
+    const currentSrc = source ? source.getAttribute("src") : "";
+    if (isDark && !currentSrc.includes("blackair")) {
+      video.innerHTML = `
+        <source src="../assets/videos/blackair.mp4" type="video/mp4" />
+        <source src="../assets/video/blackair.mp4" type="video/mp4" />
+      `;
+      video.load();
+      video.play().catch(() => {});
+    } else if (!isDark && !currentSrc.includes("carga")) {
+      video.innerHTML = `
+        <source src="../assets/videos/carga%20air%20white.mp4" type="video/mp4" />
+        <source src="../assets/video/carga%20air%20white.mp4" type="video/mp4" />
+      `;
+      video.load();
+      video.play().catch(() => {});
+    }
+  }
+
   function applyTheme(theme) {
     if (theme === "dark") {
       document.documentElement.setAttribute("data-theme", "dark");
@@ -37,6 +60,7 @@
       if (document.body) document.body.classList.remove("dark-theme");
     }
     updateSwitches(theme);
+    syncLoadingVideo(theme);
   }
 
   function updateSwitches(theme) {
