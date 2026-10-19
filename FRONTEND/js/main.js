@@ -676,7 +676,7 @@ if (!document.querySelector('script[src*="ai-chatbot.js"]')) {
     document.head.appendChild(aiScript);
 }
 
-// ── Conexión directa: Al hacer clic en una tarjeta o botón, autoselecciona destino en el buscador ──
+// ── Conexión directa: Al hacer clic en una tarjeta o botón, lleva directamente al apartado de vuelos ──
 const handleSelectDestination = (destValue) => {
     if (!destValue) return;
 
@@ -690,47 +690,25 @@ const handleSelectDestination = (destValue) => {
         if (found) matchedValue = found.value;
     }
 
-    // 1. Asignar en Choices.js para destination (airportChoices[1])
+    // 1. Asignar en Choices.js para destination (airportChoices[1]) si existe en la página actual
     const choiceInstance = window.airportChoices ? window.airportChoices[1] : (typeof airportChoices !== "undefined" && airportChoices ? airportChoices[1] : null);
     if (choiceInstance) {
         try {
             choiceInstance.removeActiveItems();
             choiceInstance.setChoiceByValue(matchedValue);
-        } catch (err) {
-            console.warn("No se pudo fijar Choices:", err);
-        }
+        } catch (_) {}
     }
 
     // 2. Asignar en select nativo de respaldo
     const destSelect = document.getElementById("destination");
     if (destSelect) {
         destSelect.value = matchedValue;
-        destSelect.dispatchEvent(new Event("change", { bubbles: true }));
     }
 
-    // 3. Scroll suave hacia el buscador de vuelos
-    const targetSearch = document.getElementById("flightSearch") || document.getElementById("vuelos") || document.getElementById("flightForm");
-    if (targetSearch) {
-        targetSearch.scrollIntoView({ behavior: "smooth", block: "center" });
-
-        // Efecto visual pulsante para destacar que se preseleccionó el destino
-        targetSearch.classList.remove("form-highlight-pulse");
-        void targetSearch.offsetWidth;
-        targetSearch.classList.add("form-highlight-pulse");
-        setTimeout(() => targetSearch.classList.remove("form-highlight-pulse"), 2500);
-
-        // Enfocar / abrir selector de fecha de salida
-        const departureTrigger = document.getElementById("departureTrigger");
-        if (departureTrigger) {
-            setTimeout(() => {
-                departureTrigger.focus();
-                const departureInput = document.getElementById("departure");
-                if (!departureInput || !departureInput.value) {
-                    departureTrigger.click();
-                }
-            }, 600);
-        }
-    }
+    // 3. Redirigir al apartado de vuelos (vuelos.html) con el destino seleccionado
+    const isHtmlFolder = window.location.pathname.includes("/html/");
+    const targetUrl = (isHtmlFolder ? "vuelos.html" : "html/vuelos.html") + `?destination=${encodeURIComponent(matchedValue)}`;
+    window.location.href = targetUrl;
 };
 
 // ── Carrusel Circular 3D / Coverflow para "Inspírate para tu próximo viaje" ──
@@ -812,7 +790,7 @@ if (inspirationTrack) {
     }
 
     // Interacción al hacer clic en las tarjetas del carrusel
-    cards.forEach((card, idx) => {
+    cards.forEach((card) => {
         const destination = card.dataset.destination;
         const bookBtn = card.querySelector(".inspiration-book-btn");
         if (bookBtn) {
@@ -825,27 +803,14 @@ if (inspirationTrack) {
 
         card.addEventListener("click", (e) => {
             if (e.target.closest(".inspiration-book-btn")) return;
-
-            // Si no es la tarjeta central activa, rotar el carrusel para centrarla
-            if (idx !== currentIndex) {
-                e.preventDefault();
-                e.stopPropagation();
-                updateCircularCarousel(idx);
-                return;
-            }
-
-            // Si es la activa, reservar o seleccionar destino
+            e.preventDefault();
             handleSelectDestination(destination);
         });
 
         card.addEventListener("keydown", (e) => {
             if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                if (idx !== currentIndex) {
-                    updateCircularCarousel(idx);
-                } else {
-                    handleSelectDestination(destination);
-                }
+                handleSelectDestination(destination);
             }
         });
     });
@@ -905,24 +870,32 @@ if (inspirationTrack) {
 }
 
 // Conectar también las tarjetas de la sección "¿A dónde quieres ir?"
-document.querySelectorAll(".destination[data-destination]").forEach((card) => {
-    const destination = card.dataset.destination;
-    card.style.cursor = "pointer";
-    card.setAttribute("role", "button");
-    card.setAttribute("tabindex", "0");
+const initDestinationCards = () => {
+    document.querySelectorAll(".destination[data-destination]").forEach((card) => {
+        if (card.dataset.boundDestination) return;
+        card.dataset.boundDestination = "true";
+        const destination = card.dataset.destination;
+        card.style.cursor = "pointer";
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
 
-    card.addEventListener("click", (e) => {
-        e.preventDefault();
-        handleSelectDestination(destination);
-    });
-
-    card.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
+        card.addEventListener("click", (e) => {
             e.preventDefault();
             handleSelectDestination(destination);
-        }
+        });
+
+        card.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleSelectDestination(destination);
+            }
+        });
     });
-});
+};
+initDestinationCards();
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initDestinationCards);
+}
 
 // Inicializar video de fondo del hero
 const heroVideo = document.getElementById("heroVideo");

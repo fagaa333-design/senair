@@ -59,6 +59,9 @@ const demoFlights = [
   ["Bogotá (BOG)", "Río de Janeiro (GIG)", "2026-09-12", "21:00", "05:30", 2499000, "SENAIR", 0],
   ["Bogotá (BOG)", "Nueva York (JFK)", "2026-09-12", "23:45", "06:30", 3899000, "SENAIR", 0],
   ["Bogotá (BOG)", "Miami (MIA)", "2026-09-12", "14:15", "18:45", 3399000, "SENAIR", 0],
+  ["Bogotá (BOG)", "Cali (CLO)", "2026-09-12", "15:30", "16:35", 169000, "SENAIR", 0],
+  ["Bogotá (BOG)", "Madrid (MAD)", "2026-09-12", "20:45", "13:30", 4099000, "SENAIR", 0],
+  ["Bogotá (BOG)", "París (CDG)", "2026-09-12", "22:15", "16:00", 5199000, "SENAIR", 1],
 ];
 
 async function initializeDatabase() {
@@ -331,12 +334,12 @@ app.get("/api/flights", async (request, response) => {
   const values = [];
 
   if (origin) {
-    conditions.push("origin = ?");
-    values.push(origin);
+    conditions.push("(origin = ? OR origin LIKE ?)");
+    values.push(origin, `%${origin}%`);
   }
   if (destination) {
-    conditions.push("destination = ?");
-    values.push(destination);
+    conditions.push("(destination = ? OR destination LIKE ?)");
+    values.push(destination, `%${destination}%`);
   }
   if (date) {
     conditions.push("departure_date = ?");
@@ -346,14 +349,28 @@ app.get("/api/flights", async (request, response) => {
   const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
   try {
     const result = await db.execute({ sql: `SELECT id, origin, destination, departure_date, departure_time, arrival_time, price, airline, stops FROM flights ${where} ORDER BY departure_date, departure_time`, args: values });
-    const flights = result.rows.map((row) => ({ ...row }));
-    if (flights.length || !origin || !destination || !date || origin === destination || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    let flights = result.rows.map((row) => ({ ...row }));
+    if (flights.length) {
       return response.json({ success: true, flights });
     }
 
-    await createRouteFlights(origin, destination, date);
-    const createdResult = await db.execute({ sql: "SELECT id, origin, destination, departure_date, departure_time, arrival_time, price, airline, stops FROM flights WHERE origin = ? AND destination = ? AND departure_date = ? ORDER BY departure_time", args: [origin, destination, date] });
-    return response.json({ success: true, flights: createdResult.rows.map((row) => ({ ...row })), created: true });
+    if (destination) {
+      const defaultOrigin = origin || (destination.includes("Bogotá") ? "Medellín (MDE)" : "Bogotá (BOG)");
+      const defaultDate = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : "2026-09-12";
+      if (defaultOrigin !== destination) {
+        await createRouteFlights(defaultOrigin, destination, defaultDate);
+        const createdResult = await db.execute({
+          sql: "SELECT id, origin, destination, departure_date, departure_time, arrival_time, price, airline, stops FROM flights WHERE (destination = ? OR destination LIKE ?) ORDER BY departure_date, departure_time",
+          args: [destination, `%${destination}%`],
+        });
+        flights = createdResult.rows.map((row) => ({ ...row }));
+        if (flights.length) {
+          return response.json({ success: true, flights, created: true });
+        }
+      }
+    }
+
+    return response.json({ success: true, flights: [] });
   } catch {
     return response.status(500).json({ success: false, message: "No se pudieron consultar los vuelos." });
   }

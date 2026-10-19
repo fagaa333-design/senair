@@ -142,9 +142,9 @@ function showAuthRequiredModal(redirectUrl = "login.html?redirect=checkout.html&
 }
 
 function renderSummary() {
-	document.querySelector(".summary-route").textContent = origin && destination ? `${origin} → ${destination}` : "Todos los vuelos disponibles";
+	document.querySelector(".summary-route").textContent = origin && destination ? `${origin} → ${destination}` : (destination ? `Vuelos hacia ${destination}` : (origin ? `Vuelos desde ${origin}` : "Todos los vuelos disponibles"));
 	document.querySelector(".summary-date").textContent = departure ? formatDate(departure) : "Todas las fechas";
-	resultsTitle.textContent = origin && destination ? `Vuelos de ${origin} a ${destination}` : "Vuelos disponibles";
+	resultsTitle.textContent = origin && destination ? `Vuelos de ${origin} a ${destination}` : (destination ? `Vuelos hacia ${destination}` : "Vuelos disponibles");
 }
 
 async function loadFlights() {
