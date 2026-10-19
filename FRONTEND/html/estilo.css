@@ -2659,12 +2659,12 @@ footer li:hover {
 
 @media (max-width: 1150px) {
     .search-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-columns: repeat(2, 1fr);
         gap: 14px;
     }
 
     .route-group {
-        grid-column: span 2;
+        grid-column: 1 / -1;
     }
 
     .date-group {
@@ -2677,7 +2677,7 @@ footer li:hover {
 
     #bbbbb.button,
     .search-button {
-        grid-column: span 2;
+        grid-column: 1 / -1;
         width: 100%;
         max-width: 320px;
         height: 56px;
@@ -2695,7 +2695,13 @@ footer li:hover {
         display: none;
     }
     
-    .search-grid,
+    .search-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        width: 100% !important;
+    }
+
     .offers-grid,
     .destinations-cards-grid,
     .services-grid,
@@ -2712,16 +2718,21 @@ footer li:hover {
         margin-left: 0;
     }
 
-    .route-group {
-        grid-column: span 2;
+    .route-group,
+    .date-group,
+    .passengers-field,
+    #bbbbb.button,
+    .search-button {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
+    .route-group,
     .date-group {
-        grid-column: span 2;
-    }
-
-    .passengers-field {
-        grid-column: span 2;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
     }
     
     .quick-link-card {
@@ -2816,14 +2827,20 @@ footer li:hover {
         font-size: 45px;
     }
     
-    .search-grid,
+    .search-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        width: 100% !important;
+    }
+
     .offers-grid,
     .destinations-cards-grid,
     .services-grid,
     .info-grid,
     .footer-grid,
     .destination-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 
     .route-group,
@@ -2831,14 +2848,15 @@ footer li:hover {
     .passengers-field,
     #bbbbb.button,
     .search-button {
-        grid-column: 1 !important;
+        grid-column: 1 / -1 !important;
         width: 100% !important;
         max-width: 100% !important;
-        margin: 6px 0 0 !important;
+        margin: 0 !important;
     }
 
     .search-panel {
-        padding: 18px;
+        padding: 16px 14px;
+        width: 100%;
     }
 
     .search-options {
@@ -2864,13 +2882,10 @@ footer li:hover {
 
     .route-group,
     .date-group {
-        grid-column: 1 / -1;
-        width: 100%;
-    }
-
-    .route-group,
-    .date-group {
-        grid-template-columns: 1fr;
+        display: grid !important;
+        grid-column: 1 / -1 !important;
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
     }
 
     .route-field:last-child,
@@ -2886,12 +2901,12 @@ footer li:hover {
     }
 
     .passenger-menu {
-        width: min(450px, calc(100vw - 58px));
-        padding: 22px 20px;
+        width: min(450px, calc(100vw - 40px));
+        padding: 20px 16px;
     }
 
     .passenger-row strong {
-        font-size: 17px;
+        font-size: 16px;
     }
 
     .passenger-row small {
@@ -2899,22 +2914,35 @@ footer li:hover {
     }
 
     .field {
-        min-height: 66px;
+        min-height: 62px;
+        padding: 10px 14px;
+        width: 100%;
     }
 
     .swap-route {
         position: absolute;
-        top: calc(50% - 5px);
-        right: 16px;
+        top: calc(50% - 16px);
+        right: 14px;
         transform: rotate(90deg);
+        z-index: 5;
     }
 
     .swap-route:hover {
         transform: rotate(270deg);
     }
     
+    #bbbbb.button,
     .search-button {
-        grid-column: auto;
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        height: 52px !important;
+        margin-top: 6px !important;
+    }
+
+    #bbbbb .button-inner {
+        height: 52px !important;
+        width: 100% !important;
+        justify-content: center !important;
     }
     
     .destination-grid {

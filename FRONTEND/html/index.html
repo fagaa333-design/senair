@@ -11,13 +11,13 @@
     <title>SENAIR | Conectando destinos</title>
     <!-- Defensa adicional si el archivo se abre sin el servidor de BACKEND. -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: https://images.unsplash.com; media-src 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net">
-    <link rel="stylesheet" href="estilo.css" />
+    <link rel="stylesheet" href="estilo.css?v=20261018g" />
     <link rel="stylesheet" href="ai-chatbot.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.0.1/public/assets/styles/choices.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/choices.js@11.0.1/public/assets/scripts/choices.min.js" defer></script>
     <script src="../js/i18n.js" defer></script>
     <script src="../js/theme.js"></script>
-    <script src="../js/main.js?v=20261018f" defer></script>
+    <script src="../js/main.js?v=20261018g" defer></script>
   </head>
 
   <body>
@@ -158,6 +158,7 @@
                 <div class="field route-field">
                   <label for="origin"><svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4Z"/></svg>Origen</label>
                   <select id="origin" name="origin" required>
+                    <option value="Bogotá (BOG)" selected>Bogotá (BOG)</option>
                   </select>
                 </div>
 
@@ -168,7 +169,7 @@
                 <div class="field route-field">
                   <label for="destination"><svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4Z"/></svg>Destino</label>
                   <select id="destination" name="destination" required>
-                    <option value="" selected disabled></option>
+                    <option value="" selected disabled>Selecciona un destino</option>
                   </select>
                 </div>
               </div>

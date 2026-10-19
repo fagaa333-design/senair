@@ -1153,6 +1153,23 @@ body.dark-theme .date-field + .date-field {
   border-left-color: #1e314b !important;
 }
 
+@media (max-width: 850px) {
+  [data-theme="dark"] .route-field:last-child,
+  body.dark-theme .route-field:last-child,
+  [data-theme="dark"] .date-field + .date-field,
+  body.dark-theme .date-field + .date-field {
+    border-top: 1px solid #1e314b !important;
+    border-left: 0 !important;
+  }
+}
+
+[data-theme="dark"] .route-field .choices__inner,
+body.dark-theme .route-field .choices__inner {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
 /* Etiquetas e Íconos */
 [data-theme="dark"] .field label,
 body.dark-theme .field label,

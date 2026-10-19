@@ -369,12 +369,23 @@ availableDestinations = [
 window.airportChoices = airportChoices = ["origin", "destination"].map((fieldId) => new Choices(`#${fieldId}`, {
     choices: availableDestinations,
     searchEnabled: true,
+    placeholder: true,
+    placeholderValue: fieldId === "origin" ? "Bogotá (BOG)" : "Selecciona un destino",
     searchPlaceholderValue: "¿A dónde quieres viajar?",
     noResultsText: "No encontramos ese aeropuerto",
     itemSelectText: "Seleccionar",
     shouldSort: false,
     allowHTML: false,
 }));
+
+if (airportChoices && airportChoices[0]) {
+    try {
+        const originEl = document.getElementById("origin");
+        if (!originEl.value) {
+            airportChoices[0].setChoiceByValue("Bogotá (BOG)");
+        }
+    } catch (_) {}
+}
 
 document.getElementById("flightForm").addEventListener("submit", (event) => {
     event.preventDefault();
