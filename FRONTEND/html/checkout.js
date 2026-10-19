@@ -121,14 +121,97 @@ paymentOptionBtns.forEach((btn) => {
   });
 });
 
+let authModalTimer = null;
+let authModalInterval = null;
+
+function showAuthRequiredModal(redirectUrl = "login.html?redirect=checkout.html&msg=auth_required") {
+  const existing = document.getElementById("senairAuthModal");
+  if (existing) existing.remove();
+  if (authModalTimer) clearTimeout(authModalTimer);
+  if (authModalInterval) clearInterval(authModalInterval);
+
+  const overlay = document.createElement("div");
+  overlay.className = "senair-auth-modal-overlay";
+  overlay.id = "senairAuthModal";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-labelledby", "senairAuthModalTitle");
+
+  overlay.innerHTML = `
+    <div class="senair-auth-modal-card">
+      <button type="button" class="senair-auth-modal-close" id="senairAuthModalClose" aria-label="Cerrar modal">&times;</button>
+      <div class="senair-auth-modal-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <span class="senair-auth-modal-kicker">Acceso Requerido</span>
+      <h3 id="senairAuthModalTitle">Inicia sesión para pagar</h3>
+      <p>Para completar tu compra en SENAIR debes iniciar sesión o registrarte con tu cuenta de cliente o administrador.</p>
+      <div class="senair-auth-modal-actions">
+        <a href="${redirectUrl}" class="senair-auth-modal-btn primary" id="senairAuthModalGoLogin">Iniciar sesión ahora</a>
+        <button type="button" class="senair-auth-modal-btn secondary" id="senairAuthModalStay">Cerrar</button>
+      </div>
+      <div class="senair-auth-modal-timer">
+        <span>Redirigiendo a inicio de sesión en <strong id="senairAuthCountdown">4</strong>s...</span>
+        <div class="senair-auth-modal-progress">
+          <div class="senair-auth-modal-bar"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = "hidden";
+
+  let remainingSeconds = 4;
+  const countdownEl = overlay.querySelector("#senairAuthCountdown");
+
+  const closeModal = () => {
+    if (authModalTimer) clearTimeout(authModalTimer);
+    if (authModalInterval) clearInterval(authModalInterval);
+    overlay.classList.add("is-closing");
+    document.body.style.overflow = "";
+    setTimeout(() => {
+      overlay.remove();
+    }, 200);
+  };
+
+  overlay.querySelector("#senairAuthModalClose").addEventListener("click", closeModal);
+  overlay.querySelector("#senairAuthModalStay").addEventListener("click", closeModal);
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  const onKeyDown = (e) => {
+    if (e.key === "Escape") {
+      document.removeEventListener("keydown", onKeyDown);
+      closeModal();
+    }
+  };
+  document.addEventListener("keydown", onKeyDown);
+
+  authModalInterval = setInterval(() => {
+    remainingSeconds -= 1;
+    if (countdownEl && remainingSeconds >= 0) {
+      countdownEl.textContent = remainingSeconds;
+    }
+  }, 1000);
+
+  authModalTimer = setTimeout(() => {
+    window.location.href = redirectUrl;
+  }, 4000);
+}
+
 function openPaymentModal() {
   if (selectedSeats.length !== passengerCount) return;
 
   const authStorageKey = "senairAuthenticated";
   const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
   if (!isAuthenticated) {
-    alert("Para comprar tu vuelo en SENAIR debes iniciar sesión o registrarte con tu cuenta.");
-    window.location.href = "login.html?redirect=checkout.html&msg=auth_required";
+    showAuthRequiredModal("login.html?redirect=checkout.html&msg=auth_required");
     return;
   }
 

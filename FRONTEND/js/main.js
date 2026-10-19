@@ -342,8 +342,11 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
+let airportChoices = null;
+let availableDestinations = [];
+
 if (document.getElementById("flightForm") && typeof Choices !== "undefined") {
-const availableDestinations = [
+availableDestinations = [
     // Principales ciudades de Colombia
     ["Bogotá", "BOG"], ["Medellín", "MDE"], ["Cali", "CLO"],
     ["Cartagena", "CTG"], ["Barranquilla", "BAQ"], ["Santa Marta", "SMR"],
@@ -363,7 +366,7 @@ const availableDestinations = [
     ["Ámsterdam", "AMS"], ["Tokio", "NRT"],
 ].map(([city, code]) => ({ value: `${city} (${code})`, label: `${city} (${code})` }));
 
-const airportChoices = ["origin", "destination"].map((fieldId) => new Choices(`#${fieldId}`, {
+window.airportChoices = airportChoices = ["origin", "destination"].map((fieldId) => new Choices(`#${fieldId}`, {
     choices: availableDestinations,
     searchEnabled: true,
     searchPlaceholderValue: "¿A dónde quieres viajar?",
@@ -677,19 +680,35 @@ if (!document.querySelector('script[src*="ai-chatbot.js"]')) {
 const handleSelectDestination = (destValue) => {
     if (!destValue) return;
 
-    // Si Choices está disponible para el destino (airportChoices[1])
-    if (typeof airportChoices !== "undefined" && airportChoices && airportChoices[1]) {
-        airportChoices[1].removeActiveItems();
-        airportChoices[1].setChoiceByValue(destValue);
-    } else {
-        const destSelect = document.getElementById("destination");
-        if (destSelect) {
-            destSelect.value = destValue;
-            destSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    // Normalizar destino
+    let matchedValue = destValue;
+    if (typeof availableDestinations !== "undefined" && Array.isArray(availableDestinations)) {
+        const queryLower = destValue.toLowerCase().trim();
+        const found = availableDestinations.find(
+            (item) => item.value.toLowerCase().includes(queryLower) || item.label.toLowerCase().includes(queryLower)
+        );
+        if (found) matchedValue = found.value;
+    }
+
+    // 1. Asignar en Choices.js para destination (airportChoices[1])
+    const choiceInstance = window.airportChoices ? window.airportChoices[1] : (typeof airportChoices !== "undefined" && airportChoices ? airportChoices[1] : null);
+    if (choiceInstance) {
+        try {
+            choiceInstance.removeActiveItems();
+            choiceInstance.setChoiceByValue(matchedValue);
+        } catch (err) {
+            console.warn("No se pudo fijar Choices:", err);
         }
     }
 
-    // Scroll suave hacia el buscador de vuelos
+    // 2. Asignar en select nativo de respaldo
+    const destSelect = document.getElementById("destination");
+    if (destSelect) {
+        destSelect.value = matchedValue;
+        destSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    // 3. Scroll suave hacia el buscador de vuelos
     const targetSearch = document.getElementById("flightSearch") || document.getElementById("vuelos") || document.getElementById("flightForm");
     if (targetSearch) {
         targetSearch.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -698,14 +717,17 @@ const handleSelectDestination = (destValue) => {
         targetSearch.classList.remove("form-highlight-pulse");
         void targetSearch.offsetWidth;
         targetSearch.classList.add("form-highlight-pulse");
-        setTimeout(() => targetSearch.classList.remove("form-highlight-pulse"), 2000);
+        setTimeout(() => targetSearch.classList.remove("form-highlight-pulse"), 2500);
 
-        // Enfocar fecha de salida si aún no está seleccionada
-        const departureInput = document.getElementById("departure");
+        // Enfocar / abrir selector de fecha de salida
         const departureTrigger = document.getElementById("departureTrigger");
-        if (departureTrigger && (!departureInput || !departureInput.value)) {
+        if (departureTrigger) {
             setTimeout(() => {
                 departureTrigger.focus();
+                const departureInput = document.getElementById("departure");
+                if (!departureInput || !departureInput.value) {
+                    departureTrigger.click();
+                }
             }, 600);
         }
     }
@@ -791,7 +813,19 @@ if (inspirationTrack) {
 
     // Interacción al hacer clic en las tarjetas del carrusel
     cards.forEach((card, idx) => {
+        const destination = card.dataset.destination;
+        const bookBtn = card.querySelector(".inspiration-book-btn");
+        if (bookBtn) {
+            bookBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSelectDestination(bookBtn.dataset.destination || destination);
+            });
+        }
+
         card.addEventListener("click", (e) => {
+            if (e.target.closest(".inspiration-book-btn")) return;
+
             // Si no es la tarjeta central activa, rotar el carrusel para centrarla
             if (idx !== currentIndex) {
                 e.preventDefault();
@@ -801,7 +835,6 @@ if (inspirationTrack) {
             }
 
             // Si es la activa, reservar o seleccionar destino
-            const destination = card.dataset.destination;
             handleSelectDestination(destination);
         });
 
@@ -811,7 +844,7 @@ if (inspirationTrack) {
                 if (idx !== currentIndex) {
                     updateCircularCarousel(idx);
                 } else {
-                    handleSelectDestination(card.dataset.destination);
+                    handleSelectDestination(destination);
                 }
             }
         });
@@ -874,7 +907,12 @@ if (inspirationTrack) {
 // Conectar también las tarjetas de la sección "¿A dónde quieres ir?"
 document.querySelectorAll(".destination[data-destination]").forEach((card) => {
     const destination = card.dataset.destination;
-    card.addEventListener("click", () => {
+    card.style.cursor = "pointer";
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+
+    card.addEventListener("click", (e) => {
+        e.preventDefault();
         handleSelectDestination(destination);
     });
 
