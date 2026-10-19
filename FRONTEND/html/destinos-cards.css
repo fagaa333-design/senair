@@ -23,5 +23,14 @@
 .image-quito{background-image:url("https://images.unsplash.com/photo-1531058020387-3be344556be6?auto=format&fit=crop&w=900&q=85")}
 .image-santiago{background-image:url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&q=85")}
 .image-new-york{background-image:url("https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=900&q=85")}
+.image-cancun{background-image:url("https://images.unsplash.com/photo-1510097467424-192d713fd8b2?auto=format&fit=crop&w=900&q=85")}
+.image-rio{background-image:url("https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=900&q=85")}
+.image-orlando{background-image:url("https://images.unsplash.com/photo-1597466599360-3b9775841aec?auto=format&fit=crop&w=900&q=85")}
+.image-panama{background-image:url("https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=85")}
+.image-leticia{background-image:url("https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=900&q=85")}
+.image-riohacha{background-image:url("https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=900&q=85")}
+.image-cucuta{background-image:url("https://images.unsplash.com/photo-1579202673506-ca3ce28943ef?auto=format&fit=crop&w=900&q=85")}
+.image-monteria{background-image:url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=85")}
 @media (max-width:900px){.destination-grid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:600px){.destination-grid{grid-template-columns:1fr}}
+

@@ -123,6 +123,15 @@ paymentOptionBtns.forEach((btn) => {
 
 function openPaymentModal() {
   if (selectedSeats.length !== passengerCount) return;
+
+  const authStorageKey = "senairAuthenticated";
+  const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
+  if (!isAuthenticated) {
+    alert("Para comprar tu vuelo en SENAIR debes iniciar sesión o registrarte con tu cuenta.");
+    window.location.href = "login.html?redirect=checkout.html&msg=auth_required";
+    return;
+  }
+
   if (!paymentOverlay) return;
 
   updateInstallmentsOptions();
@@ -172,11 +181,17 @@ function updatePayButtons() {
   const seatsComplete = selectedSeats.length === passengerCount;
   const remaining = passengerCount - selectedSeats.length;
   const totalFormatted = currency.format(selectedFlight ? selectedFlight.price * passengerCount : 0);
+  const authStorageKey = "senairAuthenticated";
+  const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
 
   openModalBtns.forEach((btn) => {
     btn.disabled = !seatsComplete;
     if (seatsComplete) {
-      btn.textContent = `Realizar Pago • ${totalFormatted}`;
+      if (!isAuthenticated) {
+        btn.textContent = `Iniciar sesión para pagar • ${totalFormatted}`;
+      } else {
+        btn.textContent = `Realizar Pago • ${totalFormatted}`;
+      }
       btn.classList.add("ready");
     } else {
       btn.textContent = `Selecciona ${remaining} asiento${remaining === 1 ? "" : "s"} más para continuar`;
@@ -188,6 +203,13 @@ function updatePayButtons() {
 if (!selectedFlight) {
   window.location.replace("vuelos.html");
 } else {
+  const authStorageKey = "senairAuthenticated";
+  const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
+  const authWarningBanner = document.getElementById("authWarningBanner");
+  if (authWarningBanner) {
+    authWarningBanner.style.display = isAuthenticated ? "none" : "flex";
+  }
+
   document.getElementById("summaryTitle").textContent = selectedFlight.airline;
   document.getElementById("route").textContent = `${selectedFlight.origin}  -  ${selectedFlight.destination}`;
   document.getElementById("departureTime").textContent = selectedFlight.departure_time;
@@ -198,20 +220,34 @@ if (!selectedFlight) {
 
   updatePayButtons();
 
-  const occupiedSeats = new Set(["1B", "2C", "3A", "3F", "4D", "5E", "6B"]);
-  for (let row = 1; row <= 6; row += 1) {
+  const occupiedSeats = new Set(["1B", "2C", "3A", "3F", "4D", "5E", "6B", "7A", "8F"]);
+  for (let row = 1; row <= 8; row += 1) {
     ["A", "B", "C", "aisle", "D", "E", "F"].forEach((column) => {
       if (column === "aisle") {
         const aisle = document.createElement("span");
         aisle.className = "aisle";
+        const badge = document.createElement("span");
+        badge.className = "aisle-row-badge";
+        badge.textContent = row;
+        badge.title = `Fila ${row}`;
+        badge.setAttribute("aria-hidden", "true");
+        aisle.append(badge);
         seatMap.append(aisle);
         return;
       }
       const seat = `${row}${column}`;
+      const isWindow = column === "A" || column === "F";
+      const isAisle = column === "C" || column === "D";
+      const locLabel = isWindow ? "Ventana" : isAisle ? "Pasillo" : "Medio";
+
       const button = document.createElement("button");
       button.type = "button";
       button.className = "seat-button";
       button.textContent = seat;
+      button.title = `Asiento ${seat} · ${locLabel}${occupiedSeats.has(seat) ? " (Ocupado)" : " (Disponible)"}`;
+      button.setAttribute("aria-label", `Asiento ${seat}, ${locLabel}`);
+      button.dataset.seat = seat;
+      button.dataset.location = locLabel;
       button.disabled = occupiedSeats.has(seat);
       if (button.disabled) button.classList.add("occupied");
       button.addEventListener("click", () => {

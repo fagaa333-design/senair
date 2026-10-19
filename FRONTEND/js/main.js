@@ -146,7 +146,9 @@ async function submitAuthForm(form, isRegistration) {
         } else {
             window.sessionStorage.removeItem("senairUserRole");
         }
-        const redirect = isAdminUser ? "admin.html" : "../index.html";
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectParam = urlParams.get("redirect");
+        const redirect = redirectParam || (isAdminUser ? "admin.html" : "../index.html");
         window.location.href = new URL(redirect, window.location.href).href;
     } catch {
         window.alert("No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.");
@@ -342,15 +344,23 @@ document.addEventListener("keydown", (event) => {
 
 if (document.getElementById("flightForm") && typeof Choices !== "undefined") {
 const availableDestinations = [
+    // Principales ciudades de Colombia
     ["Bogotá", "BOG"], ["Medellín", "MDE"], ["Cali", "CLO"],
     ["Cartagena", "CTG"], ["Barranquilla", "BAQ"], ["Santa Marta", "SMR"],
     ["San Andrés", "ADZ"], ["Pereira", "PEI"], ["Bucaramanga", "BGA"],
     ["Armenia", "AXM"], ["Manizales", "MZL"], ["Villavicencio", "VVC"],
-    ["París", "CDG"], ["Tokio", "NRT"], ["Barcelona", "BCN"],
-    ["Madrid", "MAD"], ["Londres", "LHR"], ["Roma", "FCO"],
-    ["Miami", "MIA"], ["Lima", "LIM"], ["Buenos Aires", "EZE"],
-    ["Quito", "UIO"], ["Santiago", "SCL"], ["Nueva York", "JFK"],
-    ["Caracas", "CCS"],
+    ["Leticia", "LET"], ["Riohacha", "RCH"], ["Cúcuta", "CUC"],
+    ["Montería", "MTR"], ["Pasto", "PSO"], ["Neiva", "NVA"],
+    ["Valledupar", "VUP"], ["Ibagué", "IBE"], ["Popayán", "PPN"],
+    // Destinos Internacionales
+    ["Cancún", "CUN"], ["Ciudad de México", "MEX"], ["Orlando", "MCO"],
+    ["Ciudad de Panamá", "PTY"], ["Punta Cana", "PUJ"], ["Miami", "MIA"],
+    ["Nueva York", "JFK"], ["Los Ángeles", "LAX"], ["Toronto", "YYZ"],
+    ["Río de Janeiro", "GIG"], ["São Paulo", "GRU"], ["Buenos Aires", "EZE"],
+    ["Lima", "LIM"], ["Santiago", "SCL"], ["Quito", "UIO"],
+    ["Caracas", "CCS"], ["Madrid", "MAD"], ["Barcelona", "BCN"],
+    ["París", "CDG"], ["Londres", "LHR"], ["Roma", "FCO"],
+    ["Ámsterdam", "AMS"], ["Tokio", "NRT"],
 ].map(([city, code]) => ({ value: `${city} (${code})`, label: `${city} (${code})` }));
 
 const airportChoices = ["origin", "destination"].map((fieldId) => new Choices(`#${fieldId}`, {

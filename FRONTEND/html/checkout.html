@@ -17,11 +17,51 @@
   <header class="checkout-header"><a href="vuelos.html" class="brand"><img src="logo.png" alt="" />SENAIR</a><a href="vuelos.html" class="back-link">Volver a vuelos</a></header>
   <main class="checkout-shell">
     <section class="checkout-intro"><span>Completa tu viaje</span><h1>Elige tu asiento y confirma tu reserva.</h1><p>Tu asiento estará reservado mientras completas este paso.</p></section>
+
+    <!-- Banner cuando el usuario no ha iniciado sesión -->
+    <div class="auth-warning-banner" id="authWarningBanner" style="display: none;">
+      <div class="auth-warning-content">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <div>
+          <strong>Inicio de sesión requerido para comprar</strong>
+          <p>Para emitir tiquetes en SENAIR debes tener una sesión activa (cliente o administrador). Tus datos de vuelo se mantendrán guardados.</p>
+        </div>
+      </div>
+      <a href="login.html?redirect=checkout.html&msg=auth_required" class="btn-auth-redirect">Iniciar sesión / Registrarse</a>
+    </div>
+
     <div class="checkout-layout">
       <section class="checkout-step" aria-labelledby="seatTitle">
         <div class="step-heading"><span>1</span><div><h2 id="seatTitle">Selecciona tus asientos</h2><p id="seatInstruction">Escoge tus asientos disponibles para continuar.</p></div></div>
-        <div class="seat-legend" aria-label="Referencia de asientos"><span><i class="seat available"></i>Disponible</span><span><i class="seat selected"></i>Seleccionado</span><span><i class="seat occupied"></i>Ocupado</span></div>
-        <div class="aircraft" aria-label="Mapa de asientos del avión"><div class="aircraft-nose"></div><div class="seat-labels"><span>A</span><span>B</span><span>C</span><b></b><span>D</span><span>E</span><span>F</span></div><div class="seat-map" id="seatMap"></div></div>
+        <div class="seat-legend" aria-label="Referencia de asientos">
+          <span><i class="seat available"></i>Disponible</span>
+          <span><i class="seat selected"></i>Seleccionado</span>
+          <span><i class="seat occupied"></i>Ocupado</span>
+          <span class="legend-sep">•</span>
+          <span class="legend-badge-item"><span class="legend-pill window">Ventana</span> Columnas A y F</span>
+          <span class="legend-badge-item"><span class="legend-pill aisle">Pasillo</span> Columnas C y D</span>
+        </div>
+        <div class="aircraft" aria-label="Mapa de asientos del avión">
+          <div class="aircraft-cockpit">
+            <div class="aircraft-nose"></div>
+            <span class="cockpit-text">Cabina del avión · SENAIR A320</span>
+          </div>
+          <div class="cabin-wings-indicator">
+            <span class="side-indicator window-left"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 16H5v-6h7v6zm0-8H5V5h7v6zm7 8h-5v-6h5v6zm0-8h-5V5h5v6z"/></svg> Ventana</span>
+            <span class="aisle-indicator"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M4 18v3h3v-3h10v3h3v-3c0-1.1-.9-2-2-2h-1V4c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v12H6c-1.1 0-2 .9-2 2z"/></svg> Pasillo</span>
+            <span class="side-indicator window-right">Ventana <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 16H5v-6h7v6zm0-8H5V5h7v6zm7 8h-5v-6h5v6zm0-8h-5V5h5v6z"/></svg></span>
+          </div>
+          <div class="seat-labels">
+            <span class="col-header window-col"><strong>A</strong><small>Ventana</small></span>
+            <span class="col-header"><strong>B</strong><small>Medio</small></span>
+            <span class="col-header aisle-col"><strong>C</strong><small>Pasillo</small></span>
+            <b class="aisle-header">FILA</b>
+            <span class="col-header aisle-col"><strong>D</strong><small>Pasillo</small></span>
+            <span class="col-header"><strong>E</strong><small>Medio</small></span>
+            <span class="col-header window-col"><strong>F</strong><small>Ventana</small></span>
+          </div>
+          <div class="seat-map" id="seatMap"></div>
+        </div>
         <div class="seat-confirm-row">
           <button class="pay-button open-modal-btn seat-pay-btn" id="openModalBtnSeat" type="button" disabled>Selecciona un asiento para continuar</button>
         </div>

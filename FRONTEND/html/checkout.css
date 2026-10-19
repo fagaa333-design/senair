@@ -679,4 +679,485 @@ select.input_field.installments_select:focus {
   }
 }
 
-@media(max-width:760px){.checkout-header{min-height:64px}.checkout-shell{width:min(100% - 28px,1080px);padding:38px 0 60px}.checkout-intro h1{font-size:34px}.checkout-layout{grid-template-columns:1fr}.trip-summary{position:static;grid-row:1}.form-grid{grid-template-columns:1fr 1fr}.form-grid label:first-child,.form-grid label:nth-child(2){grid-column:1/-1}}@media(max-width:420px){.back-link{font-size:13px}.checkout-step,.trip-summary{padding:22px 16px}.aircraft{padding:15px 12px 22px}.seat-map{gap:6px}.seat-button{height:31px}.form-grid{grid-template-columns:1fr}.form-grid label:first-child,.form-grid label:nth-child(2){grid-column:auto}}
+@media(max-width:760px){.checkout-header{min-height:64px}.checkout-shell{width:min(100% - 28px,1080px);padding:38px 0 60px}.checkout-intro h1{font-size:34px}.checkout-layout{grid-template-columns:1fr}.trip-summary{position:static;grid-row:1}.form-grid{grid-template-columns:1fr 1fr}.form-grid label:first-child,.form-grid label:nth-child(2){grid-column:1/-1}}
+
+/* ── Banner de Autenticación Requerida ───────────────────────── */
+.auth-warning-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 0 0 28px;
+  padding: 16px 22px;
+  background: #fffbeb;
+  border: 1.5px solid #fde047;
+  border-radius: 12px;
+  color: #78350f;
+  box-shadow: 0 4px 14px rgba(234, 179, 8, 0.12);
+  animation: modalPopIn 0.25s ease;
+}
+
+.auth-warning-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.auth-warning-content svg {
+  flex-shrink: 0;
+  color: #d97706;
+}
+
+.auth-warning-content strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  color: #92400e;
+  margin-bottom: 2px;
+}
+
+.auth-warning-content p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #78350f;
+}
+
+.btn-auth-redirect {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  padding: 10px 18px;
+  background: #d97706;
+  color: #ffffff !important;
+  font-size: 13px;
+  font-weight: 800;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.25);
+}
+
+.btn-auth-redirect:hover {
+  background: #b45309;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.35);
+}
+
+/* ── Leyenda de Asientos Mejorada ────────────────────────────── */
+.seat-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 18px;
+  margin: 22px 0 20px;
+  padding: 12px 16px;
+  background: #f7fbff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.legend-sep {
+  color: #b0c9e0;
+  font-weight: bold;
+}
+
+.legend-badge-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.legend-pill {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.legend-pill.window {
+  background: #e0f2fe;
+  color: #0284c7;
+  border: 1px solid #bae6fd;
+}
+
+.legend-pill.aisle {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+/* ── Avión y Mapa de Asientos Ampliado ───────────────────────── */
+.aircraft {
+  max-width: 530px;
+  margin: 0 auto 24px;
+  padding: 24px 28px 30px;
+  border: 2px solid var(--border);
+  border-radius: 90px 90px 22px 22px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f4f9fd 100%);
+  box-shadow: 0 10px 30px rgba(6, 43, 85, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  position: relative;
+}
+
+.aircraft-cockpit {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.aircraft-nose {
+  width: 90px;
+  height: 32px;
+  margin: 0 auto 8px;
+  border: 2px solid var(--border);
+  border-bottom: 0;
+  border-radius: 90px 90px 0 0;
+  background: #e8f3fc;
+  box-shadow: inset 0 3px 6px rgba(8, 102, 198, 0.08);
+}
+
+.cockpit-text {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.cabin-wings-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 0 16px;
+  padding: 7px 14px;
+  background: #ebf4fc;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--blue);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.cabin-wings-indicator .side-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--blue);
+}
+
+.cabin-wings-indicator .aisle-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--navy);
+  font-weight: 800;
+}
+
+.seat-labels,
+.seat-map {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) 38px repeat(3, 1fr);
+  gap: 10px;
+  text-align: center;
+  align-items: center;
+}
+
+.seat-labels {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.col-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.col-header strong {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--navy);
+}
+
+.col-header small {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.col-header.window-col small {
+  color: var(--blue);
+  font-weight: 800;
+}
+
+.col-header.aisle-col small {
+  color: #475569;
+}
+
+.aisle-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.6px;
+}
+
+/* ── Asiento Individual Grande y Ergonómico ─────────────────── */
+.seat-button {
+  width: 100%;
+  height: 48px;
+  padding: 0;
+  background: #ffffff;
+  border: 1.5px solid #a8cceb;
+  border-radius: 10px 10px 7px 7px;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 5px rgba(6, 43, 85, 0.05);
+}
+
+/* Detalle de cabecera de butaca de avión */
+.seat-button::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  background: rgba(8, 102, 198, 0.18);
+  border-radius: 3px;
+  transition: background 0.18s ease;
+}
+
+.seat-button:hover:not(.occupied) {
+  border-color: var(--blue);
+  background: #eaf4fd;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(8, 102, 198, 0.18);
+}
+
+.seat-button:hover:not(.occupied)::before {
+  background: var(--blue);
+}
+
+.seat-button.selected {
+  background: linear-gradient(135deg, #0866c6 0%, #064b91 100%) !important;
+  color: #ffffff !important;
+  border-color: #04366b !important;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px rgba(8, 102, 198, 0.38) !important;
+}
+
+.seat-button.selected::before {
+  background: rgba(255, 255, 255, 0.65) !important;
+}
+
+.seat-button.occupied {
+  background: #e2e8ee !important;
+  border-color: #ccd7e2 !important;
+  color: #8fa0b0 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
+.seat-button.occupied::before {
+  background: #b5c4d3 !important;
+}
+
+/* Badge con número de fila en el pasillo */
+.aisle-row-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin: auto;
+  border-radius: 50%;
+  background: #e8f1f9;
+  color: var(--navy);
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid #c2d8ed;
+}
+
+/* ── Responsive del Mapa de Asientos ─────────────────────────── */
+@media (max-width: 580px) {
+  .aircraft {
+    max-width: 100%;
+    padding: 18px 12px 22px;
+    border-radius: 46px 46px 16px 16px;
+  }
+  .seat-labels,
+  .seat-map {
+    grid-template-columns: repeat(3, 1fr) 24px repeat(3, 1fr);
+    gap: 6px;
+  }
+  .seat-button {
+    height: 40px;
+    font-size: 11px;
+    border-radius: 8px 8px 5px 5px;
+  }
+  .seat-button::before {
+    top: 2px;
+    height: 2px;
+  }
+  .col-header strong {
+    font-size: 12px;
+  }
+  .col-header small {
+    font-size: 7.5px;
+    letter-spacing: 0;
+  }
+  .aisle-row-badge {
+    width: 20px;
+    height: 20px;
+    font-size: 9px;
+  }
+  .cabin-wings-indicator {
+    font-size: 9.5px;
+    padding: 6px 8px;
+  }
+  .auth-warning-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .btn-auth-redirect {
+    width: 100%;
+  }
+}
+
+/* ── Modo Oscuro para Checkout y Mapa de Asientos ─────────────── */
+[data-theme="dark"] .auth-warning-banner {
+  background: #1a1608 !important;
+  border-color: #854d0e !important;
+  color: #fef08a !important;
+}
+
+[data-theme="dark"] .auth-warning-content strong {
+  color: #fde047 !important;
+}
+
+[data-theme="dark"] .auth-warning-content p {
+  color: #fef08a !important;
+}
+
+[data-theme="dark"] .seat-legend {
+  background: #0f1a2c !important;
+  border-color: #1e314b !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .legend-pill.window {
+  background: #0c2d48 !important;
+  color: #38bdf8 !important;
+  border-color: #0369a1 !important;
+}
+
+[data-theme="dark"] .legend-pill.aisle {
+  background: #1e293b !important;
+  color: #94a3b8 !important;
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] .aircraft {
+  background: linear-gradient(180deg, #0d192b 0%, #0a1322 100%) !important;
+  border-color: #1e314b !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme="dark"] .aircraft-nose {
+  background: #13243c !important;
+  border-color: #1e314b !important;
+}
+
+[data-theme="dark"] .cockpit-text {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .cabin-wings-indicator {
+  background: #112239 !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .cabin-wings-indicator .aisle-indicator {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .col-header strong {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .col-header small {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .col-header.window-col small {
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .aisle-header {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .seat-button {
+  background: #132238 !important;
+  border-color: #243c5e !important;
+  color: #60a5fa !important;
+}
+
+[data-theme="dark"] .seat-button::before {
+  background: rgba(56, 189, 248, 0.25) !important;
+}
+
+[data-theme="dark"] .seat-button:hover:not(.occupied) {
+  background: #192e4c !important;
+  border-color: #38bdf8 !important;
+  color: #93c5fd !important;
+}
+
+[data-theme="dark"] .seat-button:hover:not(.occupied)::before {
+  background: #38bdf8 !important;
+}
+
+[data-theme="dark"] .seat-button.selected {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+}
+
+[data-theme="dark"] .seat-button.occupied {
+  background: #182230 !important;
+  border-color: #233040 !important;
+  color: #475569 !important;
+}
+
+[data-theme="dark"] .aisle-row-badge {
+  background: #132238 !important;
+  border-color: #243c5e !important;
+  color: #94a3b8 !important;
+}

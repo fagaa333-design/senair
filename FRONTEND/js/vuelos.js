@@ -45,7 +45,14 @@ function renderFlights() {
 
 	resultsContainer.querySelectorAll(".choose-flight").forEach((button, index) => {
 		button.addEventListener("click", () => {
+			const authStorageKey = "senairAuthenticated";
+			const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
 			window.sessionStorage.setItem("senairSelectedFlight", JSON.stringify({ ...visibleFlights[index], passengers }));
+			if (!isAuthenticated) {
+				alert("Para comprar tu vuelo en SENAIR debes iniciar sesión o registrarte con tu cuenta.");
+				window.location.href = "login.html?redirect=checkout.html&msg=auth_required";
+				return;
+			}
 			window.location.href = "checkout.html";
 		});
 	});

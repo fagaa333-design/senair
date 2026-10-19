@@ -45,6 +45,20 @@ const demoFlights = [
   ["Medellín (MDE)", "Bogotá (BOG)", "2026-09-12", "18:20", "19:15", 169000, "SENAIR", 0],
   ["Cali (CLO)", "Cartagena (CTG)", "2026-09-11", "11:30", "14:05", 249000, "SENAIR", 1],
   ["Cali (CLO)", "Cartagena (CTG)", "2026-09-12", "11:30", "14:05", 249000, "SENAIR", 1],
+  // Nuevos destinos nacionales
+  ["Bogotá (BOG)", "Leticia (LET)", "2026-09-12", "08:15", "10:20", 269000, "SENAIR", 0],
+  ["Bogotá (BOG)", "Riohacha (RCH)", "2026-09-12", "10:00", "11:35", 199000, "SENAIR", 0],
+  ["Bogotá (BOG)", "Cúcuta (CUC)", "2026-09-12", "07:45", "08:50", 169000, "SENAIR", 0],
+  ["Bogotá (BOG)", "Santa Marta (SMR)", "2026-09-12", "11:20", "12:45", 199000, "SENAIR", 0],
+  ["Bogotá (BOG)", "San Andrés (ADZ)", "2026-09-12", "13:10", "15:20", 229000, "SENAIR", 0],
+  // Nuevos destinos internacionales
+  ["Bogotá (BOG)", "Cancún (CUN)", "2026-09-12", "06:00", "09:40", 1299000, "SENAIR", 0],
+  ["Medellín (MDE)", "Cancún (CUN)", "2026-09-12", "08:30", "12:15", 1349000, "SENAIR", 0],
+  ["Bogotá (BOG)", "Ciudad de Panamá (PTY)", "2026-09-12", "10:30", "12:10", 1099000, "SENAIR", 0],
+  ["Bogotá (BOG)", "Orlando (MCO)", "2026-09-12", "07:15", "12:55", 2399000, "SENAIR", 1],
+  ["Bogotá (BOG)", "Río de Janeiro (GIG)", "2026-09-12", "21:00", "05:30", 2499000, "SENAIR", 0],
+  ["Bogotá (BOG)", "Nueva York (JFK)", "2026-09-12", "23:45", "06:30", 3899000, "SENAIR", 0],
+  ["Bogotá (BOG)", "Miami (MIA)", "2026-09-12", "14:15", "18:45", 3399000, "SENAIR", 0],
 ];
 
 async function initializeDatabase() {
