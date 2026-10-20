@@ -230,3 +230,102 @@
 [data-theme="dark"] .senair-auth-modal-progress {
   background: #1e293b !important;
 }
+
+/* ── Estilos de logos y marcas de aerolíneas ────────────────────── */
+.flight-card {
+  grid-template-columns: 190px minmax(280px, 1fr) 180px !important;
+}
+
+.airline-mark {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 7px !important;
+}
+
+.airline-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.airline-logo-svg {
+  flex-shrink: 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.airline-name {
+  display: block;
+  font-size: 15px !important;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.15;
+}
+
+.airline-flight-num {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.airline-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #0369a1;
+  background: #e0f2fe;
+  padding: 3px 8px;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.airline-tag.tag-recommended {
+  color: #15803d;
+  background: #dcfce7;
+  font-weight: 800;
+}
+
+@media (max-width: 800px) {
+  .flight-card {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Modo oscuro para tarjetas de vuelos y aerolíneas */
+[data-theme="dark"] .flight-card,
+body.dark-theme .flight-card {
+  background: #0b1424 !important;
+  border-color: #1e2f47 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme="dark"] .airline-name,
+body.dark-theme .airline-name {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .airline-tag,
+body.dark-theme .airline-tag {
+  background: #1e293b !important;
+  color: #93c5fd !important;
+}
+
+[data-theme="dark"] .airline-tag.tag-recommended,
+body.dark-theme .airline-tag.tag-recommended {
+  background: #14532d !important;
+  color: #86efac !important;
+}
+
+[data-theme="dark"] .flight-times strong,
+body.dark-theme .flight-times strong,
+[data-theme="dark"] .flight-price > strong,
+body.dark-theme .flight-price > strong {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .flight-line i,
+body.dark-theme .flight-line i {
+  background: #334155 !important;
+}

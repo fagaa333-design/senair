@@ -23,6 +23,96 @@ function escapeHtml(value) {
   return String(value || "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 }
 
+const ROUTE_DISTANCES_MILES = {
+  // Rutas Nacionales
+  "bogota-medellin": 150,
+  "medellin-bogota": 150,
+  "bogota-cali": 185,
+  "cali-bogota": 185,
+  "bogota-cartagena": 410,
+  "cartagena-bogota": 410,
+  "cali-cartagena": 520,
+  "cartagena-cali": 520,
+  "bogota-santa marta": 460,
+  "santa marta-bogota": 460,
+  "bogota-barranquilla": 440,
+  "barranquilla-bogota": 440,
+  "bogota-san andres": 750,
+  "san andres-bogota": 750,
+  "bogota-leticia": 680,
+  "leticia-bogota": 680,
+  "bogota-riohacha": 520,
+  "riohacha-bogota": 520,
+  "bogota-cucuta": 250,
+  "cucuta-bogota": 250,
+  "bogota-monteria": 310,
+  "monteria-bogota": 310,
+  "bogota-pereira": 115,
+  "pereira-bogota": 115,
+  "bogota-bucaramanga": 185,
+  "bucaramanga-bogota": 185,
+  "bogota-armenia": 120,
+  "bogota-manizales": 105,
+  "bogota-pasto": 320,
+  "bogota-neiva": 140,
+  "bogota-valledupar": 410,
+  "bogota-ibague": 80,
+  // Rutas Internacionales
+  "bogota-ciudad de panama": 470,
+  "ciudad de panama-bogota": 470,
+  "bogota-cancun": 1410,
+  "cancun-bogota": 1410,
+  "medellin-cancun": 1390,
+  "cancun-medellin": 1390,
+  "bogota-miami": 1510,
+  "miami-bogota": 1510,
+  "bogota-orlando": 1690,
+  "orlando-bogota": 1690,
+  "bogota-nueva york": 2490,
+  "nueva york-bogota": 2490,
+  "bogota-los angeles": 3480,
+  "bogota-toronto": 2720,
+  "bogota-rio de janeiro": 2820,
+  "rio de janeiro-bogota": 2820,
+  "bogota-sao paulo": 2680,
+  "bogota-buenos aires": 2900,
+  "bogota-lima": 1170,
+  "bogota-santiago": 2640,
+  "bogota-quito": 440,
+  "bogota-caracas": 640,
+  "bogota-madrid": 5000,
+  "madrid-bogota": 5000,
+  "bogota-barcelona": 5120,
+  "barcelona-bogota": 5120,
+  "bogota-paris": 5360,
+  "paris-bogota": 5360,
+  "bogota-londres": 5280,
+  "bogota-roma": 5840,
+  "bogota-amsterdam": 5390,
+  "bogota-tokio": 8940,
+};
+
+function normalizeCity(name) {
+  return String(name || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s*\([a-z0-9]{3}\)/gi, "")
+    .trim();
+}
+
+function calculateFlightMiles(origin, destination) {
+  const normOrig = normalizeCity(origin);
+  const normDest = normalizeCity(destination);
+  const key = `${normOrig}-${normDest}`;
+  if (ROUTE_DISTANCES_MILES[key]) return ROUTE_DISTANCES_MILES[key];
+
+  const combined = `${normOrig} ${normDest}`;
+  if (/madrid|paris|barcelona|londres|roma|amsterdam|tokio/.test(combined)) return 5100;
+  if (/nueva york|miami|orlando|cancun|rio|sao paulo|buenos aires|los angeles|toronto/.test(combined)) return 2200;
+  return 380;
+}
+
 function updateMilesDisplay(reservations = [], isAuthenticated = false) {
   const milesCountEl = document.getElementById("milesCount");
   const milesTierEl = document.getElementById("milesTier");
@@ -33,19 +123,19 @@ function updateMilesDisplay(reservations = [], isAuthenticated = false) {
 
   if (!milesCountEl) return;
 
-  if (!isAuthenticated) {
+  // Si no está autenticado o no tiene vuelos confirmados, empieza estrictamente en 0 millas
+  if (!isAuthenticated || !reservations || reservations.length === 0) {
     milesCountEl.textContent = "0";
-    if (milesTierEl) milesTierEl.textContent = "Sin registrar";
+    if (milesTierEl) milesTierEl.textContent = isAuthenticated ? "Clásico · Nuevo viajero" : "Sin registrar";
     if (milesFlightsEl) milesFlightsEl.textContent = "0 vuelos";
-    if (milesNextTargetEl) milesNextTargetEl.textContent = "Inicia sesión y recibe 500 millas de bienvenida";
+    if (milesNextTargetEl) milesNextTargetEl.textContent = "Realiza tu primer vuelo para empezar a acumular millas (Meta: 3.000 millas)";
     if (milesProgressBarEl) milesProgressBarEl.style.width = "0%";
-    if (milesBenefitEl) milesBenefitEl.textContent = "Acumula en cada vuelo";
+    if (milesBenefitEl) milesBenefitEl.textContent = "Acumula millas en cada vuelo";
     return;
   }
 
-  const welcomeBonus = 500;
-  const flightMiles = reservations.length * 650;
-  const totalMiles = welcomeBonus + flightMiles;
+  // Suma de distancias de vuelo reales en millas
+  const totalMiles = reservations.reduce((sum, r) => sum + calculateFlightMiles(r.origin, r.destination), 0);
 
   const numberFormatter = new Intl.NumberFormat("es-CO");
   milesCountEl.textContent = numberFormatter.format(totalMiles);
@@ -56,18 +146,18 @@ function updateMilesDisplay(reservations = [], isAuthenticated = false) {
   if (totalMiles < 3000) {
     if (milesTierEl) milesTierEl.textContent = "Plata · Explorador";
     if (milesBenefitEl) milesBenefitEl.textContent = "Descuento en equipaje";
-    const percent = Math.min(100, Math.max(10, Math.round((totalMiles / 3000) * 100)));
+    const percent = Math.min(100, Math.max(5, Math.round((totalMiles / 3000) * 100)));
     if (milesProgressBarEl) milesProgressBarEl.style.width = `${percent}%`;
     if (milesNextTargetEl) {
       milesNextTargetEl.textContent = `Faltan ${numberFormatter.format(3000 - totalMiles)} millas para Nivel Oro`;
     }
-  } else if (totalMiles < 6000) {
+  } else if (totalMiles < 8000) {
     if (milesTierEl) milesTierEl.textContent = "Oro · Frecuente";
     if (milesBenefitEl) milesBenefitEl.textContent = "Embarque prioritario";
-    const percent = Math.min(100, Math.max(10, Math.round((totalMiles / 6000) * 100)));
+    const percent = Math.min(100, Math.max(10, Math.round((totalMiles / 8000) * 100)));
     if (milesProgressBarEl) milesProgressBarEl.style.width = `${percent}%`;
     if (milesNextTargetEl) {
-      milesNextTargetEl.textContent = `Faltan ${numberFormatter.format(6000 - totalMiles)} millas para Nivel Platino`;
+      milesNextTargetEl.textContent = `Faltan ${numberFormatter.format(8000 - totalMiles)} millas para Nivel Platino`;
     }
   } else {
     if (milesTierEl) milesTierEl.textContent = "Platino · Élite";

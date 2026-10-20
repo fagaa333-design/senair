@@ -1408,3 +1408,20 @@ body.dark-theme .account-dropdown button:hover {
   background: #152438 !important;
 }
 
+
+
+/* Botones de navegación del carrusel en Modo Oscuro */
+[data-theme="dark"] .inspiration-nav-btn,
+body.dark-theme .inspiration-nav-btn {
+  background: #0f1a2c !important;
+  border-color: #243752 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme="dark"] .inspiration-nav-btn:hover,
+body.dark-theme .inspiration-nav-btn:hover {
+  background: #0866c6 !important;
+  border-color: #0866c6 !important;
+  color: #ffffff !important;
+}

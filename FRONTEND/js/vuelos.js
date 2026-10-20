@@ -1,3 +1,70 @@
+
+const AIRLINE_INFO = {
+  "Avianca": {
+    name: "Avianca",
+    code: "AV",
+    color: "#d81e05",
+    badge: "Vuelo directo",
+    svg: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" class="airline-logo-svg"><rect width="32" height="32" rx="8" fill="#d81e05"/><path d="M7 19c4-1 9-5 12-10 1 3 3 6 6 8-5 1-11 3-18 2z" fill="#ffffff"/></svg>`
+  },
+  "LATAM": {
+    name: "LATAM Airlines",
+    code: "LA",
+    color: "#1b0088",
+    badge: "Alianza Sky",
+    svg: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" class="airline-logo-svg"><rect width="32" height="32" rx="8" fill="#1b0088"/><path d="M8 10h16l-4 6H8zm4 7h12l-4 5H12z" fill="#ff0040"/><circle cx="10" cy="19" r="2" fill="#ffffff"/></svg>`
+  },
+  "SENAIR": {
+    name: "SENAIR",
+    code: "SE",
+    color: "#0866c6",
+    badge: "Operado por SENAIR",
+    svg: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" class="airline-logo-svg"><rect width="32" height="32" rx="8" fill="#0866c6"/><path d="M8 20l4-8h8l-3 4h4l-8 7 2-3H8z" fill="#ffffff"/><circle cx="23" cy="11" r="2" fill="#7dd3fc"/></svg>`
+  },
+  "Copa Airlines": {
+    name: "Copa Airlines",
+    code: "CM",
+    color: "#003882",
+    badge: "Star Alliance",
+    svg: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" class="airline-logo-svg"><rect width="32" height="32" rx="8" fill="#003882"/><circle cx="16" cy="16" r="8" stroke="#f59e0b" stroke-width="1.8"/><ellipse cx="16" cy="16" rx="4" ry="8" stroke="#ffffff" stroke-width="1.4"/><path d="M8 16h16" stroke="#ffffff" stroke-width="1.4"/></svg>`
+  },
+  "Iberia": {
+    name: "Iberia",
+    code: "IB",
+    color: "#d71921",
+    badge: "Vuelo transatlántico",
+    svg: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" class="airline-logo-svg"><rect width="32" height="32" rx="8" fill="#d71921"/><path d="M9 22c5-1 10-6 14-14-1 4-1 8 0 11-4 1-9 3-14 3z" fill="#fbbf24"/><path d="M12 21c4-1 8-5 11-10-1 3-1 6 0 8-3 1-7 2-11 2z" fill="#ffffff"/></svg>`
+  },
+  "Air France": {
+    name: "Air France",
+    code: "AF",
+    color: "#002157",
+    badge: "SkyTeam Alliance",
+    svg: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" class="airline-logo-svg"><rect width="32" height="32" rx="8" fill="#002157"/><path d="M8 21l9-10h7l-12 11H8z" fill="#ed1c24"/><path d="M11 19l6-7h4l-8 8h-2z" fill="#ffffff"/></svg>`
+  },
+  "American Airlines": {
+    name: "American Airlines",
+    code: "AA",
+    color: "#0c2340",
+    badge: "Oneworld Alliance",
+    svg: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" class="airline-logo-svg"><rect width="32" height="32" rx="8" fill="#0c2340"/><path d="M9 16c3-1 6-4 9-7 0 3 1 5 3 6-4 1-8 2-12 1z" fill="#0078d2"/><path d="M14 16c3-1 5-4 8-7 0 3 1 5 2 6-3 1-6 2-10 1z" fill="#d50032"/></svg>`
+  }
+};
+
+function getAirlineDetails(airlineName, index = 0) {
+  const norm = String(airlineName || "SENAIR").trim();
+  let found = AIRLINE_INFO[norm];
+  if (!found) {
+    const key = Object.keys(AIRLINE_INFO).find(k => norm.toLowerCase().includes(k.toLowerCase()));
+    found = key ? AIRLINE_INFO[key] : AIRLINE_INFO["SENAIR"];
+  }
+  return {
+    ...found,
+    displayName: norm || found.name,
+    tag: index === 0 ? "⭐ Recomendado" : found.badge
+  };
+}
+
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>'"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[c]);
 }
@@ -37,9 +104,41 @@ function renderFlights() {
 	resultsContainer.replaceChildren();
 
 	visibleFlights.forEach((flight, index) => {
+		const airline = getAirlineDetails(flight.airline, index);
 		const card = document.createElement("article");
 		card.className = "flight-card";
-		card.innerHTML = `<div class="airline-mark"><strong>${escapeHtml(flight.airline)}</strong><span>${index === 0 ? "Recomendado" : "SENAIR"}</span></div><div class="flight-times"><div><strong>${escapeHtml(flight.departure_time)}</strong><span>${escapeHtml(flight.origin)}</span></div><div class="flight-line"><span>${escapeHtml(formatStops(flight.stops))}</span><i></i><span>${escapeHtml(flight.arrival_time)}</span></div><div class="arrival"><strong>${escapeHtml(flight.arrival_time)}</strong><span>${escapeHtml(flight.destination)}</span></div></div><div class="flight-price"><strong>${moneyFormatter.format(flight.price)}</strong><span>por pasajero</span><button type="button" class="choose-flight">Seleccionar</button></div>`;
+		card.innerHTML = `
+			<div class="airline-mark">
+				<div class="airline-logo-wrap">
+					${airline.svg}
+					<div>
+						<strong class="airline-name">${escapeHtml(flight.airline || "SENAIR")}</strong>
+						<span class="airline-flight-num">${escapeHtml(airline.code)}-${100 + Number(flight.id || (index * 7 + 1))}</span>
+					</div>
+				</div>
+				<span class="airline-tag ${index === 0 ? "tag-recommended" : ""}">${escapeHtml(airline.tag)}</span>
+			</div>
+			<div class="flight-times">
+				<div>
+					<strong>${escapeHtml(flight.departure_time)}</strong>
+					<span>${escapeHtml(flight.origin)}</span>
+				</div>
+				<div class="flight-line">
+					<span>${escapeHtml(formatStops(flight.stops))}</span>
+					<i></i>
+					<span>${escapeHtml(flight.arrival_time)}</span>
+				</div>
+				<div class="arrival">
+					<strong>${escapeHtml(flight.arrival_time)}</strong>
+					<span>${escapeHtml(flight.destination)}</span>
+				</div>
+			</div>
+			<div class="flight-price">
+				<strong>${moneyFormatter.format(flight.price)}</strong>
+				<span>por pasajero</span>
+				<button type="button" class="choose-flight">Seleccionar</button>
+			</div>
+		`;
 		resultsContainer.append(card);
 	});
 

@@ -39,29 +39,55 @@ const db = createClient({
 });
 
 const demoFlights = [
-  ["Bogotá (BOG)", "Medellín (MDE)", "2026-09-12", "06:30", "07:25", 159000, "SENAIR", 0],
-  ["Bogotá (BOG)", "Medellín (MDE)", "2026-09-12", "14:00", "14:55", 179000, "SENAIR", 0],
-  ["Bogotá (BOG)", "Cartagena (CTG)", "2026-09-12", "09:10", "10:35", 189000, "SENAIR", 0],
-  ["Medellín (MDE)", "Bogotá (BOG)", "2026-09-12", "18:20", "19:15", 169000, "SENAIR", 0],
-  ["Cali (CLO)", "Cartagena (CTG)", "2026-09-11", "11:30", "14:05", 249000, "SENAIR", 1],
-  ["Cali (CLO)", "Cartagena (CTG)", "2026-09-12", "11:30", "14:05", 249000, "SENAIR", 1],
-  // Nuevos destinos nacionales
-  ["Bogotá (BOG)", "Leticia (LET)", "2026-09-12", "08:15", "10:20", 269000, "SENAIR", 0],
-  ["Bogotá (BOG)", "Riohacha (RCH)", "2026-09-12", "10:00", "11:35", 199000, "SENAIR", 0],
+  // Bogotá -> Medellín
+  ["Bogotá (BOG)", "Medellín (MDE)", "2026-09-12", "05:40", "06:35", 159000, "Avianca", 0],
+  ["Bogotá (BOG)", "Medellín (MDE)", "2026-09-12", "08:15", "09:10", 179000, "LATAM", 0],
+  ["Bogotá (BOG)", "Medellín (MDE)", "2026-09-12", "11:50", "12:45", 139000, "SENAIR", 0],
+  ["Bogotá (BOG)", "Medellín (MDE)", "2026-09-12", "14:25", "15:20", 189000, "Avianca", 0],
+  ["Bogotá (BOG)", "Medellín (MDE)", "2026-09-12", "18:40", "19:35", 169000, "LATAM", 0],
+  ["Bogotá (BOG)", "Medellín (MDE)", "2026-09-12", "21:10", "22:05", 145000, "SENAIR", 0],
+
+  // Medellín -> Bogotá
+  ["Medellín (MDE)", "Bogotá (BOG)", "2026-09-12", "06:20", "07:15", 169000, "Avianca", 0],
+  ["Medellín (MDE)", "Bogotá (BOG)", "2026-09-12", "13:30", "14:25", 155000, "LATAM", 0],
+  ["Medellín (MDE)", "Bogotá (BOG)", "2026-09-12", "19:15", "20:10", 149000, "SENAIR", 0],
+
+  // Bogotá -> Cali
+  ["Bogotá (BOG)", "Cali (CLO)", "2026-09-12", "06:10", "07:12", 169000, "Avianca", 0],
+  ["Bogotá (BOG)", "Cali (CLO)", "2026-09-12", "12:45", "13:48", 179000, "LATAM", 0],
+  ["Bogotá (BOG)", "Cali (CLO)", "2026-09-12", "18:20", "19:22", 155000, "SENAIR", 0],
+
+  // Bogotá -> Cartagena
+  ["Bogotá (BOG)", "Cartagena (CTG)", "2026-09-12", "06:45", "08:15", 189000, "Avianca", 0],
+  ["Bogotá (BOG)", "Cartagena (CTG)", "2026-09-12", "11:20", "12:50", 229000, "LATAM", 0],
+  ["Bogotá (BOG)", "Cartagena (CTG)", "2026-09-12", "16:35", "18:05", 195000, "SENAIR", 0],
+  ["Cali (CLO)", "Cartagena (CTG)", "2026-09-12", "09:30", "11:05", 249000, "Avianca", 0],
+  ["Cali (CLO)", "Cartagena (CTG)", "2026-09-12", "14:40", "16:15", 225000, "LATAM", 0],
+
+  // Bogotá -> Santa Marta
+  ["Bogotá (BOG)", "Santa Marta (SMR)", "2026-09-12", "07:15", "08:45", 195000, "LATAM", 0],
+  ["Bogotá (BOG)", "Santa Marta (SMR)", "2026-09-12", "13:40", "15:10", 215000, "Avianca", 0],
+  ["Bogotá (BOG)", "Santa Marta (SMR)", "2026-09-12", "18:00", "19:30", 185000, "SENAIR", 0],
+
+  // Otros destinos nacionales
+  ["Bogotá (BOG)", "San Andrés (ADZ)", "2026-09-12", "08:10", "10:20", 229000, "Avianca", 0],
+  ["Bogotá (BOG)", "Leticia (LET)", "2026-09-12", "09:15", "11:20", 269000, "LATAM", 0],
+  ["Bogotá (BOG)", "Riohacha (RCH)", "2026-09-12", "10:30", "12:05", 199000, "Avianca", 0],
   ["Bogotá (BOG)", "Cúcuta (CUC)", "2026-09-12", "07:45", "08:50", 169000, "SENAIR", 0],
-  ["Bogotá (BOG)", "Santa Marta (SMR)", "2026-09-12", "11:20", "12:45", 199000, "SENAIR", 0],
-  ["Bogotá (BOG)", "San Andrés (ADZ)", "2026-09-12", "13:10", "15:20", 229000, "SENAIR", 0],
-  // Nuevos destinos internacionales
-  ["Bogotá (BOG)", "Cancún (CUN)", "2026-09-12", "06:00", "09:40", 1299000, "SENAIR", 0],
-  ["Medellín (MDE)", "Cancún (CUN)", "2026-09-12", "08:30", "12:15", 1349000, "SENAIR", 0],
-  ["Bogotá (BOG)", "Ciudad de Panamá (PTY)", "2026-09-12", "10:30", "12:10", 1099000, "SENAIR", 0],
-  ["Bogotá (BOG)", "Orlando (MCO)", "2026-09-12", "07:15", "12:55", 2399000, "SENAIR", 1],
-  ["Bogotá (BOG)", "Río de Janeiro (GIG)", "2026-09-12", "21:00", "05:30", 2499000, "SENAIR", 0],
-  ["Bogotá (BOG)", "Nueva York (JFK)", "2026-09-12", "23:45", "06:30", 3899000, "SENAIR", 0],
-  ["Bogotá (BOG)", "Miami (MIA)", "2026-09-12", "14:15", "18:45", 3399000, "SENAIR", 0],
-  ["Bogotá (BOG)", "Cali (CLO)", "2026-09-12", "15:30", "16:35", 169000, "SENAIR", 0],
-  ["Bogotá (BOG)", "Madrid (MAD)", "2026-09-12", "20:45", "13:30", 4099000, "SENAIR", 0],
-  ["Bogotá (BOG)", "París (CDG)", "2026-09-12", "22:15", "16:00", 5199000, "SENAIR", 1],
+
+  // Internacionales
+  ["Bogotá (BOG)", "Cancún (CUN)", "2026-09-12", "06:00", "09:40", 1299000, "Avianca", 0],
+  ["Medellín (MDE)", "Cancún (CUN)", "2026-09-12", "08:30", "12:15", 1349000, "LATAM", 0],
+  ["Bogotá (BOG)", "Ciudad de Panamá (PTY)", "2026-09-12", "07:30", "09:10", 1099000, "Copa Airlines", 0],
+  ["Bogotá (BOG)", "Ciudad de Panamá (PTY)", "2026-09-12", "15:20", "17:00", 1180000, "Avianca", 0],
+  ["Bogotá (BOG)", "Miami (MIA)", "2026-09-12", "06:20", "11:05", 1890000, "Avianca", 0],
+  ["Bogotá (BOG)", "Miami (MIA)", "2026-09-12", "14:15", "19:00", 2150000, "American Airlines", 0],
+  ["Bogotá (BOG)", "Orlando (MCO)", "2026-09-12", "07:15", "12:55", 2399000, "Avianca", 1],
+  ["Bogotá (BOG)", "Nueva York (JFK)", "2026-09-12", "23:45", "06:30", 2890000, "Avianca", 0],
+  ["Bogotá (BOG)", "Río de Janeiro (GIG)", "2026-09-12", "21:00", "05:30", 2499000, "LATAM", 0],
+  ["Bogotá (BOG)", "Madrid (MAD)", "2026-09-12", "14:30", "06:45", 4099000, "Iberia", 0],
+  ["Bogotá (BOG)", "Madrid (MAD)", "2026-09-12", "18:50", "11:05", 4350000, "Avianca", 0],
+  ["Bogotá (BOG)", "París (CDG)", "2026-09-12", "21:40", "15:20", 5199000, "Air France", 1]
 ];
 
 async function initializeDatabase() {
@@ -120,15 +146,80 @@ async function initializeDatabase() {
   });
 }
 
+function getRouteMetadata(origin, destination) {
+  const combined = `${origin} ${destination}`.toLowerCase();
+  
+  // Transatlántico
+  if (/madrid|barcelona|paris|parís|londres|roma|amsterdam|tokio/.test(combined)) {
+    return {
+      type: "transatlantic",
+      schedules: [
+        { dep: "14:20", arr: "06:35", price: 4150000, airline: "Avianca", stops: 0 },
+        { dep: "18:45", arr: "11:15", price: 3890000, airline: "Iberia", stops: 0 },
+        { dep: "21:30", arr: "15:20", price: 4420000, airline: "Air France", stops: 1 }
+      ]
+    };
+  }
+
+  // Norteamérica / Cono Sur
+  if (/nueva york|miami|orlando|los angeles|toronto|rio|río|sao paulo|são paulo|buenos aires/.test(combined)) {
+    return {
+      type: "americas",
+      schedules: [
+        { dep: "06:15", arr: "11:50", price: 2190000, airline: "Avianca", stops: 0 },
+        { dep: "12:40", arr: "18:15", price: 1890000, airline: "LATAM", stops: 0 },
+        { dep: "17:10", arr: "23:45", price: 2450000, airline: "American Airlines", stops: 1 },
+        { dep: "23:15", arr: "05:40", price: 1690000, airline: "SENAIR", stops: 0 }
+      ]
+    };
+  }
+
+  // Caribe / Centroamérica / Región Andina
+  if (/cancun|cancún|panama|panamá|lima|quito|punta cana|caracas|santiago/.test(combined)) {
+    return {
+      type: "regional",
+      schedules: [
+        { dep: "06:50", arr: "09:20", price: 1190000, airline: "Copa Airlines", stops: 0 },
+        { dep: "11:15", arr: "13:50", price: 1290000, airline: "Avianca", stops: 0 },
+        { dep: "15:40", arr: "18:15", price: 990000, airline: "SENAIR", stops: 0 },
+        { dep: "19:25", arr: "22:00", price: 1150000, airline: "LATAM", stops: 0 }
+      ]
+    };
+  }
+
+  // Nacional Costa / Islas / Selva
+  if (/cartagena|santa marta|san andres|san andrés|leticia|riohacha|monteria|montería/.test(combined)) {
+    return {
+      type: "national_long",
+      schedules: [
+        { dep: "05:50", arr: "07:20", price: 189000, airline: "Avianca", stops: 0 },
+        { dep: "08:35", arr: "10:05", price: 215000, airline: "LATAM", stops: 0 },
+        { dep: "12:15", arr: "13:45", price: 175000, airline: "SENAIR", stops: 0 },
+        { dep: "15:40", arr: "17:10", price: 239000, airline: "Avianca", stops: 0 },
+        { dep: "19:10", arr: "20:40", price: 199000, airline: "LATAM", stops: 0 }
+      ]
+    };
+  }
+
+  // Nacional Troncal Corto (Medellín, Cali, Bucaramanga, Pereira, Cúcuta, etc.)
+  return {
+    type: "national_short",
+    schedules: [
+      { dep: "05:40", arr: "06:35", price: 159000, airline: "Avianca", stops: 0 },
+      { dep: "08:15", arr: "09:10", price: 179000, airline: "LATAM", stops: 0 },
+      { dep: "11:50", arr: "12:45", price: 139000, airline: "SENAIR", stops: 0 },
+      { dep: "14:25", arr: "15:20", price: 189000, airline: "Avianca", stops: 0 },
+      { dep: "17:40", arr: "18:35", price: 215000, airline: "LATAM", stops: 0 },
+      { dep: "20:30", arr: "21:25", price: 149000, airline: "SENAIR", stops: 0 }
+    ]
+  };
+}
+
 async function createRouteFlights(origin, destination, date) {
-  const schedules = [
-    ["06:30", "07:25", 219000, 0],
-    ["12:45", "13:40", 159000, 0],
-    ["18:20", "19:15", 189000, 0],
-  ];
-  await db.batch(schedules.map(([departureTime, arrivalTime, price, stops]) => ({
+  const meta = getRouteMetadata(origin, destination);
+  await db.batch(meta.schedules.map((item) => ({
     sql: "INSERT OR IGNORE INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    args: [origin, destination, date, departureTime, arrivalTime, price, "SENAIR", stops],
+    args: [origin, destination, date, item.dep, item.arr, item.price, item.airline, item.stops],
   })), "write");
 }
 

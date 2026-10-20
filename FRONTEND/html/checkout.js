@@ -9,6 +9,69 @@ const currency = new Intl.NumberFormat("es-CO", { style: "currency", currency: "
 const passengerCount = Math.max(1, Number(selectedFlight?.passengers || 1));
 const selectedSeats = [];
 
+// Definición de Clases de Cabina
+const CABIN_CLASSES = {
+  first: {
+    key: "first",
+    name: "Primera Clase",
+    icon: "👑",
+    badgeLabel: "👑 Primera Clase",
+    rows: [1, 2],
+    className: "seat-first",
+    badgeClass: "badge-first",
+    color: "#d97706",
+    priceBonus: 140000,
+  },
+  business: {
+    key: "business",
+    name: "Clase Empresarial",
+    icon: "💼",
+    badgeLabel: "💼 Clase Empresarial",
+    rows: [3, 4],
+    className: "seat-business",
+    badgeClass: "badge-business",
+    color: "#6366f1",
+    priceBonus: 70000,
+  },
+  economy: {
+    key: "economy",
+    name: "Clase Normal",
+    icon: "✈️",
+    badgeLabel: "✈️ Clase Normal",
+    rows: [5, 6, 7, 8],
+    className: "seat-economy",
+    badgeClass: "badge-economy",
+    color: "#0866c6",
+    priceBonus: 0,
+  },
+};
+
+function getSeatClass(seat) {
+  const row = parseInt(seat, 10);
+  if (row <= 2) return "first";
+  if (row <= 4) return "business";
+  return "economy";
+}
+
+function calculateTotalPrice() {
+  if (!selectedFlight) return 0;
+  const basePrice = Number(selectedFlight.price || 0);
+  if (selectedSeats.length === 0) {
+    return basePrice * passengerCount;
+  }
+  let total = 0;
+  selectedSeats.forEach((seat) => {
+    const cls = getSeatClass(seat);
+    const bonus = CABIN_CLASSES[cls]?.priceBonus || 0;
+    total += basePrice + bonus;
+  });
+  const remaining = passengerCount - selectedSeats.length;
+  if (remaining > 0) {
+    total += basePrice * remaining;
+  }
+  return total;
+}
+
 const nameInput = document.getElementById("card_holder_name");
 const cardInput = document.getElementById("card_number_input");
 const expiryInput = document.getElementById("card_expiry_input");
@@ -53,7 +116,7 @@ function getSelectedInstallments() {
 
 function updateInstallmentsOptions() {
   if (!installmentsSelect || !selectedFlight) return;
-  const total = selectedFlight.price * passengerCount;
+  const total = calculateTotalPrice();
   const plans = [1, 2, 3, 6, 12, 24, 36];
   const cur = installmentsSelect.value || "1";
 
@@ -74,7 +137,7 @@ function updateInstallmentsOptions() {
 
 function updatePurchaseButtonText() {
   if (!purchaseBtn || !selectedFlight) return;
-  const total = selectedFlight.price * passengerCount;
+  const total = calculateTotalPrice();
   if (selectedPaymentMethod !== "card") {
     const providerName = selectedPaymentMethod === "paypal" ? "PayPal" : selectedPaymentMethod === "apple-pay" ? "Apple Pay" : "Google Pay";
     purchaseBtn.textContent = `Pagar con ${providerName} • ${currency.format(total)}`;
@@ -260,10 +323,26 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+function updateSelectedSeatClassSummary() {
+  const el = document.getElementById("selectedSeatClass");
+  if (!el) return;
+  if (selectedSeats.length === 0) {
+    el.innerHTML = '<span class="badge-none">Sin seleccionar</span>';
+    return;
+  }
+  const classes = [...new Set(selectedSeats.map(getSeatClass))];
+  el.innerHTML = classes
+    .map((c) => {
+      const info = CABIN_CLASSES[c];
+      return `<span class="seat-class-badge ${info.badgeClass}">${info.badgeLabel}</span>`;
+    })
+    .join(" ");
+}
+
 function updatePayButtons() {
   const seatsComplete = selectedSeats.length === passengerCount;
   const remaining = passengerCount - selectedSeats.length;
-  const totalFormatted = currency.format(selectedFlight ? selectedFlight.price * passengerCount : 0);
+  const totalFormatted = currency.format(calculateTotalPrice());
   const authStorageKey = "senairAuthenticated";
   const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
 
@@ -299,12 +378,53 @@ if (!selectedFlight) {
   document.getElementById("arrivalTime").textContent = selectedFlight.arrival_time;
   document.getElementById("passengerCount").textContent = passengerCount;
   document.getElementById("seatInstruction").textContent = `Escoge ${passengerCount} asiento${passengerCount === 1 ? "" : "s"} disponible${passengerCount === 1 ? "" : "s"} para continuar.`;
-  document.getElementById("totalPrice").textContent = currency.format(selectedFlight.price * passengerCount);
+  document.getElementById("totalPrice").textContent = currency.format(calculateTotalPrice());
 
+  updateSelectedSeatClassSummary();
   updatePayButtons();
 
+  // Controladores del selector de clases (filtros)
+  const classFilterBtns = document.querySelectorAll(".class-nav-btn");
+  classFilterBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      classFilterBtns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const filter = btn.dataset.classFilter;
+      seatMap.classList.remove("filter-all", "filter-first", "filter-business", "filter-economy");
+      if (filter && filter !== "all") {
+        seatMap.classList.add(`filter-${filter}`);
+        const targetDivider = seatMap.querySelector(`.${filter}-divider`);
+        if (targetDivider) {
+          targetDivider.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      }
+    });
+  });
+
   const occupiedSeats = new Set(["1B", "2C", "3A", "3F", "4D", "5E", "6B", "7A", "8F"]);
+
   for (let row = 1; row <= 8; row += 1) {
+    // Inserción de divisores estéticos de cabina de avión
+    if (row === 1) {
+      const divider = document.createElement("div");
+      divider.className = "cabin-section-divider first-divider";
+      divider.setAttribute("role", "separator");
+      divider.innerHTML = `<span class="cabin-divider-badge first">👑 Primera Clase · Suites Confort (Filas 1-2)</span>`;
+      seatMap.append(divider);
+    } else if (row === 3) {
+      const divider = document.createElement("div");
+      divider.className = "cabin-section-divider business-divider";
+      divider.setAttribute("role", "separator");
+      divider.innerHTML = `<span class="cabin-divider-badge business">💼 Clase Empresarial · Premium (Filas 3-4)</span>`;
+      seatMap.append(divider);
+    } else if (row === 5) {
+      const divider = document.createElement("div");
+      divider.className = "cabin-section-divider economy-divider";
+      divider.setAttribute("role", "separator");
+      divider.innerHTML = `<span class="cabin-divider-badge economy">✈️ Clase Normal · Confort Estándar (Filas 5-8)</span>`;
+      seatMap.append(divider);
+    }
+
     ["A", "B", "C", "aisle", "D", "E", "F"].forEach((column) => {
       if (column === "aisle") {
         const aisle = document.createElement("span");
@@ -318,21 +438,26 @@ if (!selectedFlight) {
         seatMap.append(aisle);
         return;
       }
+
       const seat = `${row}${column}`;
       const isWindow = column === "A" || column === "F";
       const isAisle = column === "C" || column === "D";
       const locLabel = isWindow ? "Ventana" : isAisle ? "Pasillo" : "Medio";
+      const seatClass = getSeatClass(seat);
+      const classInfo = CABIN_CLASSES[seatClass];
 
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "seat-button";
+      button.className = `seat-button ${classInfo.className}`;
       button.textContent = seat;
-      button.title = `Asiento ${seat} · ${locLabel}${occupiedSeats.has(seat) ? " (Ocupado)" : " (Disponible)"}`;
-      button.setAttribute("aria-label", `Asiento ${seat}, ${locLabel}`);
+      button.title = `Asiento ${seat} · ${locLabel} · ${classInfo.icon} ${classInfo.name}${occupiedSeats.has(seat) ? " (Ocupado)" : " (Disponible)"}`;
+      button.setAttribute("aria-label", `Asiento ${seat}, ${locLabel}, ${classInfo.name}`);
       button.dataset.seat = seat;
       button.dataset.location = locLabel;
+      button.dataset.seatClass = seatClass;
       button.disabled = occupiedSeats.has(seat);
       if (button.disabled) button.classList.add("occupied");
+
       button.addEventListener("click", () => {
         const existingIndex = selectedSeats.indexOf(seat);
         if (existingIndex >= 0) {
@@ -343,20 +468,26 @@ if (!selectedFlight) {
           button.classList.add("selected");
         } else if (passengerCount === 1) {
           const prevSeat = selectedSeats[0];
-          const prevBtn = Array.from(seatMap.querySelectorAll(".seat-button")).find(b => b.textContent.trim() === prevSeat);
+          const prevBtn = Array.from(seatMap.querySelectorAll(".seat-button")).find((b) => b.dataset.seat === prevSeat);
           if (prevBtn) prevBtn.classList.remove("selected");
           selectedSeats[0] = seat;
           button.classList.add("selected");
         } else {
           const oldestSeat = selectedSeats.shift();
-          const oldestBtn = Array.from(seatMap.querySelectorAll(".seat-button")).find(b => b.textContent.trim() === oldestSeat);
+          const oldestBtn = Array.from(seatMap.querySelectorAll(".seat-button")).find((b) => b.dataset.seat === oldestSeat);
           if (oldestBtn) oldestBtn.classList.remove("selected");
           selectedSeats.push(seat);
           button.classList.add("selected");
         }
+
         document.getElementById("selectedSeat").textContent = selectedSeats.length ? selectedSeats.join(", ") : "Sin seleccionar";
+        document.getElementById("totalPrice").textContent = currency.format(calculateTotalPrice());
+        updateSelectedSeatClassSummary();
         updatePayButtons();
+        updateInstallmentsOptions();
+        updatePurchaseButtonText();
       });
+
       seatMap.append(button);
     });
   }
@@ -382,10 +513,12 @@ if (paymentForm) {
       purchaseBtn.textContent = "Procesando pago...";
     }
 
-    const confirmation = document.getElementById("confirmation");
     const confirmationText = document.getElementById("confirmationText");
     const checkoutLayout = document.querySelector(".checkout-layout");
     const checkoutIntro = document.querySelector(".checkout-intro");
+
+    const calculatedTotal = calculateTotalPrice();
+    const classNamesUsed = [...new Set(selectedSeats.map(getSeatClass))].map((c) => CABIN_CLASSES[c].name).join(", ");
 
     const reservation = {
       origin: selectedFlight.origin,
@@ -394,7 +527,8 @@ if (paymentForm) {
       departureTime: selectedFlight.departure_time,
       arrivalTime: selectedFlight.arrival_time,
       seat: selectedSeats.join(", "),
-      price: selectedFlight.price * passengerCount,
+      seatClass: classNamesUsed || "Clase Normal",
+      price: calculatedTotal,
       airline: selectedFlight.airline,
       flightId: selectedFlight.id,
     };
@@ -438,7 +572,7 @@ if (paymentForm) {
     closePaymentModal();
 
     // 1. Datos para la Factura Electrónica
-    const totalAmount = selectedFlight.price * passengerCount;
+    const totalAmount = calculatedTotal;
     const subtotalAmount = Math.round(totalAmount / 1.19);
     const taxesAmount = totalAmount - subtotalAmount;
     const invoiceNum = `SEN-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -490,6 +624,9 @@ if (paymentForm) {
     const invoiceSeatsEl = document.getElementById("invoiceFlightSeats");
     if (invoiceSeatsEl) invoiceSeatsEl.textContent = selectedSeats.join(", ");
 
+    const invoiceClassEl = document.getElementById("invoiceFlightClass");
+    if (invoiceClassEl) invoiceClassEl.textContent = classNamesUsed || "Clase Normal";
+
     const invoicePassEl = document.getElementById("invoiceFlightPassengers");
     if (invoicePassEl) invoicePassEl.textContent = `${passengerCount} pasajero${passengerCount === 1 ? "" : "s"}`;
 
@@ -508,7 +645,7 @@ if (paymentForm) {
     // 2. Llenar sección de confirmación (debajo de la factura)
     const cuotasInfo = nCuotas > 1 ? ` (diferido a ${nCuotas} cuotas)` : "";
     if (confirmationText) {
-      confirmationText.textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")}${cuotasInfo}. Te hemos enviado los detalles al correo ${userEmail}.`;
+      confirmationText.textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")} (${classNamesUsed})${cuotasInfo}. Te hemos enviado los detalles al correo ${userEmail}.`;
     }
 
     if (checkoutLayout) checkoutLayout.style.display = "none";

@@ -33,13 +33,38 @@
     <div class="checkout-layout">
       <section class="checkout-step" aria-labelledby="seatTitle">
         <div class="step-heading"><span>1</span><div><h2 id="seatTitle">Selecciona tus asientos</h2><p id="seatInstruction">Escoge tus asientos disponibles para continuar.</p></div></div>
-        <div class="seat-legend" aria-label="Referencia de asientos">
-          <span><i class="seat available"></i>Disponible</span>
-          <span><i class="seat selected"></i>Seleccionado</span>
-          <span><i class="seat occupied"></i>Ocupado</span>
+        <!-- Selector de Clases de Cabina -->
+        <div class="cabin-class-nav" role="tablist" aria-label="Filtrar por clase de asiento">
+          <button type="button" class="class-nav-btn active" data-class-filter="all" id="filterAll">
+            <span class="class-dot all"></span>
+            <span class="class-btn-name">Todas las clases</span>
+          </button>
+          <button type="button" class="class-nav-btn" data-class-filter="first" id="filterFirst">
+            <span class="class-dot first"></span>
+            <span class="class-btn-name">👑 Primera Clase</span>
+            <span class="class-badge-rows">Filas 1 - 2</span>
+          </button>
+          <button type="button" class="class-nav-btn" data-class-filter="business" id="filterBusiness">
+            <span class="class-dot business"></span>
+            <span class="class-btn-name">💼 Clase Empresarial</span>
+            <span class="class-badge-rows">Filas 3 - 4</span>
+          </button>
+          <button type="button" class="class-nav-btn" data-class-filter="economy" id="filterEconomy">
+            <span class="class-dot economy"></span>
+            <span class="class-btn-name">✈️ Clase Normal</span>
+            <span class="class-badge-rows">Filas 5 - 8</span>
+          </button>
+        </div>
+
+        <div class="seat-legend" aria-label="Referencia de asientos y clases">
+          <span class="legend-class-item"><i class="seat-sample seat-sample-first"></i>👑 Primera</span>
+          <span class="legend-class-item"><i class="seat-sample seat-sample-business"></i>💼 Empresarial</span>
+          <span class="legend-class-item"><i class="seat-sample seat-sample-economy"></i>✈️ Normal</span>
           <span class="legend-sep">•</span>
-          <span class="legend-badge-item"><span class="legend-pill window">Ventana</span> Columnas A y F</span>
-          <span class="legend-badge-item"><span class="legend-pill aisle">Pasillo</span> Columnas C y D</span>
+          <span><i class="seat-sample seat-sample-occupied"></i>Ocupado</span>
+          <span class="legend-sep">•</span>
+          <span class="legend-badge-item"><span class="legend-pill window">Ventana</span> Col. A y F</span>
+          <span class="legend-badge-item"><span class="legend-pill aisle">Pasillo</span> Col. C y D</span>
         </div>
         <div class="aircraft" aria-label="Mapa de asientos del avión">
           <div class="aircraft-cockpit">
@@ -74,6 +99,7 @@
           <div><dt>Salida</dt><dd id="departureTime">--:--</dd></div>
           <div><dt>Llegada</dt><dd id="arrivalTime">--:--</dd></div>
           <div><dt>Asientos</dt><dd id="selectedSeat">Sin seleccionar</dd></div>
+          <div><dt>Clase cabina</dt><dd id="selectedSeatClass"><span class="badge-none">Sin seleccionar</span></dd></div>
           <div><dt>Pasajeros</dt><dd id="passengerCount">1</dd></div>
         </dl>
         <div class="price-row"><span>Total a pagar</span><strong id="totalPrice">$0</strong></div>
@@ -212,6 +238,7 @@
                 <th>Descripción del servicio</th>
                 <th>Ruta y Fecha</th>
                 <th>Asiento(s)</th>
+                <th>Clase</th>
                 <th>Pasajeros</th>
                 <th class="text-right">Total</th>
               </tr>
@@ -224,6 +251,7 @@
                 </td>
                 <td id="invoiceFlightRouteDate">Bogotá → Medellín<br><small>2026-09-12 · 06:30</small></td>
                 <td id="invoiceFlightSeats">1A</td>
+                <td id="invoiceFlightClass">Primera Clase</td>
                 <td id="invoiceFlightPassengers">1 pasajero</td>
                 <td class="text-right font-bold" id="invoiceBasePrice">$ 159.000</td>
               </tr>
