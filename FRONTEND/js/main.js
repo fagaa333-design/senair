@@ -929,153 +929,29 @@ function initCookieConsent() {
         return;
     }
 
+    // No mostrar en la pantalla de login ni admin
+    if (window.location.pathname.includes("login.html") || window.location.pathname.includes("admin.html")) {
+        return;
+    }
+
     // Si ya aceptó o configuró cookies en este navegador previamente
-    if (window.localStorage.getItem("senair_cookies_consent")) {
+    if (window.localStorage.getItem("senair_cookies_consent_v2") || window.sessionStorage.getItem("senair_cookies_dismissed")) {
         return;
     }
 
     // Evitar duplicados si ya está en DOM
     if (document.getElementById("senairCookieConsentBanner")) return;
 
-    // Inyectar estilos CSS del modal si no existen
-    if (!document.getElementById("senairCookieStyles")) {
-        const style = document.createElement("style");
-        style.id = "senairCookieStyles";
-        style.textContent = `
-            .senair-cookie-banner {
-                position: fixed;
-                bottom: 24px;
-                left: 50%;
-                transform: translateX(-50%) translateY(120%);
-                width: min(740px, calc(100% - 32px));
-                background: rgba(6, 43, 85, 0.94);
-                backdrop-filter: blur(16px);
-                -webkit-backdrop-filter: blur(16px);
-                color: #ffffff;
-                border: 1px solid rgba(255, 255, 255, 0.16);
-                border-radius: 18px;
-                padding: 20px 24px;
-                box-shadow: 0 20px 50px rgba(2, 18, 38, 0.55), 0 0 0 1px rgba(8, 102, 198, 0.25);
-                z-index: 99999;
-                display: flex;
-                flex-direction: column;
-                gap: 14px;
-                transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
-                opacity: 0;
-                font-family: Arial, sans-serif;
-                box-sizing: border-box;
-            }
-            .senair-cookie-banner.is-visible {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
-            .senair-cookie-banner.is-hiding {
-                transform: translateX(-50%) translateY(120%);
-                opacity: 0;
-            }
-            .senair-cookie-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 12px;
-            }
-            .senair-cookie-tag {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                background: rgba(8, 102, 198, 0.35);
-                border: 1px solid rgba(56, 189, 248, 0.4);
-                color: #7dd3fc;
-                padding: 3px 10px;
-                border-radius: 999px;
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 0.4px;
-                text-transform: uppercase;
-            }
-            .senair-cookie-content {
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-            }
-            .senair-cookie-title {
-                margin: 0;
-                font-size: 17px;
-                font-weight: 800;
-                color: #ffffff;
-                letter-spacing: -0.2px;
-            }
-            .senair-cookie-text {
-                margin: 0;
-                font-size: 13.5px;
-                color: #b9d3ec;
-                line-height: 1.5;
-            }
-            .senair-cookie-text a {
-                color: #38bdf8;
-                text-decoration: underline;
-                font-weight: 600;
-            }
-            .senair-cookie-text a:hover {
-                color: #ffffff;
-            }
-            .senair-cookie-actions {
-                display: flex;
-                align-items: center;
-                justify-content: flex-end;
-                gap: 10px;
-                flex-wrap: wrap;
-                margin-top: 4px;
-            }
-            .senair-cookie-btn {
-                padding: 10px 18px;
-                border-radius: 8px;
-                font-size: 13.5px;
-                font-weight: 700;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                border: none;
-                font-family: inherit;
-            }
-            .senair-cookie-btn.primary {
-                background: #0866c6;
-                color: #ffffff;
-                box-shadow: 0 4px 14px rgba(8, 102, 198, 0.4);
-            }
-            .senair-cookie-btn.primary:hover {
-                background: #0b78e3;
-                transform: translateY(-1px);
-            }
-            .senair-cookie-btn.secondary {
-                background: rgba(255, 255, 255, 0.12);
-                color: #e2e8f0;
-                border: 1px solid rgba(255, 255, 255, 0.18);
-            }
-            .senair-cookie-btn.secondary:hover {
-                background: rgba(255, 255, 255, 0.2);
-                color: #ffffff;
-            }
-            @media (max-width: 600px) {
-                .senair-cookie-banner {
-                    bottom: 12px;
-                    padding: 16px;
-                }
-                .senair-cookie-actions {
-                    flex-direction: column-reverse;
-                    align-items: stretch;
-                }
-                .senair-cookie-btn {
-                    width: 100%;
-                    text-align: center;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
     const banner = document.createElement("div");
     banner.id = "senairCookieConsentBanner";
     banner.className = "senair-cookie-banner";
+    // Propiedades fijas de seguridad para que NUNCA aparezca en el flujo del documento
+    banner.style.position = "fixed";
+    banner.style.bottom = "24px";
+    banner.style.left = "50%";
+    banner.style.transform = "translateX(-50%) translateY(130%)";
+    banner.style.zIndex = "999999";
+    banner.style.opacity = "0";
     banner.setAttribute("role", "dialog");
     banner.setAttribute("aria-label", "Consentimiento de cookies");
     banner.innerHTML = `
@@ -1102,12 +978,17 @@ function initCookieConsent() {
     // Animación de entrada suave tras medio segundo
     setTimeout(() => {
         banner.classList.add("is-visible");
-    }, 600);
+        banner.style.transform = "translateX(-50%) translateY(0)";
+        banner.style.opacity = "1";
+    }, 500);
 
     const dismissBanner = (choice) => {
-        window.localStorage.setItem("senair_cookies_consent", choice);
+        window.localStorage.setItem("senair_cookies_consent_v2", choice);
+        window.sessionStorage.setItem("senair_cookies_dismissed", "true");
         banner.classList.remove("is-visible");
         banner.classList.add("is-hiding");
+        banner.style.transform = "translateX(-50%) translateY(130%)";
+        banner.style.opacity = "0";
         setTimeout(() => {
             banner.remove();
         }, 450);

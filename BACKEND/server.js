@@ -286,7 +286,7 @@ const cspDirectives = [
   "frame-ancestors 'none'",
   "img-src 'self' data: https://images.unsplash.com",
   "media-src 'self'",
-  "style-src 'self' https://cdn.jsdelivr.net",
+  "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
   "script-src 'self' https://cdn.jsdelivr.net https://accounts.google.com",
   IS_PRODUCTION
     ? "connect-src 'self' https://accounts.google.com"
