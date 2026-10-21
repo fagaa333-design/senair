@@ -259,6 +259,7 @@ function closeLoadingScreen() {
     if (loadingClosed || !loadingScreen) return;
     loadingClosed = true;
     loadingScreen.classList.add("is-hidden");
+    window.dispatchEvent(new CustomEvent("senair:loading-complete"));
     window.setTimeout(() => loadingScreen.remove(), 500);
 }
 
@@ -939,6 +940,34 @@ function initCookieConsent() {
         return;
     }
 
+    // REGLA CLAVE: Si la pantalla de carga aún está visible/activa, esperar a que finalice por completo
+    const loadingScreenEl = document.getElementById("loadingScreen");
+    if (loadingScreenEl && !loadingScreenEl.classList.contains("is-hidden") && document.body.contains(loadingScreenEl)) {
+        let scheduled = false;
+        const triggerWhenDone = () => {
+            if (scheduled) return;
+            scheduled = true;
+            window.removeEventListener("senair:loading-complete", triggerWhenDone);
+            setTimeout(initCookieConsent, 600);
+        };
+
+        window.addEventListener("senair:loading-complete", triggerWhenDone, { once: true });
+
+        // Salvaguarda: si loadingScreen recibe la clase is-hidden o se remueve del DOM
+        const observer = new MutationObserver(() => {
+            const currentScreen = document.getElementById("loadingScreen");
+            if (!currentScreen || currentScreen.classList.contains("is-hidden")) {
+                observer.disconnect();
+                triggerWhenDone();
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+
+        // Timeout de seguridad en caso de que tarde más de 8.5s
+        setTimeout(triggerWhenDone, 8500);
+        return;
+    }
+
     // Evitar duplicados si ya está en DOM
     if (document.getElementById("senairCookieConsentBanner")) return;
 
@@ -980,7 +1009,7 @@ function initCookieConsent() {
         banner.classList.add("is-visible");
         banner.style.transform = "translateX(-50%) translateY(0)";
         banner.style.opacity = "1";
-    }, 500);
+    }, 400);
 
     const dismissBanner = (choice) => {
         window.localStorage.setItem("senair_cookies_consent_v2", choice);

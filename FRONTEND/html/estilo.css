@@ -22,7 +22,7 @@
 .loading-screen {
     position: fixed;
     inset: 0;
-    z-index: 9999;
+    z-index: 99999999;
     width: 100vw;
     height: 100vh;
     background: #ffffff;

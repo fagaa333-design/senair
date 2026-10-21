@@ -1084,6 +1084,10 @@ body.dark-theme {
   opacity: 1 !important;
 }
 
+.loading-screen {
+  z-index: 99999999 !important;
+}
+
 [data-theme="dark"] .loading-screen {
   background: #000000 !important;
 }
