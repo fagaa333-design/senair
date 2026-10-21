@@ -25,6 +25,7 @@ const DB_FILE = path.resolve(__dirname, "../database/senair.db");
 const ADMIN_EMAIL = "freinergudino@gmail.com";
 const ADMIN_PASSWORD_HASH = "$2a$10$eYPbqbntzyhXSw.DaCj7rOzfnCf6upji2528VBQ0RNVCTke3CzAoS";
 const app = express();
+app.disable("x-powered-by");
 
 if (!process.env.JWT_SECRET && IS_PRODUCTION) {
   console.warn("⚠ JWT_SECRET no está configurado. Se generó una clave temporal. Configura JWT_SECRET en las variables de entorno.");
@@ -299,20 +300,26 @@ app.use((request, response, next) => {
   response.setHeader("X-Frame-Options", "DENY");
   response.setHeader("Referrer-Policy", "same-origin");
   response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-  response.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  response.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+  response.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  response.setHeader("Cross-Origin-Resource-Policy", "same-origin");
+  response.setHeader("X-DNS-Prefetch-Control", "off");
+  response.setHeader("X-XSS-Protection", "1; mode=block");
 
   const origin = request.headers.origin;
-  if (IS_PRODUCTION) {
-    if (origin && ALLOWED_ORIGINS.includes(origin)) {
-      response.setHeader("Access-Control-Allow-Origin", origin);
-      response.setHeader("Access-Control-Allow-Credentials", "true");
-    }
-  } else if (origin) {
+  const isAllowedOrigin = (orig) => {
+    if (!orig) return true;
+    if (ALLOWED_ORIGINS.includes(orig)) return true;
+    if (!IS_PRODUCTION && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(orig)) return true;
+    return false;
+  };
+
+  if (origin && isAllowedOrigin(origin)) {
     response.setHeader("Access-Control-Allow-Origin", origin);
     response.setHeader("Access-Control-Allow-Credentials", "true");
   }
-  response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
+  response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization");
   if (request.method === "OPTIONS") return response.sendStatus(204);
   next();
 });
@@ -331,7 +338,35 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: { success: false, message: "Demasiadas peticiones. Por favor, intenta de nuevo en unos minutos." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api/", apiLimiter);
+
 /* ── Static files ─────────────────────────────────────────────── */
+
+/* ── Server-Side Admin Gate ──────────────────────────────────── */
+app.get(["/admin", "/admin.html", "/html/admin.html", "/SENAIR/FRONTEND/html/admin.html"], (request, response) => {
+  const token = request.cookies?.senair_token;
+  if (!token) {
+    return response.redirect("/html/login.html?redirect=admin.html&msg=admin_required");
+  }
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.email !== ADMIN_EMAIL || decoded.role !== "admin") {
+      return response.redirect("/html/login.html?redirect=admin.html&msg=forbidden");
+    }
+    return response.sendFile(path.join(FRONTEND_ROOT, "html", "admin.html"));
+  } catch {
+    response.clearCookie("senair_token", { path: "/" });
+    return response.redirect("/html/login.html?redirect=admin.html&msg=session_expired");
+  }
+});
 
 app.get(["/", "/index.html", "/SENAIR/FRONTEND/html/index.html"], (request, response) => response.redirect("/html/index.html"));
 app.use(express.static(FRONTEND_ROOT, { index: false }));
@@ -418,9 +453,12 @@ app.get("/logout", (request, response) => {
 /* ── Flight endpoints ─────────────────────────────────────────── */
 
 app.get("/api/flights", async (request, response) => {
-  const origin = String(request.query.origin || "").trim();
-  const destination = String(request.query.destination || "").trim();
-  const date = String(request.query.date || "").trim();
+  let origin = String(request.query.origin || "").trim().slice(0, 80).replace(/[;'"\\]/g, "");
+  let destination = String(request.query.destination || "").trim().slice(0, 80).replace(/[;'"\\]/g, "");
+  let date = String(request.query.date || "").trim().slice(0, 20);
+  if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    date = "";
+  }
   const conditions = [];
   const values = [];
 
@@ -467,7 +505,7 @@ app.get("/api/flights", async (request, response) => {
   }
 });
 
-app.post("/api/flights", requireAuth, async (request, response) => {
+app.post("/api/flights", requireAdmin, async (request, response) => {
   const flight = {
     origin: String(request.body.origin || "").trim(),
     destination: String(request.body.destination || "").trim(),
@@ -499,19 +537,29 @@ app.post("/api/flights", requireAuth, async (request, response) => {
 
 app.post("/api/reservations", requireAuth, async (request, response) => {
   const reservation = {
-    origin: String(request.body.origin || "").trim(),
-    destination: String(request.body.destination || "").trim(),
-    departureDate: String(request.body.departureDate || "").trim(),
-    departureTime: String(request.body.departureTime || "").trim(),
-    arrivalTime: String(request.body.arrivalTime || "").trim(),
-    seat: String(request.body.seat || "").trim(),
+    origin: String(request.body.origin || "").trim().slice(0, 80).replace(/[<>'"\\;]/g, ""),
+    destination: String(request.body.destination || "").trim().slice(0, 80).replace(/[<>'"\\;]/g, ""),
+    departureDate: String(request.body.departureDate || "").trim().slice(0, 20),
+    departureTime: String(request.body.departureTime || "").trim().slice(0, 10),
+    arrivalTime: String(request.body.arrivalTime || "").trim().slice(0, 10),
+    seat: String(request.body.seat || "").trim().slice(0, 60),
     price: Number(request.body.price),
-    airline: String(request.body.airline || "SENAIR").trim(),
+    airline: String(request.body.airline || "SENAIR").trim().slice(0, 50).replace(/[<>'"\\;]/g, ""),
     flightId: request.body.flightId ? Number(request.body.flightId) : null,
   };
 
-  if (!reservation.origin || !reservation.destination || !reservation.departureDate || !reservation.departureTime || !reservation.arrivalTime || !reservation.seat || !Number.isInteger(reservation.price) || reservation.price < 0) {
-    return response.status(400).json({ success: false, message: "Datos de reserva incompletos." });
+  if (
+    !reservation.origin ||
+    !reservation.destination ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(reservation.departureDate) ||
+    !/^\d{2}:\d{2}$/.test(reservation.departureTime) ||
+    !/^\d{2}:\d{2}$/.test(reservation.arrivalTime) ||
+    !/^[1-8][A-F](\s*,\s*[1-8][A-F])*$/.test(reservation.seat) ||
+    !Number.isInteger(reservation.price) ||
+    reservation.price < 0 ||
+    reservation.price > 100000000
+  ) {
+    return response.status(400).json({ success: false, message: "Datos de reserva inválidos o incompletos." });
   }
 
   try {
