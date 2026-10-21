@@ -978,9 +978,10 @@ function initCookieConsent() {
     banner.style.position = "fixed";
     banner.style.bottom = "24px";
     banner.style.left = "50%";
-    banner.style.transform = "translateX(-50%) translateY(130%)";
+    banner.style.transform = "translateX(-50%) translateY(20px)";
     banner.style.zIndex = "999999";
     banner.style.opacity = "0";
+    banner.style.display = "none";
     banner.setAttribute("role", "dialog");
     banner.setAttribute("aria-label", "Consentimiento de cookies");
     banner.innerHTML = `
@@ -1006,9 +1007,12 @@ function initCookieConsent() {
 
     // Animación de entrada suave tras medio segundo
     setTimeout(() => {
-        banner.classList.add("is-visible");
-        banner.style.transform = "translateX(-50%) translateY(0)";
-        banner.style.opacity = "1";
+        banner.style.display = "flex";
+        requestAnimationFrame(() => {
+            banner.classList.add("is-visible");
+            banner.style.transform = "translateX(-50%) translateY(0)";
+            banner.style.opacity = "1";
+        });
     }, 400);
 
     const dismissBanner = (choice) => {
@@ -1016,11 +1020,12 @@ function initCookieConsent() {
         window.sessionStorage.setItem("senair_cookies_dismissed", "true");
         banner.classList.remove("is-visible");
         banner.classList.add("is-hiding");
-        banner.style.transform = "translateX(-50%) translateY(130%)";
+        banner.style.transform = "translateX(-50%) translateY(20px)";
         banner.style.opacity = "0";
         setTimeout(() => {
+            banner.style.display = "none";
             banner.remove();
-        }, 450);
+        }, 350);
     };
 
     banner.querySelector("#senairCookiesAccept")?.addEventListener("click", () => dismissBanner("all"));

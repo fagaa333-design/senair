@@ -68,7 +68,7 @@ body > header nav:not(.mobile-nav) a[aria-current="page"], body > header nav:not
   position: fixed !important;
   bottom: 24px !important;
   left: 50% !important;
-  transform: translateX(-50%) translateY(130%) !important;
+  transform: translateX(-50%) translateY(20px) !important;
   width: min(740px, calc(100% - 32px)) !important;
   background: rgba(6, 43, 85, 0.96) !important;
   backdrop-filter: blur(16px);
@@ -79,22 +79,24 @@ body > header nav:not(.mobile-nav) a[aria-current="page"], body > header nav:not
   padding: 20px 24px !important;
   box-shadow: 0 20px 50px rgba(2, 18, 38, 0.55), 0 0 0 1px rgba(8, 102, 198, 0.25) !important;
   z-index: 999999 !important;
-  display: flex !important;
+  display: none !important;
   flex-direction: column !important;
   gap: 14px !important;
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease !important;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease !important;
   opacity: 0 !important;
   font-family: Arial, sans-serif !important;
   box-sizing: border-box !important;
   pointer-events: none;
 }
 .senair-cookie-banner.is-visible {
+  display: flex !important;
   transform: translateX(-50%) translateY(0) !important;
   opacity: 1 !important;
   pointer-events: auto !important;
 }
 .senair-cookie-banner.is-hiding {
-  transform: translateX(-50%) translateY(130%) !important;
+  display: flex !important;
+  transform: translateX(-50%) translateY(20px) !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }
