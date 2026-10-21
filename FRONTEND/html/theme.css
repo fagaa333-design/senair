@@ -1576,3 +1576,236 @@ body.dark-theme .inspiration-nav-btn:hover {
   }
 }
 
+
+
+/* ── Modal con Estilo de Autenticación Requerida (4s) ────────── */
+@keyframes authOverlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes authModalScale {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes authCountdownProgress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+.senair-auth-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(3, 29, 58, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: authOverlayFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.senair-auth-modal-overlay.is-closing {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.senair-auth-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 34px 28px 24px;
+  box-shadow: 0 26px 70px rgba(6, 43, 85, 0.28);
+  text-align: center;
+  border: 1px solid rgba(8, 102, 198, 0.14);
+  animation: authModalScale 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.senair-auth-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 0;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 22px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.senair-auth-modal-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: rotate(90deg);
+}
+
+.senair-auth-modal-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: #eaf4fd;
+  color: #0866c6;
+  display: grid;
+  place-items: center;
+  border: 2px solid #c9e2f8;
+  box-shadow: 0 4px 14px rgba(8, 102, 198, 0.15);
+}
+
+.senair-auth-modal-kicker {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #0866c6;
+  margin-bottom: 6px;
+}
+
+.senair-auth-modal-card h3 {
+  margin: 0 0 10px;
+  font-size: 23px;
+  font-weight: 800;
+  color: #062b55;
+  letter-spacing: -0.5px;
+}
+
+.senair-auth-modal-card p {
+  margin: 0 0 22px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #557088;
+}
+
+.senair-auth-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.senair-auth-modal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 0;
+  font-family: inherit;
+}
+
+.senair-auth-modal-btn.primary {
+  background: #0866c6;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(8, 102, 198, 0.3);
+}
+
+.senair-auth-modal-btn.primary:hover {
+  background: #064b91;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(8, 102, 198, 0.4);
+}
+
+.senair-auth-modal-btn.secondary {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.senair-auth-modal-btn.secondary:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.senair-auth-modal-timer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #e7edf3;
+  font-size: 12px;
+  color: #7a8fa3;
+}
+
+.senair-auth-modal-timer strong {
+  color: #0866c6;
+  font-weight: 800;
+}
+
+.senair-auth-modal-progress {
+  width: 100%;
+  height: 4px;
+  background: #e5edf5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.senair-auth-modal-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #0866c6, #38bdf8);
+  border-radius: 4px;
+  transform-origin: left;
+  animation: authCountdownProgress 4s linear forwards;
+}
+
+/* Modo oscuro */
+[data-theme="dark"] .senair-auth-modal-card {
+  background: #0f1a2c !important;
+  border-color: #1e314b !important;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .senair-auth-modal-card h3 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .senair-auth-modal-card p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .senair-auth-modal-close {
+  background: #19273c !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .senair-auth-modal-close:hover {
+  background: #243650 !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .senair-auth-modal-btn.secondary {
+  background: #19273c !important;
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .senair-auth-modal-btn.secondary:hover {
+  background: #243650 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .senair-auth-modal-timer {
+  border-top-color: #1e314b !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .senair-auth-modal-progress {
+  background: #1e293b !important;
+}
