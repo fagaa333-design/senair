@@ -19,7 +19,7 @@ const AIRLINE_INFO = {
     code: "SE",
     color: "#0866c6",
     badge: "Operado por SENAIR",
-    svg: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" class="airline-logo-svg"><rect width="32" height="32" rx="8" fill="#0866c6"/><path d="M8 20l4-8h8l-3 4h4l-8 7 2-3H8z" fill="#ffffff"/><circle cx="23" cy="11" r="2" fill="#7dd3fc"/></svg>`
+    img: `<img src="logo.png" alt="SENAIR" class="airline-logo-img" onerror="this.onerror=null;this.src='../assets/images/logo.png'"/>`
   },
   "Copa Airlines": {
     name: "Copa Airlines",
