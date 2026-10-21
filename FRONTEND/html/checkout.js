@@ -14,8 +14,8 @@ const CABIN_CLASSES = {
   first: {
     key: "first",
     name: "Primera Clase",
-    icon: "👑",
-    badgeLabel: "👑 Primera Clase",
+    icon: "",
+    badgeLabel: "Primera Clase",
     rows: [1, 2],
     className: "seat-first",
     badgeClass: "badge-first",
@@ -25,8 +25,8 @@ const CABIN_CLASSES = {
   business: {
     key: "business",
     name: "Clase Empresarial",
-    icon: "💼",
-    badgeLabel: "💼 Clase Empresarial",
+    icon: "",
+    badgeLabel: "Clase Empresarial",
     rows: [3, 4],
     className: "seat-business",
     badgeClass: "badge-business",
@@ -36,8 +36,8 @@ const CABIN_CLASSES = {
   economy: {
     key: "economy",
     name: "Clase Normal",
-    icon: "✈️",
-    badgeLabel: "✈️ Clase Normal",
+    icon: "",
+    badgeLabel: "Clase Normal",
     rows: [5, 6, 7, 8],
     className: "seat-economy",
     badgeClass: "badge-economy",
@@ -409,19 +409,19 @@ if (!selectedFlight) {
       const divider = document.createElement("div");
       divider.className = "cabin-section-divider first-divider";
       divider.setAttribute("role", "separator");
-      divider.innerHTML = `<span class="cabin-divider-badge first">👑 Primera Clase · Suites Confort (Filas 1-2)</span>`;
+      divider.innerHTML = `<span class="cabin-divider-badge first"> Primera Clase · Suites Confort (Filas 1-2)</span>`;
       seatMap.append(divider);
     } else if (row === 3) {
       const divider = document.createElement("div");
       divider.className = "cabin-section-divider business-divider";
       divider.setAttribute("role", "separator");
-      divider.innerHTML = `<span class="cabin-divider-badge business">💼 Clase Empresarial · Premium (Filas 3-4)</span>`;
+      divider.innerHTML = `<span class="cabin-divider-badge business"> Clase Empresarial · Premium (Filas 3-4)</span>`;
       seatMap.append(divider);
     } else if (row === 5) {
       const divider = document.createElement("div");
       divider.className = "cabin-section-divider economy-divider";
       divider.setAttribute("role", "separator");
-      divider.innerHTML = `<span class="cabin-divider-badge economy">✈️ Clase Normal · Confort Estándar (Filas 5-8)</span>`;
+      divider.innerHTML = `<span class="cabin-divider-badge economy"> Clase Normal · Confort Estándar (Filas 5-8)</span>`;
       seatMap.append(divider);
     }
 

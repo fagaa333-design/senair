@@ -254,6 +254,18 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
+.airline-logo-img {
+  width: 48px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  object-fit: contain;
+  background: #ffffff;
+  border: 1px solid #e2eaf3;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 2px;
+}
+
 .airline-name {
   display: block;
   font-size: 15px !important;

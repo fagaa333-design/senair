@@ -5,14 +5,14 @@ const AIRLINE_INFO = {
     code: "AV",
     color: "#d81e05",
     badge: "Vuelo directo",
-    svg: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" class="airline-logo-svg"><rect width="32" height="32" rx="8" fill="#d81e05"/><path d="M7 19c4-1 9-5 12-10 1 3 3 6 6 8-5 1-11 3-18 2z" fill="#ffffff"/></svg>`
+    img: `<img src="../assets/images/avianca.jpg" alt="Avianca" class="airline-logo-img"/>`
   },
   "LATAM": {
     name: "LATAM Airlines",
     code: "LA",
     color: "#1b0088",
     badge: "Alianza Sky",
-    svg: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" class="airline-logo-svg"><rect width="32" height="32" rx="8" fill="#1b0088"/><path d="M8 10h16l-4 6H8zm4 7h12l-4 5H12z" fill="#ff0040"/><circle cx="10" cy="19" r="2" fill="#ffffff"/></svg>`
+    img: `<img src="../assets/images/latam.png" alt="LATAM Airlines" class="airline-logo-img"/>`
   },
   "SENAIR": {
     name: "SENAIR",
@@ -26,7 +26,7 @@ const AIRLINE_INFO = {
     code: "CM",
     color: "#003882",
     badge: "Star Alliance",
-    svg: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" class="airline-logo-svg"><rect width="32" height="32" rx="8" fill="#003882"/><circle cx="16" cy="16" r="8" stroke="#f59e0b" stroke-width="1.8"/><ellipse cx="16" cy="16" rx="4" ry="8" stroke="#ffffff" stroke-width="1.4"/><path d="M8 16h16" stroke="#ffffff" stroke-width="1.4"/></svg>`
+    img: `<img src="../assets/images/copa.jpg" alt="Copa Airlines" class="airline-logo-img"/>`
   },
   "Iberia": {
     name: "Iberia",
@@ -110,7 +110,7 @@ function renderFlights() {
 		card.innerHTML = `
 			<div class="airline-mark">
 				<div class="airline-logo-wrap">
-					${airline.svg}
+					${airline.img || airline.svg}
 					<div>
 						<strong class="airline-name">${escapeHtml(flight.airline || "SENAIR")}</strong>
 						<span class="airline-flight-num">${escapeHtml(airline.code)}-${100 + Number(flight.id || (index * 7 + 1))}</span>
