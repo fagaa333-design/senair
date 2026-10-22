@@ -1,14 +1,14 @@
 /**
  * ═════════════════════════════════════════════════════════════════════════
- * SENAIR — Controlador de Estado, Validación y Envío de la Encuesta
- * Gestión de Respuestas, Interacción de Controles y Comunicación con API
+ * SENAIR — Controlador Interactivo de Encuesta
+ * Validación, Resumen HUD Boarding Pass en Tiempo Real y Envío al Backend
  * ═════════════════════════════════════════════════════════════════════════
  */
 
 (() => {
   "use strict";
 
-  // Estado reactivo de la encuesta
+  // Estado reactivo central de la encuesta
   const surveyState = {
     answers: {
       q1_satisfaction: null,
@@ -18,370 +18,439 @@
       q5_nps: null,
       q6_feedback: ""
     },
-    userEmail: "",
+    email: "",
     isSubmitting: false,
-    isCompleted: false
+    completed: false
   };
 
-  // Inicialización
-  function init() {
-    bindInteractiveControls();
-    setupSubmissionFlow();
-
-    // Inicializar animaciones de GSAP si están disponibles
-    if (window.FlightAnimator) {
-      window.FlightAnimator.init();
+  // Etiquetas verbales para calificaciones
+  const STAR_LABELS = {
+    q1: {
+      1: "1 ★ — Muy Deficiente",
+      2: "2 ★ — Regular",
+      3: "3 ★ — Aceptable",
+      4: "4 ★ — Muy Buena",
+      5: "5 ★ — ¡Excelente Servicio!"
+    },
+    q2: {
+      1: "1 ★ — Muy Compleja",
+      2: "2 ★ — Difícil de Usar",
+      3: "3 ★ — Aceptable",
+      4: "4 ★ — Rápida e Intuitiva",
+      5: "5 ★ — ¡Impecable y Fluida!"
     }
+  };
+
+  function init() {
+    bindStarRatings();
+    bindPunctualityCards();
+    bindMultiSelectPills();
+    bindNpsTiles();
+    bindTextInputHandlers();
+    bindSubmission();
+    bindRestartButton();
+    updateBoardingPassHUD();
   }
 
-  // ── 1. Vinculación de Controles Interactivos ───────────────────────
-  function bindInteractiveControls() {
-    // Botón de despegue en el Hero
-    const takeoffBtn = document.getElementById("takeoffBtn");
-    takeoffBtn?.addEventListener("click", () => {
-      window.FlightAnimator?.scrollToStage(1);
-    });
-
-    // Q1 & Q2: Estrellas de Calificación
-    setupStarRating("q1_satisfaction", "starsRowQ1", "starBadgeQ1", 2);
-    setupStarRating("q2_ease", "starsRowQ2", "starBadgeQ2", 3);
-
-    // Q3: Opción Única (Puntualidad)
-    const q3Cards = document.querySelectorAll('.choice-card-item[data-qid="q3_punctuality"]');
-    q3Cards.forEach((card) => {
-      card.addEventListener("click", () => {
-        const val = card.getAttribute("data-val");
-        q3Cards.forEach((c) => c.classList.remove("selected"));
-        card.classList.add("selected");
-        surveyState.answers.q3_punctuality = val;
-
-        // Auto-avance suave hacia la siguiente etapa
-        setTimeout(() => {
-          window.FlightAnimator?.scrollToStage(4);
-        }, 360);
-      });
-    });
-
-    // Q4: Selección Múltiple (Mejoras)
-    const q4Cards = document.querySelectorAll('.multi-tag-card[data-qid="q4_improvements"]');
-    q4Cards.forEach((card) => {
-      card.addEventListener("click", () => {
-        const val = card.getAttribute("data-val");
-        card.classList.toggle("selected");
-
-        const index = surveyState.answers.q4_improvements.indexOf(val);
-        if (index > -1) {
-          surveyState.answers.q4_improvements.splice(index, 1);
-        } else {
-          surveyState.answers.q4_improvements.push(val);
-        }
-      });
-    });
-
-    // Q5: Escala NPS 0 a 10
-    const npsBtns = document.querySelectorAll(".nps-tile-btn");
-    npsBtns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const val = parseInt(btn.getAttribute("data-nps"), 10);
-        npsBtns.forEach((b) => b.classList.remove("selected"));
-        btn.classList.add("selected");
-        surveyState.answers.q5_nps = val;
-
-        // Auto-avance suave hacia el aterrizaje
-        setTimeout(() => {
-          window.FlightAnimator?.scrollToStage(6);
-        }, 400);
-      });
-    });
-
-    // Q6: Textarea y Correo
-    const feedbackTextarea = document.getElementById("feedbackTextarea");
-    feedbackTextarea?.addEventListener("input", (e) => {
-      surveyState.answers.q6_feedback = e.target.value;
-    });
-
-    const contactEmailInput = document.getElementById("contactEmailInput");
-    contactEmailInput?.addEventListener("input", (e) => {
-      surveyState.userEmail = e.target.value.trim();
-    });
-
-    // Botón reiniciar encuesta para otro visitante
-    const restartSurveyBtn = document.getElementById("restartSurveyBtn");
-    restartSurveyBtn?.addEventListener("click", resetSurveyExperience);
+  // ── 1. Preguntas 1 y 2: Calificación con Estrellas ────────────────
+  function bindStarRatings() {
+    setupStarRow("starsRowQ1", "starBadgeQ1", "q1_satisfaction", "q1", "#stage-q2");
+    setupStarRow("starsRowQ2", "starBadgeQ2", "q2_ease", "q2", "#stage-q3");
   }
 
-  // Helper para Calificación de Estrellas
-  function setupStarRating(qid, rowId, badgeId, nextStageIndex) {
+  function setupStarRow(rowId, badgeId, stateKey, labelKey, nextTargetSelector) {
     const row = document.getElementById(rowId);
     const badge = document.getElementById(badgeId);
     if (!row) return;
 
-    const qConfig = window.SURVEY_CONFIG?.QUESTIONS.find((q) => q.id === qid);
-    const buttons = row.querySelectorAll(".star-interactive-btn");
+    const stars = row.querySelectorAll(".star-touch-btn");
 
-    buttons.forEach((btn) => {
-      const val = parseInt(btn.getAttribute("data-star"), 10);
+    stars.forEach((btn) => {
+      const starVal = parseInt(btn.getAttribute("data-star"), 10);
 
+      // Hover visual
       btn.addEventListener("mouseenter", () => {
-        buttons.forEach((b) => {
-          const bVal = parseInt(b.getAttribute("data-star"), 10);
-          b.classList.toggle("hover", bVal <= val);
-        });
-        if (badge && qConfig?.labels[val]) {
-          badge.textContent = qConfig.labels[val];
-        }
+        highlightStars(stars, starVal);
+        if (badge) badge.textContent = STAR_LABELS[labelKey][starVal];
       });
 
+      // Salir del hover restaura la selección guardada
       btn.addEventListener("mouseleave", () => {
-        buttons.forEach((b) => b.classList.remove("hover"));
-        const current = surveyState.answers[qid];
+        const currentVal = surveyState.answers[stateKey];
+        highlightStars(stars, currentVal || 0);
         if (badge) {
-          badge.textContent = current ? qConfig?.labels[current] : "Toca una estrella para calificar";
+          badge.textContent = currentVal
+            ? STAR_LABELS[labelKey][currentVal]
+            : "Toca una estrella para calificar";
         }
       });
 
+      // Selección con click
       btn.addEventListener("click", () => {
-        surveyState.answers[qid] = val;
-        buttons.forEach((b) => {
-          const bVal = parseInt(b.getAttribute("data-star"), 10);
-          b.classList.toggle("active", bVal <= val);
-        });
-        if (badge && qConfig?.labels[val]) {
-          badge.textContent = qConfig.labels[val];
+        surveyState.answers[stateKey] = starVal;
+        highlightStars(stars, starVal);
+        if (badge) {
+          badge.textContent = STAR_LABELS[labelKey][starVal];
+          badge.classList.add("active");
         }
+        updateBoardingPassHUD();
 
-        // Auto-avance suave
-        setTimeout(() => {
-          window.FlightAnimator?.scrollToStage(nextStageIndex);
-        }, 380);
+        // Avance suave a la siguiente pregunta tras breve feedback
+        if (nextTargetSelector && window.FlightScroller) {
+          setTimeout(() => {
+            window.FlightScroller.scrollToElement(nextTargetSelector);
+          }, 380);
+        }
       });
     });
   }
 
-  // ── 2. Validación y Envío de la Encuesta ──────────────────────────
-  function setupSubmissionFlow() {
-    const submitBtn = document.getElementById("submitFlightSurveyBtn");
-    const toastBox = document.getElementById("validationToast");
+  function highlightStars(starsList, activeCount) {
+    starsList.forEach((star) => {
+      const val = parseInt(star.getAttribute("data-star"), 10);
+      if (val <= activeCount) {
+        star.classList.add("active");
+      } else {
+        star.classList.remove("active");
+      }
+    });
+  }
 
-    submitBtn?.addEventListener("click", async () => {
+  // ── 2. Pregunta 3: Opción Única de Puntualidad ────────────────────
+  function bindPunctualityCards() {
+    const cards = document.querySelectorAll('.hud-choice-card[data-qid="q3_punctuality"]');
+
+    cards.forEach((card) => {
+      const selectAction = () => {
+        const val = card.getAttribute("data-val");
+        cards.forEach((c) => {
+          c.classList.remove("selected");
+          c.setAttribute("aria-checked", "false");
+        });
+        card.classList.add("selected");
+        card.setAttribute("aria-checked", "true");
+        surveyState.answers.q3_punctuality = val;
+        updateBoardingPassHUD();
+
+        // Avance automático a la siguiente sección (Escena 8 / Transición)
+        if (window.FlightScroller) {
+          setTimeout(() => {
+            window.FlightScroller.scrollToElement("#scene-8");
+          }, 380);
+        }
+      };
+
+      card.addEventListener("click", selectAction);
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          selectAction();
+        }
+      });
+    });
+  }
+
+  // ── 3. Pregunta 4: Selección Múltiple de Mejoras ──────────────────
+  function bindMultiSelectPills() {
+    const pills = document.querySelectorAll('.multi-pill-card[data-qid="q4_improvements"]');
+
+    pills.forEach((pill) => {
+      const toggleAction = () => {
+        const val = pill.getAttribute("data-val");
+        pill.classList.toggle("selected");
+        const isSelected = pill.classList.contains("selected");
+        pill.setAttribute("aria-checked", isSelected ? "true" : "false");
+
+        const list = surveyState.answers.q4_improvements;
+        const index = list.indexOf(val);
+        if (isSelected && index === -1) {
+          list.push(val);
+        } else if (!isSelected && index !== -1) {
+          list.splice(index, 1);
+        }
+        updateBoardingPassHUD();
+      };
+
+      pill.addEventListener("click", toggleAction);
+      pill.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleAction();
+        }
+      });
+    });
+  }
+
+  // ── 4. Pregunta 5: Escala NPS 0 a 10 ─────────────────────────────
+  function bindNpsTiles() {
+    const tiles = document.querySelectorAll(".nps-tile");
+
+    tiles.forEach((tile) => {
+      tile.addEventListener("click", () => {
+        const val = parseInt(tile.getAttribute("data-nps"), 10);
+        tiles.forEach((t) => t.classList.remove("selected"));
+        tile.classList.add("selected");
+        surveyState.answers.q5_nps = val;
+        updateBoardingPassHUD();
+
+        // Avance suave hacia la escena 10 (Resumen Boarding Pass)
+        if (window.FlightScroller) {
+          setTimeout(() => {
+            window.FlightScroller.scrollToElement("#scene-10");
+          }, 380);
+        }
+      });
+    });
+  }
+
+  // ── 5. Pregunta 6 & Correo Opcional ──────────────────────────────
+  function bindTextInputHandlers() {
+    const feedbackText = document.getElementById("feedbackTextarea");
+    const emailInput = document.getElementById("contactEmailInput");
+
+    feedbackText?.addEventListener("input", (e) => {
+      surveyState.answers.q6_feedback = e.target.value.trim();
+    });
+
+    emailInput?.addEventListener("input", (e) => {
+      surveyState.email = e.target.value.trim();
+    });
+  }
+
+  // ── 6. Actualización en Tiempo Real del HUD Boarding Pass ────────
+  function updateBoardingPassHUD() {
+    const q1ValEl = document.getElementById("summaryValQ1");
+    const q2ValEl = document.getElementById("summaryValQ2");
+    const q3ValEl = document.getElementById("summaryValQ3");
+    const q4ValEl = document.getElementById("summaryValQ4");
+    const q5ValEl = document.getElementById("summaryValQ5");
+
+    // Q1
+    if (q1ValEl) {
+      const q1 = surveyState.answers.q1_satisfaction;
+      q1ValEl.textContent = q1 ? `${q1} ★ (${STAR_LABELS.q1[q1].split("—")[1].trim()})` : "Pendiente";
+      q1ValEl.classList.toggle("is-filled", Boolean(q1));
+    }
+
+    // Q2
+    if (q2ValEl) {
+      const q2 = surveyState.answers.q2_ease;
+      q2ValEl.textContent = q2 ? `${q2} ★ (${STAR_LABELS.q2[q2].split("—")[1].trim()})` : "Pendiente";
+      q2ValEl.classList.toggle("is-filled", Boolean(q2));
+    }
+
+    // Q3
+    if (q3ValEl) {
+      const q3 = surveyState.answers.q3_punctuality;
+      q3ValEl.textContent = q3 ? `Vuelo ${q3}` : "Pendiente";
+      q3ValEl.classList.toggle("is-filled", Boolean(q3));
+    }
+
+    // Q4
+    if (q4ValEl) {
+      const q4 = surveyState.answers.q4_improvements;
+      if (q4 && q4.length > 0) {
+        q4ValEl.textContent = q4.join(" • ");
+        q4ValEl.classList.add("is-filled");
+      } else {
+        q4ValEl.textContent = "Ningún aspecto marcado (Servicio óptimo)";
+        q4ValEl.classList.remove("is-filled");
+      }
+    }
+
+    // Q5
+    if (q5ValEl) {
+      const q5 = surveyState.answers.q5_nps;
+      if (q5 !== null && q5 !== undefined) {
+        let cat = "Pasivo";
+        if (q5 >= 9) cat = "Promotor ¡Excelente!";
+        else if (q5 <= 6) cat = "Detractor";
+        q5ValEl.textContent = `${q5} / 10 — ${cat}`;
+        q5ValEl.classList.add("is-filled");
+      } else {
+        q5ValEl.textContent = "Pendiente";
+        q5ValEl.classList.remove("is-filled");
+      }
+    }
+  }
+
+  // ── 7. Validación y Envío de la Encuesta ──────────────────────────
+  function bindSubmission() {
+    const submitBtn = document.getElementById("submitSurveyBtn");
+    const errorBanner = document.getElementById("errorBanner");
+
+    if (!submitBtn) return;
+
+    submitBtn.addEventListener("click", async () => {
       if (surveyState.isSubmitting) return;
 
-      // Validación de preguntas obligatorias
-      const validation = validateRequiredAnswers();
-      if (!validation.valid) {
-        showValidationMessage(validation.message, toastBox);
-        window.FlightAnimator?.scrollToStage(validation.missingStageIndex);
-        highlightMissingCard(validation.missingStageIndex);
+      // Validación de campos obligatorios
+      const missing = [];
+      let firstMissingStage = null;
+
+      if (!surveyState.answers.q1_satisfaction) {
+        missing.push("Pregunta 1 (Satisfacción general)");
+        if (!firstMissingStage) firstMissingStage = "#stage-q1";
+      }
+      if (!surveyState.answers.q2_ease) {
+        missing.push("Pregunta 2 (Facilidad digital)");
+        if (!firstMissingStage) firstMissingStage = "#stage-q2";
+      }
+      if (!surveyState.answers.q3_punctuality) {
+        missing.push("Pregunta 3 (Puntualidad de vuelo)");
+        if (!firstMissingStage) firstMissingStage = "#stage-q3";
+      }
+      if (surveyState.answers.q5_nps === null || surveyState.answers.q5_nps === undefined) {
+        missing.push("Pregunta 5 (Índice de recomendación NPS)");
+        if (!firstMissingStage) firstMissingStage = "#stage-q5";
+      }
+
+      if (missing.length > 0) {
+        if (errorBanner) {
+          errorBanner.innerHTML = `<strong>⚠️ Faltan respuestas requeridas:</strong> Por favor responde: ${missing.join(", ")}.`;
+          errorBanner.style.display = "block";
+        }
+
+        // Desplazamiento automático inteligente hacia la primera pregunta pendiente
+        if (firstMissingStage && window.FlightScroller) {
+          window.FlightScroller.scrollToElement(firstMissingStage);
+        }
         return;
       }
 
-      if (toastBox) toastBox.style.display = "none";
-      surveyState.isSubmitting = true;
+      if (errorBanner) {
+        errorBanner.style.display = "none";
+      }
 
-      // Estado de carga en el botón
-      const originalText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="spin-icon">
-          <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-linecap="round"></circle>
-        </svg>
-        Aterrizando y registrando respuestas...
-      `;
-
-      // Calcular Perfil de Viajero
-      const profile = calculateTravelerProfile(surveyState.answers);
-
-      // Payload JSON a enviar
+      // Preparar payload de envío
       const payload = {
-        name: "Viajero SENAIR",
-        email: surveyState.userEmail || null,
-        answers: surveyState.answers,
-        traveler_profile: profile.badge
+        fullName: "Visitante de Feria de Software",
+        email: surveyState.email || "anonimo@feria.senair.com",
+        phone: "",
+        answers: surveyState.answers
       };
 
+      surveyState.isSubmitting = true;
+      submitBtn.classList.add("is-loading");
+      const btnText = submitBtn.querySelector(".btn-text");
+      if (btnText) btnText.textContent = "Transmitiendo datos a la torre de control...";
+
       try {
-        const endpoint = window.SURVEY_CONFIG?.SURVEY_ENDPOINT || "/api/survey/submit";
+        const endpoint = (typeof SURVEY_DATA !== "undefined" && SURVEY_DATA.ENDPOINT)
+          ? SURVEY_DATA.ENDPOINT
+          : "/api/survey/submit";
+
         const response = await fetch(endpoint, {
           method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
 
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok && !data.success) {
-          throw new Error(data.message || "Error al registrar");
+        const resData = await response.json();
+
+        if (response.ok && resData.success) {
+          handleSuccess();
+        } else {
+          throw new Error(resData.message || "Error al registrar encuesta en el servidor");
         }
       } catch (err) {
-        console.warn("Conexión con servidor no disponible, guardando en persistencia local:", err);
-        // Fallback local seguro (Stub solicitado)
-        try {
-          const stored = JSON.parse(localStorage.getItem("senair_survey_offline") || "[]");
-          stored.push({ timestamp: new Date().toISOString(), payload });
-          localStorage.setItem("senair_survey_offline", JSON.stringify(stored));
-        } catch (_) {}
+        console.warn("[SENAIR] Error en conexión remota. Activando respaldo local offline:", err);
+        saveOfflineBackup(payload);
+        handleSuccess();
       } finally {
         surveyState.isSubmitting = false;
-        surveyState.isCompleted = true;
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-
-        // Renderizar Boarding Pass Final
-        renderFinalBoardingPass(profile);
-
-        // Desplazar suavemente a la etapa de agradecimiento
-        window.FlightAnimator?.scrollToStage(7);
-
-        // Disparar confeti sutil de aterrizaje
-        triggerLandingConfetti();
+        submitBtn.classList.remove("is-loading");
+        if (btnText) btnText.textContent = "Transmitir y Enviar Encuesta";
       }
     });
   }
 
-  // Validación de respuestas requeridas
-  function validateRequiredAnswers() {
-    const a = surveyState.answers;
+  function handleSuccess() {
+    surveyState.completed = true;
 
-    if (!a.q1_satisfaction) {
-      return { valid: false, message: "Por favor califica tu experiencia en la etapa de Despegue (Pregunta 1).", missingStageIndex: 1 };
-    }
-    if (!a.q2_ease) {
-      return { valid: false, message: "Por favor indica qué tan fácil fue comprar tu reserva en Ascenso (Pregunta 2).", missingStageIndex: 2 };
-    }
-    if (!a.q3_punctuality) {
-      return { valid: false, message: "Por favor califica la puntualidad de los vuelos en Crucero (Pregunta 3).", missingStageIndex: 3 };
-    }
-    if (!a.q4_improvements || a.q4_improvements.length === 0) {
-      return { valid: false, message: "Por favor selecciona al menos un aspecto a mejorar en Crucero (Pregunta 4).", missingStageIndex: 4 };
-    }
-    if (a.q5_nps === null || a.q5_nps === undefined) {
-      return { valid: false, message: "Por favor califica tu probabilidad de recomendación en Descenso (Pregunta 5).", missingStageIndex: 5 };
-    }
-
-    return { valid: true };
-  }
-
-  function showValidationMessage(msg, toastEl) {
-    if (!toastEl) return;
-    toastEl.textContent = msg;
-    toastEl.style.display = "block";
-    toastEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }
-
-  function highlightMissingCard(stageIndex) {
-    const stage = document.getElementById(`stage-${stageIndex}`);
-    const card = stage?.querySelector(".stage-card");
-    if (!card) return;
-    card.style.borderColor = "#e87562";
-    card.style.boxShadow = "0 0 0 4px rgba(232, 117, 98, 0.25)";
-    setTimeout(() => {
-      card.style.borderColor = "";
-      card.style.boxShadow = "";
-    }, 2000);
-  }
-
-  // ── 3. Lógica del Perfil de Viajero SENAIR ─────────────────────────
-  function calculateTravelerProfile(answers) {
-    const q1 = Number(answers.q1_satisfaction || 0);
-    const nps = Number(answers.q5_nps || 0);
-    const punctuality = answers.q3_punctuality;
-    const improvements = answers.q4_improvements || [];
-
-    if (q1 === 5 && nps >= 9) {
-      return {
-        badge: "Viajero Embajador SENAIR",
-        icon: "🌟",
-        desc: "Tu confianza e ilusión por volar con nosotros nos inspira a mantener la más alta excelencia en cada despegue."
-      };
-    }
-
-    if (punctuality === "Excelente" || q1 >= 4) {
-      return {
-        badge: "Viajero Confort & Puntualidad",
-        icon: "👑",
-        desc: "Valoras el cumplimiento riguroso de los tiempos, la comodidad a bordo y una atención de primer nivel."
-      };
-    }
-
-    if (improvements.some((item) => item.includes("Check-in") || item.includes("app") || item.includes("Precios"))) {
-      return {
-        badge: "Viajero Visionario Digital",
-        icon: "🚀",
-        desc: "Aprovechas la innovación tecnológica, el mapa interactivo 3D y la rapidez de autogestión en línea."
-      };
-    }
-
-    return {
-      badge: "Explorador Frecuente",
-      icon: "✈️",
-      desc: "Volar es para ti una oportunidad de conectar con nuevos horizontes, culturas y personas inolvidables."
-    };
-  }
-
-  // ── 4. Renderizado del Pase de Abordar Final ───────────────────────
-  function renderFinalBoardingPass(profile) {
-    const profileNameEl = document.getElementById("ticketProfileName");
-    const profileDescEl = document.getElementById("ticketProfileDesc");
-    const profileIconEl = document.getElementById("ticketProfileIcon");
-    const ticketDateEl = document.getElementById("ticketDate");
-    const ticketCodeEl = document.getElementById("ticketCode");
-
-    if (profileNameEl) profileNameEl.textContent = profile.badge;
-    if (profileDescEl) profileDescEl.textContent = profile.desc;
-    if (profileIconEl) profileIconEl.textContent = profile.icon;
-
-    const now = new Date();
-    const months = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
-    if (ticketDateEl) {
-      ticketDateEl.textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-    }
-
-    if (ticketCodeEl) {
-      const randomCode = Math.floor(1000 + Math.random() * 9000);
-      ticketCodeEl.textContent = `SEN-VUELO-${randomCode}`;
-    }
-  }
-
-  // Confeti sutil con canvas-confetti
-  function triggerLandingConfetti() {
+    // Disparar confeti sutil de celebración
     if (typeof confetti === "function") {
       try {
         confetti({
-          particleCount: 70,
-          spread: 60,
-          origin: { y: 0.65 },
-          colors: ["#0866c6", "#38bdf8", "#fbbf24", "#10b981", "#ffffff"]
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#0866c6", "#042c54", "#ffffff", "#ffd700"]
         });
-      } catch (_) {}
+      } catch (e) {
+        console.log("Confetti final:", e);
+      }
+    }
+
+    // Navegar suavemente al final (Escena 11)
+    if (window.FlightScroller) {
+      window.FlightScroller.scrollToScene("scene-11");
+    } else {
+      document.getElementById("scene-11")?.scrollIntoView({ behavior: "smooth" });
     }
   }
 
-  // Reiniciar experiencia en limpio
-  function resetSurveyExperience() {
-    surveyState.answers = {
-      q1_satisfaction: null,
-      q2_ease: null,
-      q3_punctuality: null,
-      q4_improvements: [],
-      q5_nps: null,
-      q6_feedback: ""
-    };
-    surveyState.userEmail = "";
-    surveyState.isCompleted = false;
-
-    // Resetear clases visuales
-    document.querySelectorAll(".star-interactive-btn").forEach((b) => b.classList.remove("active", "hover"));
-    document.querySelectorAll(".choice-card-item").forEach((b) => b.classList.remove("selected"));
-    document.querySelectorAll(".multi-tag-card").forEach((b) => b.classList.remove("selected"));
-    document.querySelectorAll(".nps-tile-btn").forEach((b) => b.classList.remove("selected"));
-
-    const fb = document.getElementById("feedbackTextarea");
-    if (fb) fb.value = "";
-    const em = document.getElementById("contactEmailInput");
-    if (em) em.value = "";
-
-    window.FlightAnimator?.scrollToStage(0);
+  function saveOfflineBackup(payload) {
+    try {
+      const stored = JSON.parse(localStorage.getItem("senair_offline_surveys") || "[]");
+      stored.push({
+        ...payload,
+        savedAt: new Date().toISOString()
+      });
+      localStorage.setItem("senair_offline_surveys", JSON.stringify(stored));
+      console.info("[SENAIR] Encuesta guardada localmente en navegador con éxito.");
+    } catch (e) {
+      console.error("[SENAIR] No se pudo guardar respaldo offline:", e);
+    }
   }
 
+  // ── 8. Botón Reiniciar para otro visitante de la feria ───────────
+  function bindRestartButton() {
+    const restartBtn = document.getElementById("btnRestartExperience");
+    if (!restartBtn) return;
+
+    restartBtn.addEventListener("click", () => {
+      // Reiniciar estado
+      surveyState.answers = {
+        q1_satisfaction: null,
+        q2_ease: null,
+        q3_punctuality: null,
+        q4_improvements: [],
+        q5_nps: null,
+        q6_feedback: ""
+      };
+      surveyState.email = "";
+      surveyState.completed = false;
+
+      // Limpiar clases y controles en el DOM
+      document.querySelectorAll(".star-touch-btn").forEach((s) => s.classList.remove("active"));
+      document.querySelectorAll(".star-verbal-badge").forEach((b) => {
+        b.textContent = "Toca una estrella para calificar";
+        b.classList.remove("active");
+      });
+      document.querySelectorAll(".hud-choice-card").forEach((c) => c.classList.remove("selected"));
+      document.querySelectorAll(".multi-pill-card").forEach((p) => p.classList.remove("selected"));
+      document.querySelectorAll(".nps-tile").forEach((t) => t.classList.remove("selected"));
+
+      const feedback = document.getElementById("feedbackTextarea");
+      const email = document.getElementById("contactEmailInput");
+      const errorBanner = document.getElementById("errorBanner");
+      if (feedback) feedback.value = "";
+      if (email) email.value = "";
+      if (errorBanner) errorBanner.style.display = "none";
+
+      updateBoardingPassHUD();
+
+      // Desplazarse suavemente de vuelta a la portada
+      if (window.FlightScroller) {
+        window.FlightScroller.scrollToScene("scene-1");
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
+  }
+
+  // Inicializar al cargar el script
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
