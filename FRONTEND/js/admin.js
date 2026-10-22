@@ -1,6 +1,8 @@
 /**
  * ═════════════════════════════════════════════════════════════════════════
  * SENAIR — Panel de Administración (Frontend Logic)
+ * 100% Funcional: Edición y Borrado de Vuelos, Usuarios y Reservas
+ * Sin Alertas Bloqueantes del Navegador (In-App Confirm Modals)
  * ═════════════════════════════════════════════════════════════════════════
  */
 
@@ -72,6 +74,43 @@
     }, 3800);
   }
 
+  // ── 2.1. Modal de Confirmación In-App (Sin alertas de Google/Browser) ─
+  let confirmResolve = null;
+
+  function showConfirmModal({ title = "Confirmar Acción", message = "¿Estás seguro?", acceptText = "Confirmar", isDanger = true }) {
+    const modal = document.getElementById("adminConfirmModalOverlay");
+    const titleEl = document.getElementById("confirmModalTitle");
+    const msgEl = document.getElementById("confirmModalMessage");
+    const acceptBtn = document.getElementById("confirmModalAcceptBtn");
+
+    if (!modal) {
+      // Fallback seguro en caso de que no exista el modal en el DOM
+      return Promise.resolve(window.confirm(message));
+    }
+
+    if (titleEl) titleEl.textContent = title;
+    if (msgEl) msgEl.textContent = message;
+    if (acceptBtn) {
+      acceptBtn.textContent = acceptText;
+      acceptBtn.className = isDanger ? "btn-danger" : "btn-primary";
+    }
+
+    modal.classList.add("is-open");
+
+    return new Promise((resolve) => {
+      confirmResolve = resolve;
+    });
+  }
+
+  function closeConfirmModal(result = false) {
+    const modal = document.getElementById("adminConfirmModalOverlay");
+    if (modal) modal.classList.remove("is-open");
+    if (typeof confirmResolve === "function") {
+      confirmResolve(result);
+      confirmResolve = null;
+    }
+  }
+
   // ── 3. Carga de Estadísticas / KPIs ────────────────────────────
   async function loadStats() {
     try {
@@ -80,10 +119,15 @@
       if (!data.success) return;
 
       const { stats, recentReservations, maintenanceMode } = data;
-      document.getElementById("statUsers").textContent = stats.totalUsers;
-      document.getElementById("statFlights").textContent = stats.totalFlights;
-      document.getElementById("statReservations").textContent = stats.totalReservations;
-      document.getElementById("statRevenue").textContent = copFormatter.format(stats.totalRevenue);
+      const elUsers = document.getElementById("statUsers");
+      const elFlights = document.getElementById("statFlights");
+      const elRes = document.getElementById("statReservations");
+      const elRev = document.getElementById("statRevenue");
+
+      if (elUsers) elUsers.textContent = stats.totalUsers;
+      if (elFlights) elFlights.textContent = stats.totalFlights;
+      if (elRes) elRes.textContent = stats.totalReservations;
+      if (elRev) elRev.textContent = copFormatter.format(stats.totalRevenue);
 
       // Actualizar switch de mantenimiento si existe
       const toggle = document.getElementById("maintenanceToggle");
@@ -120,7 +164,7 @@
     `).join("");
   }
 
-  // ── 4. Gestión de Vuelos (CRUD) ─────────────────────────────────
+  // ── 4. Gestión de Vuelos (CRUD Completo) ─────────────────────────
   async function loadFlights() {
     try {
       const res = await fetch("/api/admin/flights", { credentials: "include" });
@@ -152,24 +196,24 @@
         </td>
         <td>
           <div>${escapeHtml(f.departure_date)}</div>
-          <small style="font-weight:700; color:var(--blue);">${escapeHtml(f.departure_time)} - ${escapeHtml(f.arrival_time)}</small>
+          <small style="font-weight:700; color:var(--blue);">${escapeHtml(String(f.departure_time || "").slice(0, 5))} - ${escapeHtml(String(f.arrival_time || "").slice(0, 5))}</small>
         </td>
         <td><strong>${copFormatter.format(f.price)}</strong></td>
-        <td>${escapeHtml(f.airline)}</td>
+        <td>${escapeHtml(f.airline || "SENAIR")}</td>
         <td>
-          ${f.stops === 0
+          ${Number(f.stops) === 0
             ? '<span class="badge badge-direct">Directo</span>'
-            : `<span class="badge badge-stop">${f.stops} Escala${f.stops > 1 ? "s" : ""}</span>`}
+            : `<span class="badge badge-stop">${f.stops} Escala${Number(f.stops) > 1 ? "s" : ""}</span>`}
         </td>
         <td>
           <span style="font-weight:700;">${f.bookings_count || 0}</span> pasajes
         </td>
         <td>
           <div class="action-buttons">
-            <button class="btn-icon" title="Editar Vuelo" onclick="window.adminOpenEditFlight(${f.id})">
+            <button type="button" class="btn-icon edit" title="Editar Vuelo" data-action="edit-flight" data-id="${f.id}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
             </button>
-            <button class="btn-icon delete" title="Eliminar Vuelo" onclick="window.adminDeleteFlight(${f.id})">
+            <button type="button" class="btn-icon delete" title="Eliminar Vuelo" data-action="delete-flight" data-id="${f.id}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
             </button>
           </div>
@@ -182,37 +226,49 @@
   const flightModalOverlay = document.getElementById("flightModalOverlay");
   const flightForm = document.getElementById("flightForm");
 
-  window.adminOpenCreateFlight = function () {
-    if (!flightForm) return;
+  function adminOpenCreateFlight() {
+    if (!flightForm || !flightModalOverlay) return;
     flightForm.reset();
-    document.getElementById("flightModalTitle").textContent = "Nuevo Vuelo SENAIR";
+    const titleEl = document.getElementById("flightModalTitle");
+    if (titleEl) titleEl.textContent = "Nuevo Vuelo SENAIR";
     document.getElementById("flightId").value = "";
     document.getElementById("airline").value = "SENAIR";
     document.getElementById("stops").value = "0";
+
+    // Fecha mínima hoy por defecto
+    const today = new Date().toISOString().split("T")[0];
+    const depDateInput = document.getElementById("departureDate");
+    if (depDateInput) depDateInput.value = today;
+
     flightModalOverlay.classList.add("is-open");
-  };
+  }
 
-  window.adminOpenEditFlight = function (id) {
-    const flight = allFlights.find((f) => f.id === id);
-    if (!flight || !flightForm) return;
+  function adminOpenEditFlight(id) {
+    const flight = allFlights.find((f) => Number(f.id) === Number(id));
+    if (!flight || !flightForm || !flightModalOverlay) {
+      showToast("Vuelo no encontrado en memoria", "error");
+      return;
+    }
 
-    document.getElementById("flightModalTitle").textContent = `Editar Vuelo #${flight.id}`;
+    const titleEl = document.getElementById("flightModalTitle");
+    if (titleEl) titleEl.textContent = `Editar Vuelo #${flight.id}`;
+
     document.getElementById("flightId").value = flight.id;
-    document.getElementById("origin").value = flight.origin;
-    document.getElementById("destination").value = flight.destination;
-    document.getElementById("departureDate").value = flight.departure_date;
-    document.getElementById("departureTime").value = flight.departure_time.slice(0, 5);
-    document.getElementById("arrivalTime").value = flight.arrival_time.slice(0, 5);
-    document.getElementById("price").value = flight.price;
-    document.getElementById("airline").value = flight.airline;
-    document.getElementById("stops").value = flight.stops;
+    document.getElementById("origin").value = flight.origin || "";
+    document.getElementById("destination").value = flight.destination || "";
+    document.getElementById("departureDate").value = flight.departure_date || "";
+    document.getElementById("departureTime").value = String(flight.departure_time || "").slice(0, 5);
+    document.getElementById("arrivalTime").value = String(flight.arrival_time || "").slice(0, 5);
+    document.getElementById("price").value = flight.price || "";
+    document.getElementById("airline").value = flight.airline || "SENAIR";
+    document.getElementById("stops").value = String(flight.stops ?? 0);
 
     flightModalOverlay.classList.add("is-open");
-  };
+  }
 
-  window.adminCloseFlightModal = function () {
+  function adminCloseFlightModal() {
     if (flightModalOverlay) flightModalOverlay.classList.remove("is-open");
-  };
+  }
 
   if (flightForm) {
     flightForm.addEventListener("submit", async (e) => {
@@ -230,6 +286,12 @@
         airline: document.getElementById("airline").value.trim() || "SENAIR",
         stops: Number(document.getElementById("stops").value || 0),
       };
+
+      const saveBtn = document.getElementById("btnSaveFlight");
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Guardando...";
+      }
 
       try {
         const url = isEdit ? `/api/admin/flights/${flightId}` : "/api/admin/flights";
@@ -252,14 +314,30 @@
         adminCloseFlightModal();
         await loadFlights();
         await loadStats();
-      } catch {
+      } catch (err) {
+        console.error("Error al guardar vuelo:", err);
         showToast("Error de conexión con el servidor", "error");
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = "Guardar Vuelo";
+        }
       }
     });
   }
 
-  window.adminDeleteFlight = async function (id) {
-    if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente el vuelo #${id}?`)) return;
+  async function adminDeleteFlight(id) {
+    const flight = allFlights.find((f) => Number(f.id) === Number(id));
+    const flightLabel = flight ? `${flight.origin} → ${flight.destination} (${flight.departure_date})` : `Vuelo #${id}`;
+
+    const confirmed = await showConfirmModal({
+      title: `¿Eliminar Vuelo #${id}?`,
+      message: `¿Estás seguro de que deseas eliminar permanentemente el vuelo #${id} (${flightLabel})? Esta acción lo quitará del itinerario de SENAIR.`,
+      acceptText: "Eliminar Vuelo",
+      isDanger: true,
+    });
+
+    if (!confirmed) return;
 
     try {
       const res = await fetch(`/api/admin/flights/${id}`, {
@@ -271,13 +349,13 @@
         showToast(result.message || "No se pudo eliminar el vuelo", "error");
         return;
       }
-      showToast("Vuelo eliminado del sistema", "success");
+      showToast("Vuelo eliminado del sistema con éxito", "success");
       await loadFlights();
       await loadStats();
     } catch {
       showToast("Error de conexión al eliminar vuelo", "error");
     }
-  };
+  }
 
   // ── 5. Gestión de Reservas ─────────────────────────────────────
   async function loadReservations() {
@@ -306,19 +384,19 @@
       <tr>
         <td><strong>#${String(r.id).padStart(4, "0")}</strong></td>
         <td>
-          <div style="font-weight:700;">${escapeHtml(r.user_name || "Pasajero")}</div>
-          <small style="color:var(--muted);">${escapeHtml(r.user_email || "")}</small>
+          <div style="font-weight:700;">${escapeHtml(r.passenger_name || r.user_name || "Pasajero")}</div>
+          <small style="color:var(--muted);">${escapeHtml(r.passenger_email || r.user_email || "")}</small>
         </td>
         <td>${escapeHtml(r.origin)} → ${escapeHtml(r.destination)}</td>
         <td>
           <div>${escapeHtml(r.departure_date)}</div>
-          <small style="color:var(--muted); font-weight:600;">${escapeHtml(r.departure_time)}</small>
+          <small style="color:var(--muted); font-weight:600;">${escapeHtml(String(r.departure_time || "").slice(0, 5))}</small>
         </td>
         <td><span class="badge badge-confirmed">Asiento ${escapeHtml(r.seat)}</span></td>
         <td><strong>${copFormatter.format(r.price)}</strong></td>
         <td style="font-size:12px; color:var(--muted);">${formatTimestamp(r.created_at)}</td>
         <td>
-          <button class="btn-icon delete" title="Cancelar Reserva" onclick="window.adminDeleteReservation(${r.id})">
+          <button type="button" class="btn-icon delete" title="Cancelar Reserva" data-action="delete-reservation" data-id="${r.id}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </td>
@@ -326,8 +404,15 @@
     `).join("");
   }
 
-  window.adminDeleteReservation = async function (id) {
-    if (!confirm(`¿Deseas cancelar y anular la reserva #${id}?`)) return;
+  async function adminDeleteReservation(id) {
+    const confirmed = await showConfirmModal({
+      title: `¿Cancelar Reserva #${String(id).padStart(4, "0")}?`,
+      message: `¿Deseas anular esta reserva? El asiento asignado quedará inmediatamente liberado en la cabina para otros viajeros.`,
+      acceptText: "Anular Reserva",
+      isDanger: true,
+    });
+
+    if (!confirmed) return;
 
     try {
       const res = await fetch(`/api/admin/reservations/${id}`, {
@@ -342,12 +427,13 @@
       showToast("Reserva cancelada correctamente", "success");
       await loadReservations();
       await loadStats();
+      await loadFlights();
     } catch {
       showToast("Error de conexión al cancelar reserva", "error");
     }
-  };
+  }
 
-  // ── 6. Gestión de Usuarios ─────────────────────────────────────
+  // ── 6. Gestión de Usuarios (CRUD Completo) ─────────────────────
   async function loadUsers() {
     try {
       const res = await fetch("/api/admin/users", { credentials: "include" });
@@ -370,35 +456,170 @@
       return;
     }
 
-    tbody.innerHTML = users.map((u) => `
-      <tr>
-        <td><strong>#${u.id}</strong></td>
-        <td>
-          <div style="font-weight:700;">${escapeHtml(u.name)}</div>
-          <small style="color:var(--muted);">${escapeHtml(u.email)}</small>
-        </td>
-        <td>
-          ${u.role === "admin"
-            ? '<span class="badge badge-admin">Administrador</span>'
-            : '<span class="badge badge-user">Cliente</span>'}
-        </td>
-        <td><strong>${u.reservations_count || 0}</strong> viajes</td>
-        <td style="font-size:12px; color:var(--muted);">${formatTimestamp(u.created_at)}</td>
-        <td>
-          ${u.email === "freinergudino@gmail.com"
-            ? '<small style="color:var(--muted); font-weight:700;">Superadmin</small>'
-            : `<button class="btn-icon delete" title="Eliminar Usuario" onclick="window.adminDeleteUser(${u.id})">
-                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-               </button>`}
-        </td>
-      </tr>
-    `).join("");
+    tbody.innerHTML = users.map((u) => {
+      const isSuperAdmin = u.email === "freinergudino@gmail.com";
+      return `
+        <tr>
+          <td><strong>#${u.id}</strong></td>
+          <td>
+            <div style="font-weight:700;">${escapeHtml(u.name)}</div>
+            <small style="color:var(--muted);">${escapeHtml(u.email)}</small>
+          </td>
+          <td>
+            ${u.role === "admin"
+              ? '<span class="badge badge-admin">Administrador</span>'
+              : '<span class="badge badge-user">Cliente</span>'}
+          </td>
+          <td><strong>${u.reservations_count || 0}</strong> viajes</td>
+          <td style="font-size:12px; color:var(--muted);">${formatTimestamp(u.created_at)}</td>
+          <td>
+            ${isSuperAdmin
+              ? '<small style="color:var(--muted); font-weight:700;">Superadmin</small>'
+              : `<div class="action-buttons">
+                   <button type="button" class="btn-icon edit" title="Editar Usuario" data-action="edit-user" data-id="${u.id}">
+                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                   </button>
+                   <button type="button" class="btn-icon delete" title="Eliminar Usuario" data-action="delete-user" data-id="${u.id}">
+                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                   </button>
+                 </div>`}
+          </td>
+        </tr>
+      `;
+    }).join("");
   }
 
-  window.adminDeleteUser = async function (id) {
+  // Modal para Crear / Editar Usuario
+  const userModalOverlay = document.getElementById("userModalOverlay");
+  const userForm = document.getElementById("userForm");
+
+  function adminOpenCreateUser() {
+    if (!userForm || !userModalOverlay) return;
+    userForm.reset();
+    document.getElementById("userModalTitle").textContent = "Nuevo Usuario SENAIR";
+    document.getElementById("userId").value = "";
+    document.getElementById("userRole").value = "user";
+
+    const pwInput = document.getElementById("userPassword");
+    const pwNote = document.getElementById("userPasswordNote");
+    if (pwInput) {
+      pwInput.required = true;
+      pwInput.placeholder = "Mínimo 8 caracteres";
+    }
+    if (pwNote) pwNote.textContent = "(mínimo 8 caracteres)";
+
+    userModalOverlay.classList.add("is-open");
+  }
+
+  function adminOpenEditUser(id) {
+    const user = allUsers.find((u) => Number(u.id) === Number(id));
+    if (!user || !userForm || !userModalOverlay) {
+      showToast("Usuario no encontrado", "error");
+      return;
+    }
+
+    document.getElementById("userModalTitle").textContent = `Editar Usuario #${user.id}`;
+    document.getElementById("userId").value = user.id;
+    document.getElementById("userName").value = user.name || "";
+    document.getElementById("userEmail").value = user.email || "";
+    document.getElementById("userRole").value = user.role || "user";
+
+    const pwInput = document.getElementById("userPassword");
+    const pwNote = document.getElementById("userPasswordNote");
+    if (pwInput) {
+      pwInput.value = "";
+      pwInput.required = false;
+      pwInput.placeholder = "Dejar en blanco para conservar actual";
+    }
+    if (pwNote) pwNote.textContent = "(dejar en blanco para no modificar)";
+
+    userModalOverlay.classList.add("is-open");
+  }
+
+  function adminCloseUserModal() {
+    if (userModalOverlay) userModalOverlay.classList.remove("is-open");
+  }
+
+  if (userForm) {
+    userForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const userId = document.getElementById("userId").value;
+      const isEdit = Boolean(userId);
+
+      const name = document.getElementById("userName").value.trim();
+      const email = document.getElementById("userEmail").value.trim();
+      const role = document.getElementById("userRole").value;
+      const password = document.getElementById("userPassword").value;
+
+      if (!name || name.length < 2) {
+        showToast("Ingresa un nombre válido (mínimo 2 letras)", "error");
+        return;
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showToast("Ingresa un correo electrónico con formato válido", "error");
+        return;
+      }
+      if (!isEdit && (!password || password.length < 8)) {
+        showToast("La contraseña debe tener al menos 8 caracteres", "error");
+        return;
+      }
+
+      const saveBtn = document.getElementById("btnSaveUser");
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Guardando...";
+      }
+
+      const payload = { name, email, role };
+      if (password && password.length >= 8) {
+        payload.password = password;
+      }
+
+      try {
+        const url = isEdit ? `/api/admin/users/${userId}` : "/api/admin/users";
+        const method = isEdit ? "PUT" : "POST";
+
+        const res = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          credentials: "include",
+        });
+
+        const result = await res.json();
+        if (!res.ok || !result.success) {
+          showToast(result.message || "No se pudo guardar el usuario", "error");
+          return;
+        }
+
+        showToast(result.message || "Usuario guardado con éxito", "success");
+        adminCloseUserModal();
+        await loadUsers();
+        await loadStats();
+      } catch (err) {
+        console.error("Error al guardar usuario:", err);
+        showToast("Error de conexión al guardar usuario", "error");
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = "Guardar Usuario";
+        }
+      }
+    });
+  }
+
+  async function adminDeleteUser(id) {
     const user = allUsers.find((u) => Number(u.id) === Number(id));
     const userName = user ? user.name : `Usuario #${id}`;
-    if (!confirm(`¿Deseas eliminar la cuenta de ${userName}? Se eliminarán también todas sus reservas asociadas.`)) return;
+
+    const confirmed = await showConfirmModal({
+      title: `¿Eliminar Cuenta de ${userName}?`,
+      message: `¿Deseas eliminar permanentemente la cuenta de ${userName} (${user ? user.email : ""})? Se cancelarán y eliminarán también todas sus reservas asociadas.`,
+      acceptText: "Eliminar Usuario",
+      isDanger: true,
+    });
+
+    if (!confirmed) return;
 
     try {
       const res = await fetch(`/api/admin/users/${id}`, {
@@ -410,7 +631,7 @@
         showToast(result.message || "No se pudo eliminar el usuario", "error");
         return;
       }
-      showToast("Usuario eliminado con éxito", "success");
+      showToast("Usuario y sus reservas eliminados con éxito", "success");
       await loadUsers();
       await loadStats();
       await loadReservations();
@@ -418,7 +639,7 @@
       console.error("Error al eliminar usuario:", err);
       showToast("Error de conexión al eliminar usuario", "error");
     }
-  };
+  }
 
   // ── 7. Ajustes & Modo Mantenimiento ────────────────────────────
   const maintenanceToggle = document.getElementById("maintenanceToggle");
@@ -444,7 +665,7 @@
   }
 
   // Exportar datos a CSV o JSON
-  window.adminExportData = function (type, format) {
+  function adminExportData(type, format) {
     let dataToExport = [];
     let filename = "";
 
@@ -457,7 +678,7 @@
     }
 
     if (!dataToExport.length) {
-      showToast("No hay datos para exportar", "error");
+      showToast("No hay datos para exportar en este momento", "error");
       return;
     }
 
@@ -484,7 +705,7 @@
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     showToast(`Archivo ${filename} descargado con éxito`, "success");
-  };
+  }
 
   // ── 8. Búsquedas y Filtros en Vivo ─────────────────────────────
   const searchFlightsInput = document.getElementById("searchFlights");
@@ -506,8 +727,8 @@
     searchReservationsInput.addEventListener("input", (e) => {
       const query = e.target.value.toLowerCase().trim();
       const filtered = allReservations.filter((r) =>
-        (r.user_name || "").toLowerCase().includes(query) ||
-        (r.user_email || "").toLowerCase().includes(query) ||
+        (r.passenger_name || r.user_name || "").toLowerCase().includes(query) ||
+        (r.passenger_email || r.user_email || "").toLowerCase().includes(query) ||
         r.origin.toLowerCase().includes(query) ||
         r.destination.toLowerCase().includes(query) ||
         r.seat.toLowerCase().includes(query) ||
@@ -700,6 +921,101 @@
     });
   }
 
+  // ── 12. Delegación Global de Eventos (Cero Bloqueo CSP) ─────────
+  document.addEventListener("click", async (e) => {
+    // 1. Botón de aceptar confirmación
+    if (e.target.closest("#confirmModalAcceptBtn")) {
+      closeConfirmModal(true);
+      return;
+    }
+
+    // 2. Botón de cancelar confirmación o cerrar modal de confirmación
+    if (e.target.closest("#confirmModalCancelBtn, [data-action='close-confirm-modal']")) {
+      closeConfirmModal(false);
+      return;
+    }
+
+    // 3. Clic fuera de los modales (en el backdrop overlay)
+    if (e.target.classList.contains("admin-modal-overlay")) {
+      if (e.target.id === "adminConfirmModalOverlay") {
+        closeConfirmModal(false);
+      } else {
+        e.target.classList.remove("is-open");
+      }
+      return;
+    }
+
+    // 4. Botones con data-action
+    const actionBtn = e.target.closest("[data-action]");
+    if (!actionBtn) return;
+
+    const action = actionBtn.getAttribute("data-action");
+    const id = actionBtn.getAttribute("data-id");
+
+    switch (action) {
+      case "open-create-flight":
+        e.preventDefault();
+        adminOpenCreateFlight();
+        break;
+
+      case "edit-flight":
+        e.preventDefault();
+        adminOpenEditFlight(id);
+        break;
+
+      case "delete-flight":
+        e.preventDefault();
+        adminDeleteFlight(id);
+        break;
+
+      case "close-flight-modal":
+        e.preventDefault();
+        adminCloseFlightModal();
+        break;
+
+      case "open-create-user":
+        e.preventDefault();
+        adminOpenCreateUser();
+        break;
+
+      case "edit-user":
+        e.preventDefault();
+        adminOpenEditUser(id);
+        break;
+
+      case "delete-user":
+        e.preventDefault();
+        adminDeleteUser(id);
+        break;
+
+      case "close-user-modal":
+        e.preventDefault();
+        adminCloseUserModal();
+        break;
+
+      case "delete-reservation":
+        e.preventDefault();
+        adminDeleteReservation(id);
+        break;
+
+      case "export-data":
+        e.preventDefault();
+        const exportType = actionBtn.getAttribute("data-export-type") || "flights";
+        const exportFormat = actionBtn.getAttribute("data-export-format") || "csv";
+        adminExportData(exportType, exportFormat);
+        break;
+    }
+  });
+
+  // Cerrar modales con tecla Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeConfirmModal(false);
+      adminCloseFlightModal();
+      adminCloseUserModal();
+    }
+  });
+
   // ── Utilidades ─────────────────────────────────────────────────
   function escapeHtml(str) {
     return String(str || "")
@@ -720,6 +1036,18 @@
     }
   }
 
+  // Exportar al ámbito global para compatibilidad
+  window.adminOpenCreateFlight = adminOpenCreateFlight;
+  window.adminOpenEditFlight = adminOpenEditFlight;
+  window.adminCloseFlightModal = adminCloseFlightModal;
+  window.adminDeleteFlight = adminDeleteFlight;
+  window.adminOpenCreateUser = adminOpenCreateUser;
+  window.adminOpenEditUser = adminOpenEditUser;
+  window.adminCloseUserModal = adminCloseUserModal;
+  window.adminDeleteUser = adminDeleteUser;
+  window.adminDeleteReservation = adminDeleteReservation;
+  window.adminExportData = adminExportData;
+
   // ── Inicialización ─────────────────────────────────────────────
   document.addEventListener("DOMContentLoaded", async () => {
     const user = await checkAdminAuth();
@@ -728,4 +1056,3 @@
     await Promise.all([loadStats(), loadFlights(), loadReservations(), loadUsers()]);
   });
 })();
-

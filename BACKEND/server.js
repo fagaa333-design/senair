@@ -190,6 +190,42 @@ async function initializeDatabase() {
     sql: "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'admin') ON CONFLICT(email) DO UPDATE SET name = excluded.name, password = excluded.password, role = 'admin'",
     args: ["Administrador", ADMIN_EMAIL, ADMIN_PASSWORD_HASH],
   });
+
+  try {
+    const userCountRes = await db.execute({ sql: "SELECT COUNT(*) as count FROM users WHERE role != 'admin'", args: [] });
+    if (Number(userCountRes.rows[0].count) === 0) {
+      const demoPw = ADMIN_PASSWORD_HASH;
+      await db.execute({
+        sql: "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'user')",
+        args: ["Carlos Mendoza", "carlos.mendoza@gmail.com", demoPw]
+      });
+      await db.execute({
+        sql: "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'user')",
+        args: ["Sofía Gómez", "sofia.gomez@gmail.com", demoPw]
+      });
+      await db.execute({
+        sql: "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'user')",
+        args: ["Alejandro Ruiz", "alejandro.ruiz@hotmail.com", demoPw]
+      });
+    }
+
+    const resCountRes = await db.execute({ sql: "SELECT COUNT(*) as count FROM reservations", args: [] });
+    if (Number(resCountRes.rows[0].count) === 0) {
+      const demoUsers = await db.execute({ sql: "SELECT id, name, email FROM users WHERE role != 'admin' LIMIT 2", args: [] });
+      if (demoUsers.rows.length >= 2) {
+        await db.execute({
+          sql: "INSERT INTO reservations (user_id, flight_id, origin, destination, departure_date, departure_time, arrival_time, seat, price, airline, passenger_name, passenger_doc, passenger_email, passenger_phone) VALUES (?, 1, 'Bogotá (BOG)', 'Medellín (MDE)', '2026-09-12', '06:30', '07:25', '12A', 159000, 'SENAIR', ?, 'CC 1029384756', ?, '3104567890')",
+          args: [demoUsers.rows[0].id, demoUsers.rows[0].name, demoUsers.rows[0].email]
+        });
+        await db.execute({
+          sql: "INSERT INTO reservations (user_id, flight_id, origin, destination, departure_date, departure_time, arrival_time, seat, price, airline, passenger_name, passenger_doc, passenger_email, passenger_phone) VALUES (?, 2, 'Bogotá (BOG)', 'Medellín (MDE)', '2026-09-12', '14:00', '14:55', '4C', 179000, 'SENAIR', ?, 'CC 1098765432', ?, '3159876543')",
+          args: [demoUsers.rows[1].id, demoUsers.rows[1].name, demoUsers.rows[1].email]
+        });
+      }
+    }
+  } catch (err) {
+    console.warn("[SENAIR] Aviso al verificar datos demo:", err.message);
+  }
 }
 
 function getRouteMetadata(origin, destination) {
@@ -659,7 +695,7 @@ app.delete("/api/reservations/:id", requireAuth, async (request, response) => {
 
 let isMaintenanceModeActive = false;
 
-app.get(["/admin", "/admin.html", "/html/admin.html"], (request, response) => response.redirect("/html/mantenimiento.html"));
+// Redirect antiguo de mantenimiento retirado en favor de la ruta autenticada
 
 app.get("/api/admin/check", requireAdmin, (request, response) => {
   response.json({
@@ -727,13 +763,13 @@ app.post("/api/admin/flights", requireAdmin, async (request, response) => {
   const origin = String(request.body.origin || "").trim();
   const destination = String(request.body.destination || "").trim();
   const departureDate = String(request.body.departureDate || "").trim();
-  const departureTime = String(request.body.departureTime || "").trim();
-  const arrivalTime = String(request.body.arrivalTime || "").trim();
-  const price = Number(request.body.price);
+  const departureTime = String(request.body.departureTime || "").trim().slice(0, 5);
+  const arrivalTime = String(request.body.arrivalTime || "").trim().slice(0, 5);
+  const price = Math.round(Number(request.body.price));
   const airline = String(request.body.airline || "SENAIR").trim();
-  const stops = Number(request.body.stops || 0);
+  const stops = Math.max(0, parseInt(request.body.stops, 10) || 0);
 
-  if (!origin || !destination || origin === destination || !/^\d{4}-\d{2}-\d{2}$/.test(departureDate) || !/^\d{2}:\d{2}$/.test(departureTime) || !/^\d{2}:\d{2}$/.test(arrivalTime) || !Number.isInteger(price) || price < 0 || !Number.isInteger(stops) || stops < 0) {
+  if (!origin || !destination || origin === destination || !/^\d{4}-\d{2}-\d{2}$/.test(departureDate) || !/^\d{2}:\d{2}$/.test(departureTime) || !/^\d{2}:\d{2}$/.test(arrivalTime) || !Number.isFinite(price) || price < 0) {
     return response.status(400).json({ success: false, message: "Datos de vuelo inválidos o incompletos." });
   }
 
@@ -744,7 +780,7 @@ app.post("/api/admin/flights", requireAdmin, async (request, response) => {
     });
     response.status(201).json({ success: true, id: Number(result.lastInsertRowid), message: "Vuelo creado con éxito." });
   } catch (error) {
-    if (error.code === "SQLITE_CONSTRAINT") {
+    if (error.code === "SQLITE_CONSTRAINT" || String(error.message).includes("UNIQUE constraint")) {
       return response.status(409).json({ success: false, message: "Ya existe un vuelo programado en esa fecha, hora y ruta." });
     }
     response.status(500).json({ success: false, message: "Error al guardar el vuelo." });
@@ -758,13 +794,13 @@ app.put("/api/admin/flights/:id", requireAdmin, async (request, response) => {
   const origin = String(request.body.origin || "").trim();
   const destination = String(request.body.destination || "").trim();
   const departureDate = String(request.body.departureDate || "").trim();
-  const departureTime = String(request.body.departureTime || "").trim();
-  const arrivalTime = String(request.body.arrivalTime || "").trim();
-  const price = Number(request.body.price);
+  const departureTime = String(request.body.departureTime || "").trim().slice(0, 5);
+  const arrivalTime = String(request.body.arrivalTime || "").trim().slice(0, 5);
+  const price = Math.round(Number(request.body.price));
   const airline = String(request.body.airline || "SENAIR").trim();
-  const stops = Number(request.body.stops || 0);
+  const stops = Math.max(0, parseInt(request.body.stops, 10) || 0);
 
-  if (!origin || !destination || origin === destination || !/^\d{4}-\d{2}-\d{2}$/.test(departureDate) || !/^\d{2}:\d{2}$/.test(departureTime) || !/^\d{2}:\d{2}$/.test(arrivalTime) || !Number.isInteger(price) || price < 0) {
+  if (!origin || !destination || origin === destination || !/^\d{4}-\d{2}-\d{2}$/.test(departureDate) || !/^\d{2}:\d{2}$/.test(departureTime) || !/^\d{2}:\d{2}$/.test(arrivalTime) || !Number.isFinite(price) || price < 0) {
     return response.status(400).json({ success: false, message: "Datos de actualización inválidos." });
   }
 
@@ -778,7 +814,7 @@ app.put("/api/admin/flights/:id", requireAdmin, async (request, response) => {
     }
     response.json({ success: true, message: "Vuelo actualizado correctamente." });
   } catch (error) {
-    if (error.code === "SQLITE_CONSTRAINT") {
+    if (error.code === "SQLITE_CONSTRAINT" || String(error.message).includes("UNIQUE constraint")) {
       return response.status(409).json({ success: false, message: "Conflicto con otro vuelo existente en ese horario." });
     }
     response.status(500).json({ success: false, message: "Error al actualizar vuelo." });
@@ -790,6 +826,7 @@ app.delete("/api/admin/flights/:id", requireAdmin, async (request, response) => 
   if (!flightId) return response.status(400).json({ success: false, message: "ID de vuelo inválido." });
 
   try {
+    await db.execute({ sql: "UPDATE reservations SET flight_id = NULL WHERE flight_id = ?", args: [flightId] });
     const result = await db.execute({
       sql: "DELETE FROM flights WHERE id = ?",
       args: [flightId],
@@ -852,12 +889,81 @@ app.get("/api/admin/users", requireAdmin, async (request, response) => {
   }
 });
 
+app.post("/api/admin/users", requireAdmin, async (request, response) => {
+  const name = String(request.body.name || "").trim().slice(0, 100);
+  const email = String(request.body.email || "").trim().toLowerCase().slice(0, 190);
+  const password = String(request.body.password || "SenAir2026*");
+  const role = String(request.body.role || "user").trim().toLowerCase() === "admin" ? "admin" : "user";
+
+  if (!name || name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return response.status(400).json({ success: false, message: "Datos de usuario inválidos. Verifica nombre y correo." });
+  }
+
+  try {
+    const passwordHash = await bcrypt.hash(password, 10);
+    const result = await db.execute({
+      sql: "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+      args: [name, email, passwordHash, role],
+    });
+    response.status(201).json({ success: true, id: Number(result.lastInsertRowid), message: "Usuario creado exitosamente." });
+  } catch (error) {
+    if (error.code === "SQLITE_CONSTRAINT" || String(error.message).includes("UNIQUE constraint")) {
+      return response.status(409).json({ success: false, message: "Ese correo electrónico ya se encuentra registrado." });
+    }
+    response.status(500).json({ success: false, message: "Error al registrar el usuario." });
+  }
+});
+
+app.put("/api/admin/users/:id", requireAdmin, async (request, response) => {
+  const userId = Number.parseInt(request.params.id, 10);
+  if (!userId) return response.status(400).json({ success: false, message: "ID de usuario inválido." });
+
+  const name = String(request.body.name || "").trim().slice(0, 100);
+  const email = String(request.body.email || "").trim().toLowerCase().slice(0, 190);
+  const role = String(request.body.role || "user").trim().toLowerCase() === "admin" ? "admin" : "user";
+  const password = String(request.body.password || "").trim();
+
+  if (!name || name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return response.status(400).json({ success: false, message: "Nombre o correo inválido." });
+  }
+
+  try {
+    const userRes = await db.execute({ sql: "SELECT id, email, role FROM users WHERE id = ?", args: [userId] });
+    const targetUser = userRes.rows[0];
+    if (!targetUser) return response.status(404).json({ success: false, message: "Usuario no encontrado." });
+
+    if (targetUser.email === ADMIN_EMAIL && role !== "admin") {
+      return response.status(403).json({ success: false, message: "No es posible revocar permisos al Administrador principal." });
+    }
+
+    if (password && password.length >= 8) {
+      const passwordHash = await bcrypt.hash(password, 10);
+      await db.execute({
+        sql: "UPDATE users SET name = ?, email = ?, role = ?, password = ? WHERE id = ?",
+        args: [name, email, role, passwordHash, userId],
+      });
+    } else {
+      await db.execute({
+        sql: "UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?",
+        args: [name, email, role, userId],
+      });
+    }
+
+    response.json({ success: true, message: "Usuario actualizado correctamente." });
+  } catch (error) {
+    if (error.code === "SQLITE_CONSTRAINT" || String(error.message).includes("UNIQUE constraint")) {
+      return response.status(409).json({ success: false, message: "Ese correo ya está registrado por otro usuario." });
+    }
+    response.status(500).json({ success: false, message: "Error al actualizar usuario." });
+  }
+});
+
 app.delete("/api/admin/users/:id", requireAdmin, async (request, response) => {
   const userId = Number.parseInt(request.params.id, 10);
   if (!userId) return response.status(400).json({ success: false, message: "ID de usuario inválido." });
 
   try {
-    const userRes = await db.execute({ sql: "SELECT email FROM users WHERE id = ?", args: [userId] });
+    const userRes = await db.execute({ sql: "SELECT email, role FROM users WHERE id = ?", args: [userId] });
     const targetUser = userRes.rows[0];
     if (!targetUser) return response.status(404).json({ success: false, message: "Usuario no encontrado." });
 
@@ -865,7 +971,6 @@ app.delete("/api/admin/users/:id", requireAdmin, async (request, response) => {
       return response.status(403).json({ success: false, message: "No es posible eliminar la cuenta del Administrador principal." });
     }
 
-    // Eliminar primero las reservas asociadas para no violar la restricción de clave foránea
     await db.execute({ sql: "DELETE FROM reservations WHERE user_id = ?", args: [userId] });
     await db.execute({ sql: "DELETE FROM users WHERE id = ?", args: [userId] });
     response.json({ success: true, message: "Usuario y sus reservas eliminados con éxito." });
