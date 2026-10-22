@@ -1293,17 +1293,36 @@ body.dark-theme .calendar-navigation button {
   border-color: #243b5e !important;
 }
 
+[data-theme="dark"] .calendar-navigation button:disabled,
+body.dark-theme .calendar-navigation button:disabled,
+.calendar-navigation button:disabled {
+  opacity: 0.25 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
 [data-theme="dark"] .calendar-day,
 body.dark-theme .calendar-day {
   color: #e2e8f0 !important;
 }
 
-[data-theme="dark"] .calendar-day:hover,
-body.dark-theme .calendar-day:hover,
+[data-theme="dark"] .calendar-day:not(:disabled):hover,
+body.dark-theme .calendar-day:not(:disabled):hover,
 [data-theme="dark"] .calendar-day.is-selected,
 body.dark-theme .calendar-day.is-selected {
   color: #ffffff !important;
   background: #0866c6 !important;
+}
+
+[data-theme="dark"] .calendar-day:disabled,
+body.dark-theme .calendar-day:disabled,
+.calendar-day:disabled {
+  color: #475569 !important;
+  background: transparent !important;
+  opacity: 0.25 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  box-shadow: none !important;
 }
 
 /* Modal de Pasajeros en Modo Oscuro */
@@ -1997,4 +2016,66 @@ footer,
 [data-theme="dark"] .senair-alert-close:hover {
   background: #223550 !important;
   color: #f8fafc !important;
+}
+
+/* Configuración de idioma y tema en navegación móvil */
+.mobile-nav-settings {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding: 12px 10px 4px !important;
+  margin-top: 8px !important;
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="dark"] .mobile-nav-settings,
+body.dark-theme .mobile-nav-settings {
+  border-top-color: #1e314b !important;
+}
+
+.mobile-nav-settings .lang-switch {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: rgba(8, 102, 198, 0.08) !important;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+}
+
+[data-theme="dark"] .mobile-nav-settings .lang-switch,
+body.dark-theme .mobile-nav-settings .lang-switch {
+  background: #1e293b !important;
+}
+
+.mobile-nav-settings .lang-btn {
+  background: none !important;
+  border: none !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #64748b !important;
+  cursor: pointer !important;
+  padding: 2px 4px !important;
+  line-height: 1 !important;
+  text-decoration: none !important;
+}
+
+.mobile-nav-settings .lang-btn.active {
+  color: #0866c6 !important;
+}
+
+[data-theme="dark"] .mobile-nav-settings .lang-btn.active,
+body.dark-theme .mobile-nav-settings .lang-btn.active {
+  color: #38bdf8 !important;
+}
+
+.mobile-nav-settings .lang-sep {
+  font-size: 12px !important;
+  color: #94a3b8 !important;
+  user-select: none !important;
+}
+
+.mobile-nav-settings .theme-switch {
+  margin: 0 !important;
+  flex-shrink: 0 !important;
 }

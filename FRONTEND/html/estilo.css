@@ -879,7 +879,7 @@ h1 {
     cursor: pointer;
 }
 
-.calendar-day:hover,
+.calendar-day:not(:disabled):hover,
 .calendar-day.is-selected {
     color: var(--white);
     background: var(--blue);
@@ -892,6 +892,14 @@ h1 {
 .calendar-day:disabled {
     color: #bdc6cf;
     cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.35;
+}
+
+.calendar-navigation button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .calendar-day.is-empty {
@@ -3963,4 +3971,49 @@ body.login-page {
 
 [data-theme="dark"] .terms-checkbox-label a {
     color: #60a5fa !important;
+}
+
+.mobile-nav-settings {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 10px 4px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border, #e2e8f0);
+}
+
+.mobile-nav-settings .lang-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(8, 102, 198, 0.08);
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.mobile-nav-settings .lang-btn {
+    background: none;
+    border: none;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted, #64748b);
+    cursor: pointer;
+    padding: 2px 4px;
+    line-height: 1;
+}
+
+.mobile-nav-settings .lang-btn.active {
+    color: var(--blue, #0866c6);
+}
+
+.mobile-nav-settings .lang-sep {
+    font-size: 12px;
+    color: #94a3b8;
+    user-select: none;
+}
+
+.mobile-nav-settings .theme-switch {
+    margin: 0;
+    flex-shrink: 0;
 }

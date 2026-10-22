@@ -596,19 +596,28 @@ calendarTriggers.forEach((trigger) => {
 });
 
 calendarDays.addEventListener("click", (event) => {
-    const dayButton = event.target.closest(".calendar-day:not(:disabled)");
-    if (!dayButton || dayButton.classList.contains("is-empty")) return;
-    calendarInputs[activeDateType].value = dayButton.dataset.value;
+    const dayButton = event.target.closest(".calendar-day");
+    if (!dayButton || dayButton.classList.contains("is-empty") || dayButton.disabled || dayButton.hasAttribute("disabled")) return;
+    const value = dayButton.dataset.value;
+    const minimumValue = dateToValue(minimumDate(activeDateType));
+    if (value < minimumValue) return;
+    calendarInputs[activeDateType].value = value;
     calendarInputs[activeDateType].dispatchEvent(new Event("change", { bubbles: true }));
     updateDateTrigger(activeDateType);
-    if (activeDateType === "departure" && calendarInputs.return.value < calendarInputs.departure.value) {
-        calendarInputs.return.value = "";
-        updateDateTrigger("return");
+    if (activeDateType === "departure") {
+        calendarInputs.return.min = value;
+        if (calendarInputs.return.value && calendarInputs.return.value < value) {
+            calendarInputs.return.value = "";
+            updateDateTrigger("return");
+        }
     }
     closeCalendar();
 });
 
 calendarPrevious.addEventListener("click", () => {
+    const minDate = minimumDate(activeDateType);
+    const minMonth = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+    if (visibleMonth <= minMonth) return;
     visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1);
     renderCalendar();
 });
