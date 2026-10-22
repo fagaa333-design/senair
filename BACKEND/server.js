@@ -1,4 +1,6 @@
 
+console.log("==> [SENAIR] Iniciando proceso de servidor...");
+
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
@@ -14,6 +16,7 @@ const QRCode = require("qrcode");
 /* ── Configuration ────────────────────────────────────────────── */
 
 const PORT = Number.parseInt(process.env.PORT || "3000", 10);
+const HOST = "0.0.0.0";
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString("hex");
 const JWT_EXPIRY = "7d";
@@ -1260,7 +1263,7 @@ app.use((request, response) => response.status(404).send("Recurso no encontrado"
 /* ── Start ────────────────────────────────────────────────────── */
 
 initializeDatabase()
-  .then(() => app.listen(PORT, () => {
+  .then(() => app.listen(PORT, HOST, () => {
     console.log(`SENAIR disponible en http://localhost:${PORT}`);
   }))
   .catch((error) => {
