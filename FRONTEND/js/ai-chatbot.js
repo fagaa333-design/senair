@@ -729,6 +729,53 @@ Como asistente virtual de SENAIR, puedo brindarte información detallada sobre:
     max-height: 560px !important;
   }
 }
+
+.ai-confirm-banner {
+  background: #062b55 !important;
+  color: #ffffff !important;
+  padding: 10px 16px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+  font-size: 13px !important;
+  animation: aiSlideDown 0.2s ease forwards !important;
+  z-index: 10 !important;
+}
+.ai-confirm-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+.ai-confirm-actions {
+  display: flex !important;
+  gap: 8px !important;
+}
+.ai-confirm-btn {
+  padding: 5px 12px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  border: none !important;
+  transition: all 0.2s ease !important;
+}
+.ai-confirm-yes {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+}
+.ai-confirm-yes:hover {
+  background: #dc2626 !important;
+}
+.ai-confirm-no {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+.ai-confirm-no:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+@keyframes aiSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 `;
     document.head.appendChild(styleEl);
   }
@@ -949,10 +996,40 @@ Como asistente virtual de SENAIR, puedo brindarte información detallada sobre:
 
     if (clearBtn) {
       clearBtn.addEventListener("click", () => {
-        if (confirm("¿Deseas reiniciar la conversación con AeroBot?")) {
+        let existingBanner = widget.querySelector(".ai-confirm-banner");
+        if (existingBanner) {
+          existingBanner.remove();
+          return;
+        }
+
+        const banner = document.createElement("div");
+        banner.className = "ai-confirm-banner";
+        banner.innerHTML = `
+          <div class="ai-confirm-content">
+            <span>¿Reiniciar conversación con AeroBot?</span>
+            <div class="ai-confirm-actions">
+              <button type="button" class="ai-confirm-btn ai-confirm-yes">Sí, reiniciar</button>
+              <button type="button" class="ai-confirm-btn ai-confirm-no">Cancelar</button>
+            </div>
+          </div>
+        `;
+
+        const header = widget.querySelector(".ai-chat-header");
+        if (header) {
+          header.insertAdjacentElement("afterend", banner);
+        } else {
+          widget.prepend(banner);
+        }
+
+        banner.querySelector(".ai-confirm-yes").addEventListener("click", () => {
           sessionStorage.removeItem(STORAGE_KEY);
           renderHistory();
-        }
+          banner.remove();
+        });
+
+        banner.querySelector(".ai-confirm-no").addEventListener("click", () => {
+          banner.remove();
+        });
       });
     }
 

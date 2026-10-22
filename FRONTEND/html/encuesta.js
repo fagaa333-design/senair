@@ -1,14 +1,14 @@
 /**
  * ═════════════════════════════════════════════════════════════════════════
  * SENAIR — Controlador de Encuesta de Experiencia del Viajero (Feria 2026)
- * Diseño Editorial, Flujo Progresivo, Validación y Persistencia en SQLite
+ * Diseño Dinámico, Telemetría de Vuelo, Español Latinoamericano & SQLite
  * ═════════════════════════════════════════════════════════════════════════
  */
 
 (() => {
   "use strict";
 
-  // Estado reactivo de la aplicación
+  // Estado de la encuesta
   const state = {
     step: 0, // 0: Welcome, 1: Register, 2..7: Q1..Q6, 8: Touchdown
     participant: {
@@ -32,20 +32,20 @@
   };
 
   const STAR_FEEDBACK = {
-    1: "Nivel 1 // Inicial — Requiere optimización prioritaria",
-    2: "Nivel 2 // Regular — Varios aspectos técnicos a perfeccionar",
-    3: "Nivel 3 // Aceptable — Cumple con el estándar de servicio",
-    4: "Nivel 4 // Favorable — Gran agilidad y experiencia de vuelo",
-    5: "Nivel 5 // Sobresaliente — Excelente estándar de servicio"
+    1: "1 estrella — Muy insatisfecho, tenemos mucho por mejorar",
+    2: "2 estrellas — Regular, hay detalles importantes por corregir",
+    3: "3 estrellas — Buena experiencia, cumple con lo esperado",
+    4: "4 estrellas — Muy buena, una experiencia cómoda y agradable",
+    5: "5 estrellas — ¡Excelente! El viaje superó mis expectativas"
   };
 
-  const QUESTION_CATEGORIES = {
-    1: "EXPERIENCIA GENERAL",
-    2: "PLATAFORMA DIGITAL",
-    3: "OPERACIONES & SERVICIO",
-    4: "CONFORT & INNOVACIÓN",
-    5: "RECOMENDACIÓN DE MARCA",
-    6: "COMENTARIOS & PROPUESTAS"
+  const FLIGHT_PHASES = {
+    1: "FASE: DESPEGUE // 5,000 FT",
+    2: "FASE: ASCENSO // 14,000 FT",
+    3: "FASE: NIVEL DE CRUCERO // 28,000 FT",
+    4: "FASE: CRUCERO ESTABLE // 36,000 FT",
+    5: "FASE: DESCENSO // 12,000 FT",
+    6: "FASE: APROXIMACIÓN // 3,000 FT"
   };
 
   // ── 1. Inicialización ──────────────────────────────────────────────
@@ -73,9 +73,7 @@
     const viewRegister = document.getElementById("viewRegister");
     const viewQuestions = document.getElementById("viewQuestions");
     const viewTouchdown = document.getElementById("viewTouchdown");
-    const navTracker = document.getElementById("navStepTracker");
     const stepCounterPill = document.getElementById("stepCounterPill");
-    const stepProgressBar = document.getElementById("stepProgressBar");
 
     // Ocultar todas las vistas principales
     [viewWelcome, viewRegister, viewQuestions, viewTouchdown].forEach((v) => {
@@ -85,25 +83,23 @@
     if (targetStep === 0) {
       // Bienvenida
       if (viewWelcome) viewWelcome.classList.add("active");
-      if (navTracker) navTracker.style.display = "none";
+      if (stepCounterPill) stepCounterPill.textContent = "BIENVENIDA";
     } else if (targetStep === 1) {
       // Registro / Check-in
       if (viewRegister) viewRegister.classList.add("active");
-      if (navTracker) navTracker.style.display = "none";
+      if (stepCounterPill) stepCounterPill.textContent = "CHECK-IN";
     } else if (targetStep >= 2 && targetStep <= 7) {
       // Preguntas 1 a 6
       if (viewQuestions) viewQuestions.classList.add("active");
-      if (navTracker) navTracker.style.display = "flex";
 
       const qNum = targetStep - 1; // 1 a 6
       if (stepCounterPill) stepCounterPill.textContent = `PREGUNTA ${qNum} DE 6`;
-      if (stepProgressBar) stepProgressBar.style.width = `${Math.round((qNum / 6) * 100)}%`;
 
       renderQuestionPane(qNum);
     } else if (targetStep === 8) {
-      // Pasabordo final / Touchdown
+      // Pase de Abordar / Touchdown
       if (viewTouchdown) viewTouchdown.classList.add("active");
-      if (navTracker) navTracker.style.display = "none";
+      if (stepCounterPill) stepCounterPill.textContent = "PASE DE ABORDAR";
       updateBoardingPassSummary();
     }
 
@@ -120,12 +116,16 @@
     if (activePane) activePane.classList.add("active");
 
     const badge = document.getElementById("questionCounterBadge");
-    const catTag = document.getElementById("questionCategoryTag");
+    const phaseEl = document.getElementById("flightTelemetryPhase");
     const fill = document.getElementById("questionProgressFill");
+    const planeMarker = document.getElementById("planeTelemetryMarker");
+
+    const percent = Math.round((qNum / 6) * 100);
 
     if (badge) badge.textContent = `PREGUNTA ${qNum} DE 6`;
-    if (catTag) catTag.textContent = QUESTION_CATEGORIES[qNum] || "ENCUESTA";
-    if (fill) fill.style.width = `${Math.round((qNum / 6) * 100)}%`;
+    if (phaseEl) phaseEl.textContent = FLIGHT_PHASES[qNum] || "EN VUELO";
+    if (fill) fill.style.width = `${percent}%`;
+    if (planeMarker) planeMarker.style.left = `${percent}%`;
   }
 
   // ── 3. Enlaces y Botones de Avance/Retroceso ───────────────────────
@@ -162,13 +162,13 @@
       });
     });
 
-    // Desde Q6 -> Ir al Pasabordo Final
+    // Desde Q6 -> Ir al Pase de Abordar Final
     const btnGoToBp = document.getElementById("btnGoToBoardingPass");
     if (btnGoToBp) {
       btnGoToBp.addEventListener("click", () => renderView(8));
     }
 
-    // Desde Pasabordo -> Volver a modificar respuestas
+    // Desde Pase de Abordar -> Volver a modificar respuestas
     const btnBackToQ = document.getElementById("btnBackToQuestions");
     if (btnBackToQ) {
       btnBackToQ.addEventListener("click", () => renderView(7)); // Vuelve a Q6
@@ -221,7 +221,7 @@
       const submitBtn = document.getElementById("btnSubmitRegister");
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = `<span>Registrando viajero...</span>`;
+        submitBtn.innerHTML = `<span>Emitiendo pase de abordar...</span>`;
       }
 
       try {
@@ -244,7 +244,7 @@
           state.participant.token = data.token;
           state.participant.id = data.participant_id;
 
-          showRegisterAlert("Check-in verificado. Asiento 14A asignado. Iniciando evaluacion...", "success");
+          showRegisterAlert("Check-in exitoso. Asiento 14A asignado. ¡Iniciando el vuelo!", "success");
 
           setTimeout(() => {
             renderView(2); // Avanza a Pregunta 1
@@ -254,14 +254,14 @@
         }
       } catch (err) {
         console.warn("Fallo de red al registrar, avanzando en modo resiliente:", err);
-        showRegisterAlert("Check-in registrado. Continuando a cabina...", "success");
+        showRegisterAlert("Check-in verificado. Continuando a cabina...", "success");
         setTimeout(() => {
           renderView(2);
         }, 450);
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = `<span>Confirmar Check-In y Continuar</span> <svg class="btn-arrow-svg" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 10h12m-5-5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+          submitBtn.innerHTML = `<span>Confirmar Check-In y Seguir</span> <svg class="btn-arrow-svg" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 10h12m-5-5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
         }
       }
     });
@@ -299,7 +299,7 @@
         if (feedbackLbl) {
           feedbackLbl.textContent = current && STAR_FEEDBACK[current]
             ? STAR_FEEDBACK[current]
-            : "Selecciona una calificación";
+            : "Toca una estrella para calificar tu experiencia";
         }
       });
 
@@ -323,7 +323,7 @@
     });
   }
 
-  // ── 6. Pregunta 2: Tarjetas Editoriales de Selección Única ─────────
+  // ── 6. Pregunta 2: Tarjetas de Selección Única ─────────────────────
   function bindQuestion2Cards() {
     const cards = document.querySelectorAll(".editorial-choice-card");
     cards.forEach((card) => {
@@ -344,7 +344,7 @@
     });
   }
 
-  // ── 7. Pregunta 3: Opciones con Estados de Puntualidad ─────────────
+  // ── 7. Pregunta 3: Opciones de Puntualidad ─────────────────────────
   function bindQuestion3Status() {
     const rows = document.querySelectorAll(".status-choice-row");
     rows.forEach((row) => {
@@ -416,11 +416,11 @@
 
         if (descDisplay) {
           if (val <= 6) {
-            descDisplay.innerHTML = `<span class="nps-desc-text" style="color: #b91c1c;">Puntaje: ${val}/10 • Detractor // Tomamos nota de tus observaciones para perfeccionar el servicio.</span>`;
+            descDisplay.innerHTML = `<span class="nps-desc-text" style="color: #dc2626;">Calificación: ${val}/10 · Tomamos nota de tus comentarios para seguir mejorando.</span>`;
           } else if (val <= 8) {
-            descDisplay.innerHTML = `<span class="nps-desc-text" style="color: #b45309;">Puntaje: ${val}/10 • Pasivo // Agradecemos tu voto, seguiremos innovando para superar tus expectativas.</span>`;
+            descDisplay.innerHTML = `<span class="nps-desc-text" style="color: #d97706;">Calificación: ${val}/10 · ¡Gracias! Seguiremos trabajando para que tu próximo viaje sea un 10.</span>`;
           } else {
-            descDisplay.innerHTML = `<span class="nps-desc-text" style="color: #047857;">Puntaje: ${val}/10 • ¡Promotor! // ¡Excelente! Gracias por impulsar la propuesta de SENAIR.</span>`;
+            descDisplay.innerHTML = `<span class="nps-desc-text" style="color: #059669;">Calificación: ${val}/10 · ¡Qué alegría! Muchas gracias por confiar en SENAIR.</span>`;
           }
         }
 
@@ -463,22 +463,22 @@
         })
       });
     } catch (err) {
-      // Silencioso: el envío final consolidará la información
+      // Silencioso: el envío final consolida la información
     }
   }
 
   function getQuestionText(qid) {
     switch (qid) {
       case "q1_satisfaction": return "¿Cómo calificarías tu experiencia general con SENAIR?";
-      case "q2_ease": return "¿Qué aspecto valoras más en la plataforma web?";
-      case "q3_punctuality": return "Cumplimiento de itinerarios y puntualidad";
-      case "q4_improvements": return "Innovaciones y servicios adicionales a bordo";
-      case "q5_nps": return "Índice NPS de recomendación";
+      case "q2_ease": return "¿Qué fue lo que más te gustó de la página web?";
+      case "q3_punctuality": return "Puntualidad y cumplimiento de itinerarios";
+      case "q4_improvements": return "Comodidades deseadas en los aviones";
+      case "q5_nps": return "Índice de recomendación NPS";
       default: return qid;
     }
   }
 
-  // ── 12. Sincronización del Pasabordo Oficial (Boarding Pass) ────────
+  // ── 12. Sincronización del Pase de Abordar ─────────────────────────
   function updateBoardingPassSummary() {
     const nameEl = document.getElementById("bpPassengerName");
     const emailEl = document.getElementById("bpPassengerEmail");
@@ -489,9 +489,9 @@
     // Q1
     const valQ1 = document.getElementById("bpValQ1");
     if (valQ1) {
-      valQ1.textContent = state.answers.q1_satisfaction
-        ? `Nivel ${state.answers.q1_satisfaction} / 5 (${STAR_FEEDBACK[state.answers.q1_satisfaction] ? STAR_FEEDBACK[state.answers.q1_satisfaction].split(' // ')[1].split(' — ')[0] : 'Evaluado'})`
-        : "Sin calificar";
+      const q1Val = state.answers.q1_satisfaction;
+      const q1Labels = { 1: "Mala", 2: "Regular", 3: "Buena", 4: "Muy buena", 5: "Excelente" };
+      valQ1.textContent = q1Val ? `${q1Val} estrellas (${q1Labels[q1Val]})` : "Sin calificar";
     }
 
     // Q2
@@ -517,7 +517,7 @@
     const valQ5 = document.getElementById("bpValQ5");
     if (valQ5) {
       valQ5.textContent = state.answers.q5_nps !== null
-        ? `${state.answers.q5_nps}/10 (${state.answers.q5_nps >= 9 ? "Promotor" : state.answers.q5_nps >= 7 ? "Pasivo" : "Detractor"})`
+        ? `${state.answers.q5_nps}/10 (${state.answers.q5_nps >= 9 ? "Promotor" : state.answers.q5_nps >= 7 ? "Neutral" : "Detractor"})`
         : "Sin calificar";
     }
   }
@@ -534,7 +534,7 @@
 
       state.isSubmitting = true;
       btnSubmit.disabled = true;
-      btnSubmit.innerHTML = `<span>Procesando y Guardando en Base de Datos...</span>`;
+      btnSubmit.innerHTML = `<span>Guardando en el sistema de SENAIR...</span>`;
 
       try {
         let confirmationCode = `SA-CONF-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -597,7 +597,7 @@
       } finally {
         state.isSubmitting = false;
         btnSubmit.disabled = false;
-        btnSubmit.innerHTML = `<span>Guardar Encuesta en Base de Datos</span> <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16.7 5.3 7.5 14.5 3.3 10.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        btnSubmit.innerHTML = `<span>Guardar Encuesta y Emitir Confirmación</span> <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16.7 5.3 7.5 14.5 3.3 10.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
       }
     });
   }
@@ -608,32 +608,32 @@
 
     try {
       confetti({
-        particleCount: 75,
-        spread: 65,
+        particleCount: 80,
+        spread: 70,
         origin: { y: 0.6 },
-        colors: ["#062b55", "#0866c6", "#fbbf24", "#10b981"]
+        colors: ["#062b55", "#0866c6", "#fbbf24", "#059669"]
       });
 
       setTimeout(() => {
         confetti({
-          particleCount: 45,
+          particleCount: 50,
           angle: 60,
-          spread: 50,
+          spread: 55,
           origin: { x: 0 },
           colors: ["#0866c6", "#fbbf24"]
         });
         confetti({
-          particleCount: 45,
+          particleCount: 50,
           angle: 120,
-          spread: 50,
+          spread: 55,
           origin: { x: 1 },
-          colors: ["#062b55", "#10b981"]
+          colors: ["#062b55", "#059669"]
         });
       }, 250);
     } catch (e) {}
   }
 
-  // ── 15. Reiniciar Encuesta para Otro Visitante ─────────────────────
+  // ── 15. Reiniciar Encuesta para Nuevo Pasajero ─────────────────────
   function bindRestartSurvey() {
     const btnRestart = document.getElementById("btnRestartSurvey");
     if (!btnRestart) return;
@@ -675,13 +675,13 @@
       document.querySelectorAll(".nps-block").forEach((b) => b.classList.remove("selected"));
 
       const q1Lbl = document.getElementById("q1FeedbackLabel");
-      if (q1Lbl) q1Lbl.textContent = "Selecciona una calificación";
+      if (q1Lbl) q1Lbl.textContent = "Toca una estrella para calificar tu experiencia";
 
       const multiBadge = document.getElementById("multiSelectCounter");
       if (multiBadge) multiBadge.textContent = "0 seleccionadas";
 
       const npsBox = document.getElementById("npsFeedbackDisplay");
-      if (npsBox) npsBox.innerHTML = '<span class="nps-desc-text">Selecciona un número del 0 al 10</span>';
+      if (npsBox) npsBox.innerHTML = '<span class="nps-desc-text">Toca un número del 0 al 10 para calificar</span>';
 
       const feedback = document.getElementById("inputFeedbackText");
       if (feedback) feedback.value = "";
@@ -694,7 +694,7 @@
     });
   }
 
-  // Ejecución inicial
+  // Inicialización
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {

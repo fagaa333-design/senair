@@ -3,42 +3,40 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>SENAIR — Estudio de Experiencia del Viajero</title>
+    <title>SENAIR — Encuesta de Experiencia del Viajero</title>
     <link rel="icon" type="image/png" href="logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="encuesta.css" />
   </head>
   <body class="survey-page">
 
-    <!-- ── BARRA SUPERIOR DE NAVEGACIÓN OFICIAL SENAIR ── -->
+    <!-- ── BARRA SUPERIOR EXCLUSIVA SENAIR ── -->
     <header class="survey-navbar" role="banner">
       <div class="navbar-container">
-        <a href="index.html" class="navbar-brand" title="Volver al Portal Principal de SENAIR">
+        <div class="navbar-brand">
           <img src="logo.png" alt="Logotipo SENAIR" class="brand-logo" onerror="this.onerror=null;this.src='../assets/images/logo.png'" />
           <div class="brand-info">
             <span class="brand-title">SENAIR</span>
-            <span class="brand-tag">EXPERIENCIA Y SERVICIO AÉREO</span>
-          </div>
-        </a>
-
-        <!-- Indicador de Progreso Dinámico para Cuestionario -->
-        <div class="nav-step-tracker" id="navStepTracker" style="display: none;">
-          <span class="step-num-pill" id="stepCounterPill">PREGUNTA 1 DE 6</span>
-          <div class="step-progress-mini">
-            <div class="step-progress-bar" id="stepProgressBar" style="width: 16%;"></div>
+            <span class="brand-tag">EXPERIENCIA DEL VIAJERO</span>
           </div>
         </div>
 
+        <!-- Indicador de Vuelo / Telemetría en Vivo -->
+        <div class="nav-flight-tracker" id="navFlightTracker">
+          <div class="flight-route-pill">
+            <span class="route-station">BOG</span>
+            <div class="route-line-anim">
+              <span class="flight-plane-dot">✈</span>
+            </div>
+            <span class="route-station">MDE</span>
+          </div>
+          <span class="flight-step-badge" id="stepCounterPill">CHECK-IN</span>
+        </div>
+
         <div class="nav-right-meta">
-          <span class="badge-fair-official">EDICIÓN 2026 // FERIA DE SOFTWARE</span>
-          <a href="index.html" class="nav-exit-btn" title="Salir de la encuesta">
-            <span>Salir</span>
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M3 3l10 10M13 3L3 13" stroke-linecap="round"/>
-            </svg>
-          </a>
+          <span class="badge-fair-official">FERIA DE SOFTWARE 2026</span>
         </div>
       </div>
     </header>
@@ -56,18 +54,18 @@
             <!-- Franja Superior de Metadatos de Vuelo -->
             <div class="cover-telemetry-strip">
               <div class="tel-item">
-                <span class="tel-kicker">ESTUDIO DE PERCEPCIÓN</span>
-                <strong class="tel-value">REF: SENAIR-UX-2026</strong>
+                <span class="tel-kicker">ENCUESTA OFICIAL</span>
+                <strong class="tel-value">VUELO SENAIR-2026</strong>
               </div>
               <div class="tel-divider" aria-hidden="true"></div>
               <div class="tel-item">
-                <span class="tel-kicker">CORREDORES EVALUADOS</span>
-                <strong class="tel-value">BOG 04°42′N · MDE 06°10′N · CTG 10°26′N</strong>
+                <span class="tel-kicker">RUTAS EVALUADAS</span>
+                <strong class="tel-value">BOGOTÁ · MEDELLÍN · CALI · CARTAGENA</strong>
               </div>
               <div class="tel-divider" aria-hidden="true"></div>
               <div class="tel-item tel-status">
                 <span class="tel-status-dot"></span>
-                <strong class="tel-value">SISTEMA ACTIVO</strong>
+                <strong class="tel-value">CABINA EN LÍNEA</strong>
               </div>
             </div>
 
@@ -105,46 +103,46 @@
               <div class="hero-editorial-content">
                 <div class="content-eyebrow">
                   <span class="eyebrow-accent-line"></span>
-                  <span class="eyebrow-text">PROGRAMA DE EVALUACIÓN DE VUELO Y PLATAFORMA DIGITAL</span>
+                  <span class="eyebrow-text">PROGRAMA DE RETROALIMENTACIÓN DE VUELO</span>
                 </div>
 
                 <h1 class="hero-editorial-title">
-                  La perspectiva del viajero <br class="hide-mobile" />
+                  Tu opinión como viajero <br class="hide-mobile" />
                   <span class="title-serif">traza el rumbo</span> de SENAIR.
                 </h1>
 
                 <p class="hero-editorial-lead">
-                  Presentamos en la feria de software un ecosistema concebido para elevar el estándar de los viajes aéreos en Colombia: desde la reserva transparente hasta la selección en cabina y la puntualidad operativa. Tu experiencia nos guía para perfeccionar cada detalle del servicio.
+                  Queremos que conozcas y evalúes nuestra plataforma web para viajar por Colombia: desde la reserva transparente hasta la elección de asiento y el confort a bordo. Tu opinión nos ayuda a perfeccionar la experiencia de volar.
                 </p>
 
-                <!-- Especificaciones Técnicas del Estudio (Sin emojis, puramente tipográfico) -->
+                <!-- Especificaciones del Estudio -->
                 <div class="hero-specs-row">
                   <div class="hero-spec-item">
-                    <span class="spec-label">DURACIÓN ESTIMADA</span>
+                    <span class="spec-label">TIEMPO ESTIMADO</span>
                     <strong class="spec-headline">2 minutos</strong>
-                    <span class="spec-footnote">6 etapas de avance rápido</span>
+                    <span class="spec-footnote">Preguntas rápidas y fluidas</span>
                   </div>
                   <div class="hero-spec-item">
-                    <span class="spec-label">CUMPLIMIENTO LEGAL</span>
+                    <span class="spec-label">DATOS PROTEGIDOS</span>
                     <strong class="spec-headline">Ley 1581 de 2012</strong>
-                    <span class="spec-footnote">Tratamiento de datos seguro</span>
+                    <span class="spec-footnote">Confidencial y seguro</span>
                   </div>
                   <div class="hero-spec-item">
-                    <span class="spec-label">DOCUMENTO EMITIDO</span>
-                    <strong class="spec-headline">Pasabordo Digital</strong>
+                    <span class="spec-label">TU RESULTADO</span>
+                    <strong class="spec-headline">Pase de Abordar</strong>
                     <span class="spec-footnote">Asignación de asiento 14A</span>
                   </div>
                 </div>
 
-                <!-- Botón de Acción Principal y Claridad para Evaluadores -->
+                <!-- Botón de Acción Principal -->
                 <div class="hero-action-block">
                   <button type="button" class="btn-senair-primary btn-cover-start" id="btnStartSurvey">
-                    <span>Iniciar Check-In de Evaluación</span>
+                    <span>Hacer Check-In y Comenzar</span>
                     <svg class="btn-arrow-svg" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <path d="M4 10h12m-5-5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                   </button>
-                  <span class="hero-audience-note">Optimizado para jurados de software, docentes, estudiantes y viajeros.</span>
+                  <span class="hero-audience-note">Para jurados de software, docentes, estudiantes y todos nuestros viajeros.</span>
                 </div>
 
               </div>
@@ -154,19 +152,19 @@
         </section>
 
         <!-- ══════════════════════════════════════════════════════════
-             ETAPA 1: REGISTRO DEL PARTICIPANTE (CHECK-IN DE VUELO)
+             ETAPA 1: REGISTRO DEL PARTICIPANTE (CHECK-IN)
              ══════════════════════════════════════════════════════════ -->
         <section class="survey-view" id="viewRegister" aria-label="Registro de viajero">
           <div class="survey-card-stage register-stage">
             
             <div class="stage-header-block">
               <div class="stage-eyebrow">
-                <span class="eyebrow-chip">PASO 01 // CHECK-IN</span>
-                <span>EMISIÓN DE CREDENCIAL DE VUELO</span>
+                <span class="eyebrow-chip">PASO 01</span>
+                <span>CHECK-IN Y ASIGNACIÓN DE ASIENTO</span>
               </div>
               <h2 class="stage-title">Registro de Pasajero</h2>
               <p class="stage-subtitle">
-                Por favor identifícate para emitir tu pasabordo oficial y registrar de forma persistente tus respuestas en la base de datos de SENAIR.
+                Ingresa tus datos para emitir tu pase de abordar digital y registrar tu opinión en el sistema de SENAIR.
               </p>
             </div>
 
@@ -175,7 +173,7 @@
                 <div class="form-field-wrapper">
                   <label for="inputName" class="form-label">Nombre y Apellido <span class="required-mark">*</span></label>
                   <div class="input-with-icon">
-                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
                       <circle cx="12" cy="7" r="4"/>
                     </svg>
@@ -184,9 +182,9 @@
                 </div>
 
                 <div class="form-field-wrapper">
-                  <label for="inputEmail" class="form-label">Correo Electrónico <span class="optional-mark">(Opcional para recibir pase)</span></label>
+                  <label for="inputEmail" class="form-label">Correo Electrónico <span class="optional-mark">(Opcional)</span></label>
                   <div class="input-with-icon">
-                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <rect width="20" height="16" x="2" y="4" rx="2"/>
                       <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
                     </svg>
@@ -197,9 +195,9 @@
 
               <div class="form-grid-duo">
                 <div class="form-field-wrapper">
-                  <label for="selectProfile" class="form-label">Perfil de Asistencia a la Feria</label>
+                  <label for="selectProfile" class="form-label">¿Cómo nos visitas en la feria?</label>
                   <div class="input-with-icon">
-                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                       <circle cx="9" cy="7" r="4"/>
                       <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
@@ -209,16 +207,16 @@
                       <option value="Jurado de Software" selected>Jurado Calificador de Software</option>
                       <option value="Docente / Académico">Docente o Evaluador Académico</option>
                       <option value="Estudiante">Estudiante / Compañero</option>
-                      <option value="Viajero Frecuente">Viajero Frecuente / Usuario Particular</option>
-                      <option value="Visitante General">Visitante General de la Feria</option>
+                      <option value="Viajero Frecuente">Viajero Frecuente / Particular</option>
+                      <option value="Visitante General">Visitante de la Feria</option>
                     </select>
                   </div>
                 </div>
 
                 <div class="form-field-wrapper">
-                  <label for="selectCity" class="form-label">Ciudad de Procedencia</label>
+                  <label for="selectCity" class="form-label">¿Desde qué ciudad viajas o nos acompañas?</label>
                   <div class="input-with-icon">
-                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
                       <circle cx="12" cy="10" r="3"/>
                     </svg>
@@ -230,6 +228,7 @@
                       <option value="Cartagena (CTG)">Cartagena (CTG)</option>
                       <option value="Bucaramanga (BGA)">Bucaramanga (BGA)</option>
                       <option value="Pereira (PEI)">Pereira / Eje Cafetero (PEI)</option>
+                      <option value="Santa Marta (SMR)">Santa Marta (SMR)</option>
                       <option value="Otra Ciudad">Otra Ciudad</option>
                     </select>
                   </div>
@@ -242,7 +241,7 @@
                   <input type="checkbox" id="checkPrivacyConsent" required checked />
                   <span class="checkbox-indicator"></span>
                   <span class="checkbox-label-text">
-                    Autorizo el tratamiento de mis datos personales para fines estadísticos, académicos y de retroalimentación de la Feria de Software de SENAIR, en estricto cumplimiento de la <strong>Ley 1581 de 2012</strong>.
+                    Autorizo el tratamiento de mis datos personales para fines estadísticos y de retroalimentación de la Feria de Software de SENAIR, según la <strong>Ley 1581 de 2012</strong>.
                   </span>
                 </label>
               </div>
@@ -250,9 +249,9 @@
               <div class="form-status-alert" id="registerAlertMsg" style="display: none;" role="alert"></div>
 
               <div class="form-footer-actions">
-                <button type="button" class="btn-senair-ghost" id="btnBackToWelcome">← Volver a Portada</button>
+                <button type="button" class="btn-senair-ghost" id="btnBackToWelcome">← Volver</button>
                 <button type="submit" class="btn-senair-primary" id="btnSubmitRegister">
-                  <span>Confirmar Check-In y Continuar</span>
+                  <span>Confirmar Check-In y Seguir</span>
                   <svg class="btn-arrow-svg" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path d="M4 10h12m-5-5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
@@ -269,66 +268,77 @@
         <section class="survey-view" id="viewQuestions" aria-label="Cuestionario de evaluación">
           <div class="survey-card-stage question-stage">
 
-            <!-- Encabezado de Progreso Progresivo -->
-            <div class="question-progress-header">
-              <div class="progress-meta-row">
+            <!-- Telemetría Dinámica de Vuelo en Cabina -->
+            <div class="flight-telemetry-banner">
+              <div class="telemetry-top-row">
+                <div class="flight-badge-group">
+                  <span class="flight-number-tag">VUELO SA-2026</span>
+                  <span class="flight-status-live" id="flightTelemetryPhase">FASE: DESPEGUE // 5,000 FT</span>
+                </div>
                 <span class="meta-question-pill" id="questionCounterBadge">PREGUNTA 1 DE 6</span>
-                <span class="meta-category-tag" id="questionCategoryTag">EXPERIENCIA GENERAL</span>
               </div>
-              <div class="progress-track-full">
-                <div class="progress-fill-active" id="questionProgressFill" style="width: 16.6%;"></div>
+              <div class="telemetry-track-wrapper">
+                <div class="telemetry-bar-fill" id="questionProgressFill" style="width: 16.6%;"></div>
+                <div class="telemetry-plane-marker" id="planeTelemetryMarker" style="left: 16.6%;">
+                  <span>✈</span>
+                </div>
               </div>
             </div>
 
             <!-- CONTENEDOR DE PASOS DE PREGUNTA -->
             <div class="questions-stack" id="questionsStack">
 
-              <!-- ── PREGUNTA 1: ESCALA DE SATISFACCIÓN GLOBAL (ESTRELLAS VECTORIALES SVG) ── -->
+              <!-- ── PREGUNTA 1: ESCALA DE SATISFACCIÓN GLOBAL ── -->
               <div class="question-pane active" id="paneQ1" data-qid="q1_satisfaction">
-                <span class="pane-eyebrow">01 // EVALUACIÓN GLOBAL</span>
-                <h3 class="pane-title">¿Cómo calificarías tu experiencia general con la plataforma y propuesta de SENAIR?</h3>
+                <span class="pane-eyebrow">01 // SATISFACCIÓN GENERAL</span>
+                <h3 class="pane-title">¿Cómo calificarías tu experiencia general con SENAIR y nuestra página web?</h3>
                 <p class="pane-description">
-                  Evalúa aspectos como identidad visual, arquitectura de información, claridad y navegación en la plataforma de la aerolínea.
+                  Evalúa aspectos como la facilidad para navegar, el diseño visual y lo que te transmite nuestra propuesta de aerolínea colombiana.
                 </p>
 
                 <div class="satisfaction-scale-wrapper">
-                  <div class="scale-buttons-row" role="radiogroup" aria-label="Calificación de 1 a 5">
-                    <button type="button" class="scale-star-btn" data-value="1" role="radio" aria-checked="false" aria-label="Nivel 1 - Deficiente">
-                      <svg class="star-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true">
+                  <div class="scale-buttons-row" role="radiogroup" aria-label="Calificación de 1 a 5 estrellas">
+                    <button type="button" class="scale-star-btn" data-value="1" role="radio" aria-checked="false" aria-label="1 estrella - Muy insatisfecho">
+                      <svg class="star-svg" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                       </svg>
                       <span class="star-number">1</span>
+                      <small class="star-tag">Mala</small>
                     </button>
-                    <button type="button" class="scale-star-btn" data-value="2" role="radio" aria-checked="false" aria-label="Nivel 2 - Regular">
-                      <svg class="star-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true">
+                    <button type="button" class="scale-star-btn" data-value="2" role="radio" aria-checked="false" aria-label="2 estrellas - Regular">
+                      <svg class="star-svg" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                       </svg>
                       <span class="star-number">2</span>
+                      <small class="star-tag">Regular</small>
                     </button>
-                    <button type="button" class="scale-star-btn" data-value="3" role="radio" aria-checked="false" aria-label="Nivel 3 - Aceptable">
-                      <svg class="star-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true">
+                    <button type="button" class="scale-star-btn" data-value="3" role="radio" aria-checked="false" aria-label="3 estrellas - Buena">
+                      <svg class="star-svg" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                       </svg>
                       <span class="star-number">3</span>
+                      <small class="star-tag">Buena</small>
                     </button>
-                    <button type="button" class="scale-star-btn" data-value="4" role="radio" aria-checked="false" aria-label="Nivel 4 - Favorable">
-                      <svg class="star-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true">
+                    <button type="button" class="scale-star-btn" data-value="4" role="radio" aria-checked="false" aria-label="4 estrellas - Muy buena">
+                      <svg class="star-svg" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                       </svg>
                       <span class="star-number">4</span>
+                      <small class="star-tag">Muy buena</small>
                     </button>
-                    <button type="button" class="scale-star-btn" data-value="5" role="radio" aria-checked="false" aria-label="Nivel 5 - Sobresaliente">
-                      <svg class="star-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true">
+                    <button type="button" class="scale-star-btn" data-value="5" role="radio" aria-checked="false" aria-label="5 estrellas - ¡Excelente!">
+                      <svg class="star-svg" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                       </svg>
                       <span class="star-number">5</span>
+                      <small class="star-tag">¡Excelente!</small>
                     </button>
                   </div>
 
-                  <div class="scale-legend-bar">
-                    <span class="legend-left">1 — Nivel inicial</span>
-                    <strong class="legend-current" id="q1FeedbackLabel">Selecciona una calificación</strong>
-                    <span class="legend-right">5 — Estándar sobresaliente</span>
+                  <!-- Feedback verbal dinámico y elegante -->
+                  <div class="rating-feedback-pill">
+                    <span class="pill-dot">●</span>
+                    <strong id="q1FeedbackLabel">Toca una estrella para calificar tu experiencia</strong>
                   </div>
                 </div>
 
@@ -343,21 +353,21 @@
                 </div>
               </div>
 
-              <!-- ── PREGUNTA 2: ASPECTO MÁS VALORADO (ICONOS VECTORIALES COHERENTES) ── -->
+              <!-- ── PREGUNTA 2: LO QUE MÁS TE GUSTÓ (CARDS ANIMADAS) ── -->
               <div class="question-pane" id="paneQ2" data-qid="q2_ease">
-                <span class="pane-eyebrow">02 // VALOR PERCIBIDO</span>
-                <h3 class="pane-title">¿Qué funcionalidad o módulo consideras más destacable en el sistema SENAIR?</h3>
+                <span class="pane-eyebrow">02 // LO QUE MÁS TE GUSTÓ</span>
+                <h3 class="pane-title">¿Qué fue lo que más te gustó o llamó la atención de nuestra página web?</h3>
                 <p class="pane-description">
-                  Selecciona la característica que mayor impacto positivo genera en la experiencia de usuario.
+                  Elige la característica que te pareció más útil o mejor desarrollada:
                 </p>
 
-                <div class="editorial-cards-grid" role="radiogroup" aria-label="Aspectos valorados de SENAIR">
+                <div class="editorial-cards-grid" role="radiogroup" aria-label="Aspectos que más gustaron">
                   
-                  <!-- Tarjeta 1: Mapa de Asientos -->
+                  <!-- Tarjeta 1: Elegir Asiento -->
                   <button type="button" class="editorial-choice-card" data-value="Mapa de Asientos Interactivo" role="radio" aria-checked="false">
                     <div class="card-indicator"></div>
-                    <div class="card-icon-box">
-                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <div class="card-icon-box bg-blue-tint">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M7 3h10a2 2 0 0 1 2 2v7H5V5a2 2 0 0 1 2-2Z"/>
                         <path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>
                         <path d="M2 12h20"/>
@@ -365,47 +375,56 @@
                       </svg>
                     </div>
                     <div class="card-text-group">
-                      <strong class="card-heading">Mapa de Asientos en Cabina</strong>
-                      <span class="card-subtext">Selección visual e interactiva de puestos con vista de distribución en tiempo real.</span>
+                      <div class="card-title-row">
+                        <strong class="card-heading">Elegir mi asiento en cabina</strong>
+                        <span class="card-tag-pill">INTERACTIVO</span>
+                      </div>
+                      <span class="card-subtext">Ver la distribución real del avión y escoger el puesto favorito en tiempo real.</span>
                     </div>
                   </button>
 
                   <!-- Tarjeta 2: Tarifas Transparentes -->
                   <button type="button" class="editorial-choice-card" data-value="Transparencia de Tarifas" role="radio" aria-checked="false">
                     <div class="card-indicator"></div>
-                    <div class="card-icon-box">
-                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <div class="card-icon-box bg-emerald-tint">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
                         <line x1="7" y1="7" x2="7.01" y2="7"/>
                       </svg>
                     </div>
                     <div class="card-text-group">
-                      <strong class="card-heading">Tarifas Claras y Flexibles</strong>
-                      <span class="card-subtext">Desglose transparente de costos sin cargos imprevistos al momento de cotizar.</span>
+                      <div class="card-title-row">
+                        <strong class="card-heading">Precios claros y sin cobros sorpresa</strong>
+                        <span class="card-tag-pill">TRANSPARENTE</span>
+                      </div>
+                      <span class="card-subtext">Tarifas honestas desde el inicio, con desglose exacto de lo que estás pagando.</span>
                     </div>
                   </button>
 
                   <!-- Tarjeta 3: Reserva y Pago -->
                   <button type="button" class="editorial-choice-card" data-value="Proceso de Reserva y Pago" role="radio" aria-checked="false">
                     <div class="card-indicator"></div>
-                    <div class="card-icon-box">
-                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <div class="card-icon-box bg-indigo-tint">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect width="20" height="14" x="2" y="5" rx="2"/>
                         <line x1="2" y1="10" x2="22" y2="10"/>
                         <path d="M6 15h4"/>
                       </svg>
                     </div>
                     <div class="card-text-group">
-                      <strong class="card-heading">Flujo de Reserva y Pago</strong>
-                      <span class="card-subtext">Proceso ágil, intuitivo y adaptado para dispositivos móviles con confirmación inmediata.</span>
+                      <div class="card-title-row">
+                        <strong class="card-heading">Facilidad para reservar y pagar</strong>
+                        <span class="card-tag-pill">RÁPIDO</span>
+                      </div>
+                      <span class="card-subtext">Un proceso sencillo, seguro y pensado para completarse en un par de minutos desde el celular.</span>
                     </div>
                   </button>
 
                   <!-- Tarjeta 4: Asistente Aerobot -->
                   <button type="button" class="editorial-choice-card" data-value="Asistente Virtual Aerobot 24/7" role="radio" aria-checked="false">
                     <div class="card-indicator"></div>
-                    <div class="card-icon-box">
-                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <div class="card-icon-box bg-amber-tint">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M12 2a2 2 0 0 1 2 2v1h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h2V4a2 2 0 0 1 2-2Z"/>
                         <circle cx="9" cy="11" r="1"/>
                         <circle cx="15" cy="11" r="1"/>
@@ -413,8 +432,11 @@
                       </svg>
                     </div>
                     <div class="card-text-group">
-                      <strong class="card-heading">Asistente Inteligente Aerobot</strong>
-                      <span class="card-subtext">Atención al viajero para resolver inquietudes de rutas, itinerarios y servicios.</span>
+                      <div class="card-title-row">
+                        <strong class="card-heading">AeroBot: Asistente virtual 24/7</strong>
+                        <span class="card-tag-pill">INTELIGENCIA ARTIFICIAL</span>
+                      </div>
+                      <span class="card-subtext">Respuestas inmediatas con inteligencia artificial para resolver dudas de viaje a cualquier hora.</span>
                     </div>
                   </button>
 
@@ -431,57 +453,57 @@
                 </div>
               </div>
 
-              <!-- ── PREGUNTA 3: PUNTUALIDAD Y OPERACIONES (BADGES OPERACIONALES SIN EMOJIS) ── -->
+              <!-- ── PREGUNTA 3: PUNTUALIDAD Y CUMPLIMIENTO ── -->
               <div class="question-pane" id="paneQ3" data-qid="q3_punctuality">
-                <span class="pane-eyebrow">03 // OPERACIONES Y PUNTUALIDAD</span>
-                <h3 class="pane-title">¿Cuál es tu percepción sobre el cumplimiento de itinerarios e información de vuelos?</h3>
+                <span class="pane-eyebrow">03 // PUNTUALIDAD Y CUMPLIMIENTO</span>
+                <h3 class="pane-title">¿Qué opinas sobre la puntualidad y el cumplimiento de los vuelos?</h3>
                 <p class="pane-description">
-                  La puntualidad y la claridad en los estados de vuelo constituyen el pilar esencial de la aviación comercial.
+                  Para nosotros en SENAIR, tu tiempo y la tranquilidad en tus horarios son lo primero:
                 </p>
 
                 <div class="status-options-list" role="radiogroup" aria-label="Percepción de puntualidad">
                   
-                  <button type="button" class="status-choice-row" data-value="Impecable (A tiempo)" role="radio" aria-checked="false">
+                  <button type="button" class="status-choice-row" data-value="Excelente, siempre a tiempo" role="radio" aria-checked="false">
                     <span class="status-marker green"></span>
                     <div class="status-content">
                       <div class="status-title-row">
-                        <strong class="status-name">Impecable y Confiable</strong>
-                        <span class="badge-tag green">ESTÁNDAR ÓPTIMO</span>
+                        <strong class="status-name">Excelente, siempre a tiempo</strong>
+                        <span class="badge-tag green">A TIEMPO</span>
                       </div>
-                      <small class="status-desc">Información precisa, estados en vivo y sincronización estricta de itinerarios.</small>
+                      <small class="status-desc">Vuelos puntuales y con información clara y en vivo en todo momento.</small>
                     </div>
                   </button>
 
-                  <button type="button" class="status-choice-row" data-value="Aceptable (< 15 min)" role="radio" aria-checked="false">
+                  <button type="button" class="status-choice-row" data-value="Aceptable, demoras mínimas" role="radio" aria-checked="false">
                     <span class="status-marker yellow"></span>
                     <div class="status-content">
                       <div class="status-title-row">
-                        <strong class="status-name">Aceptable y Tolerable</strong>
-                        <span class="badge-tag yellow">MARGEN REGULAR</span>
+                        <strong class="status-name">Aceptable, demoras mínimas</strong>
+                        <span class="badge-tag yellow">TOLERABLE</span>
                       </div>
-                      <small class="status-desc">Variaciones operacionales menores a 15 minutos dentro del margen de vuelo.</small>
+                      <small class="status-desc">Pequeños retrasos de menos de 15 minutos que se pueden entender en el viaje.</small>
                     </div>
                   </button>
 
-                  <button type="button" class="status-choice-row" data-value="Requiere Mejoras" role="radio" aria-checked="false">
+                  <button type="button" class="status-choice-row" data-value="Tienen que mejorar" role="radio" aria-checked="false">
                     <span class="status-marker red"></span>
                     <div class="status-content">
                       <div class="status-title-row">
-                        <strong class="status-name">Oportunidad de Optimización</strong>
-                        <span class="badge-tag red">PRIORIDAD</span>
+                        <strong class="status-name">Tienen que mejorar</strong>
+                        <span class="badge-tag red">POR MEJORAR</span>
                       </div>
-                      <small class="status-desc">Necesidad de mayor anticipación y comunicación activa ante ajustes de horario.</small>
+                      <small class="status-desc">Se presentan retrasos y hace falta avisar con mayor anticipación al pasajero.</small>
                     </div>
                   </button>
 
-                  <button type="button" class="status-choice-row" data-value="Primera Experiencia en Feria" role="radio" aria-checked="false">
+                  <button type="button" class="status-choice-row" data-value="Primera vez que conozco SENAIR" role="radio" aria-checked="false">
                     <span class="status-marker blue"></span>
                     <div class="status-content">
                       <div class="status-title-row">
-                        <strong class="status-name">Primera Experiencia / Evaluador</strong>
-                        <span class="badge-tag blue">FERIA 2026</span>
+                        <strong class="status-name">Primera vez que conozco la aerolínea</strong>
+                        <span class="badge-tag blue">NUEVO VIAJERO</span>
                       </div>
-                      <small class="status-desc">Conociendo la propuesta digital y funcional durante la feria de software.</small>
+                      <small class="status-desc">Vengo a conocer y evaluar la propuesta como jurado o visitante de la feria de software.</small>
                     </div>
                   </button>
 
@@ -498,22 +520,22 @@
                 </div>
               </div>
 
-              <!-- ── PREGUNTA 4: INNOVACIONES PRIORITARIAS (CHIPS CON ICONOGRAFÍA SVG) ── -->
+              <!-- ── PREGUNTA 4: COMODIDADES A BORDO (SIN LA PALABRA FLOTA) ── -->
               <div class="question-pane" id="paneQ4" data-qid="q4_improvements">
                 <div class="pane-header-with-badge">
                   <div>
-                    <span class="pane-eyebrow">04 // CONFORT E INNOVACIÓN A BORDO</span>
-                    <h3 class="pane-title">¿Qué servicios o innovaciones adicionales te gustaría ver en la flota SENAIR?</h3>
-                    <p class="pane-description">Selecciona una o varias opciones prioritarias para tu experiencia de vuelo:</p>
+                    <span class="pane-eyebrow">04 // COMODIDADES A BORDO</span>
+                    <h3 class="pane-title">¿Qué comodidades te gustaría disfrutar en los aviones de SENAIR?</h3>
+                    <p class="pane-description">Puedes marcar varias opciones que hagan tu viaje más bacano y placentero:</p>
                   </div>
                   <div class="selected-counter-badge" id="multiSelectCounter">0 seleccionadas</div>
                 </div>
 
-                <div class="amenities-chips-container" role="group" aria-label="Servicios e innovaciones a bordo">
+                <div class="amenities-chips-container" role="group" aria-label="Servicios a bordo">
                   
                   <button type="button" class="amenity-chip-item" data-value="WiFi Satelital Gratis" aria-pressed="false">
-                    <span class="chip-icon-box">
-                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <span class="chip-icon-box bg-blue-tint">
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M12 20h.01"/>
                         <path d="M8.5 16.429a5 5 0 0 1 7 0"/>
                         <path d="M5 12.859a10 10 0 0 1 14 0"/>
@@ -521,28 +543,28 @@
                       </svg>
                     </span>
                     <div class="chip-text">
-                      <strong class="chip-title">WiFi Satelital de Alta Velocidad</strong>
-                      <small class="chip-sub">Conectividad continua para trabajo o entretenimiento.</small>
+                      <strong class="chip-title">WiFi rápido y gratis en todo el vuelo</strong>
+                      <small class="chip-sub">Para chatear, trabajar o ver redes mientras vuelas.</small>
                     </div>
                   </button>
 
                   <button type="button" class="amenity-chip-item" data-value="Pantallas Táctiles 4K" aria-pressed="false">
-                    <span class="chip-icon-box">
-                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <span class="chip-icon-box bg-indigo-tint">
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect width="20" height="14" x="2" y="3" rx="2"/>
                         <line x1="8" y1="21" x2="16" y2="21"/>
                         <line x1="12" y1="17" x2="12" y2="21"/>
                       </svg>
                     </span>
                     <div class="chip-text">
-                      <strong class="chip-title">Pantallas Individuales 4K</strong>
-                      <small class="chip-sub">Sistema multimedia de entretenimiento a bordo.</small>
+                      <strong class="chip-title">Pantalla individual 4K con películas</strong>
+                      <small class="chip-sub">Series, música y juegos en el respaldo de tu asiento.</small>
                     </div>
                   </button>
 
                   <button type="button" class="amenity-chip-item" data-value="Gastronomía Regional Colombiana" aria-pressed="false">
-                    <span class="chip-icon-box">
-                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <span class="chip-icon-box bg-amber-tint">
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
                         <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
                         <line x1="6" y1="1" x2="6" y2="4"/>
@@ -551,14 +573,14 @@
                       </svg>
                     </span>
                     <div class="chip-text">
-                      <strong class="chip-title">Café Especial y Gastronomía Regional</strong>
-                      <small class="chip-sub">Sabores emblemáticos de las regiones colombianas.</small>
+                      <strong class="chip-title">Cafecito colombiano y refrigerio típico</strong>
+                      <small class="chip-sub">Sabores de nuestra tierra incluidos en tu tiquete.</small>
                     </div>
                   </button>
 
                   <button type="button" class="amenity-chip-item" data-value="Mayor Espacio entre Asientos" aria-pressed="false">
-                    <span class="chip-icon-box">
-                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <span class="chip-icon-box bg-emerald-tint">
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M4 18V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12"/>
                         <path d="M9 14h6"/>
                         <path d="M12 11v6"/>
@@ -566,35 +588,35 @@
                       </svg>
                     </span>
                     <div class="chip-text">
-                      <strong class="chip-title">Mayor Espacio Ergonómico en Piernas</strong>
-                      <small class="chip-sub">Comodidad superior en todas las filas de cabina.</small>
+                      <strong class="chip-title">Más espacio para estirar las piernas</strong>
+                      <small class="chip-sub">Mayor comodidad y ergonomía en todas las filas.</small>
                     </div>
                   </button>
 
                   <button type="button" class="amenity-chip-item" data-value="Programa de Millas SENAIR" aria-pressed="false">
-                    <span class="chip-icon-box">
-                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <span class="chip-icon-box bg-rose-tint">
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="12" cy="8" r="6"/>
                         <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
                       </svg>
                     </span>
                     <div class="chip-text">
-                      <strong class="chip-title">Programa de Fidelización y Millas</strong>
-                      <small class="chip-sub">Acumulación de beneficios y upgrades de vuelo.</small>
+                      <strong class="chip-title">Millas y puntos para viajar gratis</strong>
+                      <small class="chip-sub">Beneficios para reclamar tiquetes y ascensos de cabina.</small>
                     </div>
                   </button>
 
                   <button type="button" class="amenity-chip-item" data-value="Embarque Biométrico Facial" aria-pressed="false">
-                    <span class="chip-icon-box">
-                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <span class="chip-icon-box bg-sky-tint">
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3"/>
                         <circle cx="12" cy="12" r="3"/>
                         <path d="M9 16c1-1 5-1 6 0"/>
                       </svg>
                     </span>
                     <div class="chip-text">
-                      <strong class="chip-title">Embarque Biométrico Ágil</strong>
-                      <small class="chip-sub">Abordaje sin contacto mediante reconocimiento facial seguro.</small>
+                      <strong class="chip-title">Abordar rápido sin filas</strong>
+                      <small class="chip-sub">Entrada al avión sin contacto con reconocimiento facial seguro.</small>
                     </div>
                   </button>
 
@@ -611,12 +633,12 @@
                 </div>
               </div>
 
-              <!-- ── PREGUNTA 5: ÍNDICE NETO DE RECOMENDACIÓN (NPS 0-10) ── -->
+              <!-- ── PREGUNTA 5: RECOMENDACIÓN (NPS 0-10) ── -->
               <div class="question-pane" id="paneQ5" data-qid="q5_nps">
-                <span class="pane-eyebrow">05 // RECOMENDACIÓN DE MARCA</span>
-                <h3 class="pane-title">En una escala de 0 a 10, ¿qué tan probable es que recomiendes SENAIR a colegas o familiares?</h3>
+                <span class="pane-eyebrow">05 // RECOMENDACIÓN</span>
+                <h3 class="pane-title">Del 0 al 10, ¿qué tan probable es que recomiendes volar con SENAIR?</h3>
                 <p class="pane-description">
-                  0 = Nada probable • 10 = Definitivamente lo recomendaría como primera opción
+                  0 = No lo recomendaría · 10 = ¡De una, totalmente recomendado!
                 </p>
 
                 <div class="nps-scale-container">
@@ -635,7 +657,7 @@
                   </div>
 
                   <div class="nps-feedback-box" id="npsFeedbackDisplay">
-                    <span class="nps-desc-text">Selecciona un número del 0 al 10</span>
+                    <span class="nps-desc-text">Toca un número del 0 al 10 para calificar</span>
                   </div>
                 </div>
 
@@ -652,10 +674,10 @@
 
               <!-- ── PREGUNTA 6: COMENTARIOS LIBRES ── -->
               <div class="question-pane" id="paneQ6" data-qid="q6_feedback">
-                <span class="pane-eyebrow">06 // OBSERVACIONES Y PROPUESTAS</span>
-                <h3 class="pane-title">¿Tienes alguna recomendación técnica, idea innovadora o mensaje para el equipo de SENAIR?</h3>
+                <span class="pane-eyebrow">06 // COMENTARIOS Y SALUDOS</span>
+                <h3 class="pane-title">¿Tienes algún comentario, felicitación o idea para el equipo de SENAIR?</h3>
                 <p class="pane-description">
-                  Tus observaciones enriquecen la sustentación del proyecto y la evolución de la arquitectura del sistema (Opcional):
+                  Tu opinión sincera le da mucho valor a nuestra presentación en la feria de software (Opcional):
                 </p>
 
                 <div class="textarea-card-wrapper">
@@ -663,7 +685,7 @@
                     id="inputFeedbackText" 
                     class="form-control feedback-textarea" 
                     rows="4" 
-                    placeholder="Comparte aquí tus observaciones técnicas, felicitaciones o propuestas de mejora..." 
+                    placeholder="Escríbenos lo que quieras: qué te gustó, qué nos falta o un saludo para el equipo..." 
                     maxlength="500"
                   ></textarea>
                   <div class="textarea-counter-row">
@@ -674,7 +696,7 @@
                 <div class="pane-navigation-footer">
                   <button type="button" class="btn-senair-ghost btn-prev-question" data-target-step="5">← Anterior</button>
                   <button type="button" class="btn-senair-primary btn-review-bp" id="btnGoToBoardingPass">
-                    <span>Revisar Pasabordo y Finalizar</span>
+                    <span>Ver mi Pase de Abordar y Finalizar</span>
                     <svg class="btn-arrow-svg" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <path d="M4 10h12m-5-5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
@@ -688,9 +710,9 @@
         </section>
 
         <!-- ══════════════════════════════════════════════════════════
-             ETAPA 3: PASABORDO OFICIAL SENAIR (BOARDING PASS)
+             ETAPA 3: PASE DE ABORDAR OFICIAL (BOARDING PASS)
              ══════════════════════════════════════════════════════════ -->
-        <section class="survey-view" id="viewTouchdown" aria-label="Pasabordo oficial y confirmación de vuelo">
+        <section class="survey-view" id="viewTouchdown" aria-label="Pase de abordar oficial SENAIR">
           <div class="touchdown-container">
             
             <div class="editorial-boarding-pass" id="officialBoardingPass">
@@ -701,16 +723,16 @@
                   <img src="logo.png" alt="SENAIR" class="pass-logo-img" onerror="this.onerror=null;this.src='../assets/images/logo.png'" />
                   <div>
                     <strong class="pass-company">SENAIR AIRLINES</strong>
-                    <span class="pass-type-tag">TARJETA DE EMBARQUE & CERTIFICACIÓN</span>
+                    <span class="pass-type-tag">PASE DE ABORDAR DIGITAL & CERTIFICACIÓN</span>
                   </div>
                 </div>
                 <div class="pass-flight-badge">
-                  <span class="pf-label">VUELO OFICIAL</span>
+                  <span class="pf-label">VUELO ESPECIAL</span>
                   <strong class="pf-code">SA-2026</strong>
                 </div>
               </div>
 
-              <!-- Cuerpo de Datos del Pasabordo -->
+              <!-- Cuerpo de Datos del Pase de Abordar -->
               <div class="pass-body">
                 <div class="pass-meta-grid">
                   <div class="pass-meta-cell">
@@ -733,15 +755,15 @@
 
                 <!-- Resumen Consolidado de Calificaciones Emitidas -->
                 <div class="pass-answers-summary">
-                  <span class="summary-section-title">CONSOLIDADO DE RESPUESTAS REGISTRADAS</span>
+                  <span class="summary-section-title">RESUMEN DE TUS RESPUESTAS</span>
                   
                   <div class="answers-summary-grid">
                     <div class="summary-box">
-                      <span class="sb-label">01 // SATISFACCIÓN</span>
+                      <span class="sb-label">01 // SATISFACCIÓN GENERAL</span>
                       <strong class="sb-val" id="bpValQ1">Pendiente</strong>
                     </div>
                     <div class="summary-box">
-                      <span class="sb-label">02 // VALOR DESTACADO</span>
+                      <span class="sb-label">02 // LO QUE MÁS TE GUSTÓ</span>
                       <strong class="sb-val" id="bpValQ2">Pendiente</strong>
                     </div>
                     <div class="summary-box">
@@ -749,20 +771,20 @@
                       <strong class="sb-val" id="bpValQ3">Pendiente</strong>
                     </div>
                     <div class="summary-box">
-                      <span class="sb-label">05 // ÍNDICE NPS</span>
+                      <span class="sb-label">05 // RECOMENDACIÓN</span>
                       <strong class="sb-val highlight" id="bpValQ5">Pendiente</strong>
                     </div>
                     <div class="summary-box full-width">
-                      <span class="sb-label">04 // MEJORAS PRIORITARIAS</span>
+                      <span class="sb-label">04 // COMODIDADES A BORDO DESEADAS</span>
                       <strong class="sb-val" id="bpValQ4">Ninguna seleccionada</strong>
                     </div>
                   </div>
                 </div>
 
-                <!-- Código de Barras Aeronáutico Auténtico -->
+                <!-- Código de Barras Realista -->
                 <div class="pass-barcode-section">
                   <div class="barcode-graphic" aria-hidden="true"></div>
-                  <span class="barcode-serial">SENAIR-SA2026-FLIGHT-EXPERIENCE-REGISTRATION-COLOMBIA</span>
+                  <span class="barcode-serial">SENAIR-SA2026-EXPERIENCIA-VIAJERO-COLOMBIA</span>
                 </div>
               </div>
 
@@ -771,9 +793,9 @@
                 <div class="submit-alert-box" id="submitAlertBanner" style="display: none;" role="alert"></div>
 
                 <div class="pass-buttons-group">
-                  <button type="button" class="btn-senair-ghost" id="btnBackToQuestions">← Modificar Respuestas</button>
+                  <button type="button" class="btn-senair-ghost" id="btnBackToQuestions">← Cambiar Respuestas</button>
                   <button type="button" class="btn-senair-primary btn-save-database" id="btnConfirmFinalSubmission">
-                    <span>Guardar Encuesta en Base de Datos</span>
+                    <span>Guardar Encuesta y Emitir Confirmación</span>
                     <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <path d="M16.7 5.3 7.5 14.5 3.3 10.3" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
@@ -793,18 +815,18 @@
           <div class="completion-modal-card">
             
             <div class="completion-seal">
-              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                 <polyline points="22 4 12 14.01 9 11.01"/>
               </svg>
             </div>
 
-            <span class="status-verified-badge">PERSISTENCIA CONFIRMADA EN BASE DE DATOS</span>
+            <span class="status-verified-badge">REGISTRO EXITOSO EN BASE DE DATOS</span>
 
-            <h2 class="completion-title" id="completionTitle">¡Gracias por ser parte del vuelo SENAIR!</h2>
+            <h2 class="completion-title" id="completionTitle">¡Gracias por viajar con SENAIR!</h2>
             
             <p class="completion-message">
-              Tus respuestas han sido integradas de forma permanente en la base de datos de la aerolínea. Tu retroalimentación técnica y tu criterio como usuario nos ayudan a consolidar este proyecto en la feria de software.
+              Tus respuestas ya quedaron guardadas en nuestra base de datos. Tu aporte como usuario y evaluador es fundamental para seguir construyendo la mejor aerolínea de Colombia.
             </p>
 
             <div class="official-code-panel">
@@ -814,13 +836,13 @@
 
             <div class="completion-actions-row">
               <a href="index.html" class="btn-senair-primary">
-                <span>Volver al Portal SENAIR</span>
+                <span>Ir al Sitio Web Principal</span>
                 <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <path d="M4 10h12m-5-5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </a>
               <button type="button" class="btn-senair-ghost" id="btnRestartSurvey">
-                <span>Registrar Nueva Encuesta (Otro visitante)</span>
+                <span>Registrar Otra Encuesta (Nuevo Pasajero)</span>
               </button>
             </div>
 
