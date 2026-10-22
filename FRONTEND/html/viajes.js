@@ -251,6 +251,23 @@ async function renderReservations() {
   });
 }
 
+function saveFavorites(favorites) {
+  try {
+    window.localStorage.setItem(favoritesStorageKey, JSON.stringify(favorites));
+    return true;
+  } catch (e) {
+    console.error("Error al guardar favoritos:", e);
+    return false;
+  }
+}
+
+function removeFavorite(id) {
+  const favorites = getFavorites();
+  const updated = favorites.filter((fav) => fav.id !== id && fav.name !== id && fav.searchName !== id);
+  saveFavorites(updated);
+  renderTrips();
+}
+
 function renderTrips() {
   const query = searchInput.value.trim().toLowerCase();
   const favorites = getFavorites();
@@ -264,11 +281,41 @@ function renderTrips() {
   visibleFavorites.forEach((favorite) => {
     const card = document.createElement("article");
     card.className = "trip-card";
-    card.dataset.id = favorite.id;
-    card.innerHTML = `<div class="destination-image ${escapeHtml(favorite.imageClass)}"></div><div class="trip-content"><div class="trip-meta"><span>${escapeHtml(favorite.meta?.[0] || "Destino SENAIR")}</span><span>${escapeHtml(favorite.meta?.[1] || "Disponible")}</span></div><h3>${escapeHtml(favorite.name)}</h3><p>${escapeHtml(favorite.description)}</p><div class="trip-footer"><strong>${escapeHtml(favorite.price)}</strong><a href="index.html#vuelos">Buscar vuelo <span aria-hidden="true">→</span></a></div></div>`;
+    const favId = favorite.id || favorite.searchName || favorite.name;
+    card.dataset.id = favId;
+    card.innerHTML = `
+      <div class="destination-image ${escapeHtml(favorite.imageClass)}">
+        <button class="save-button remove-favorite-btn" type="button" data-id="${escapeHtml(favId)}" aria-label="Quitar ${escapeHtml(favorite.name)} de guardados" title="Quitar de guardados" aria-pressed="true">♥</button>
+      </div>
+      <div class="trip-content">
+        <div class="trip-meta">
+          <span>${escapeHtml(favorite.meta?.[0] || "Destino SENAIR")}</span>
+          <span>${escapeHtml(favorite.meta?.[1] || "Disponible")}</span>
+        </div>
+        <h3>${escapeHtml(favorite.name)}</h3>
+        <p>${escapeHtml(favorite.description)}</p>
+        <div class="trip-footer">
+          <strong>${escapeHtml(favorite.price)}</strong>
+          <div class="trip-actions">
+            <button type="button" class="remove-trip" data-id="${escapeHtml(favId)}" aria-label="Quitar destino" title="Quitar de guardados">Quitar</button>
+            <a href="index.html#vuelos">Buscar vuelo <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </div>
+    `;
     tripsGrid.append(card);
   });
 }
+
+tripsGrid.addEventListener("click", (event) => {
+  const removeBtn = event.target.closest(".remove-trip, .remove-favorite-btn, .save-button");
+  if (!removeBtn) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const id = removeBtn.dataset.id || removeBtn.closest(".trip-card")?.dataset.id;
+  if (!id) return;
+  removeFavorite(id);
+});
 
 searchInput.addEventListener("input", renderTrips);
 renderReservations();

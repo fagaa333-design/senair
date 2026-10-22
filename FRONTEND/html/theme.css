@@ -2079,3 +2079,18 @@ body.dark-theme .mobile-nav-settings .lang-btn.active {
   margin: 0 !important;
   flex-shrink: 0 !important;
 }
+
+/* Modo oscuro para quitar favoritos en Mis Viajes */
+[data-theme="dark"] .remove-trip,
+body.dark-theme .remove-trip {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .remove-trip:hover,
+body.dark-theme .remove-trip:hover {
+  color: #f87171 !important;
+}
+[data-theme="dark"] .trip-card .save-button,
+body.dark-theme .trip-card .save-button {
+  background: #1e293b !important;
+  color: #f87171 !important;
+}
