@@ -4,9 +4,8 @@
   "description": "SENAIR Airline Web Platform & Backend Service",
   "private": true,
   "scripts": {
-    "postinstall": "cd BACKEND && npm install",
-    "build": "cd BACKEND && npm install",
-    "start": "cd BACKEND && node server.js"
+    "build": "npm --prefix BACKEND install",
+    "start": "node BACKEND/server.js"
   },
   "engines": {
     "node": ">=18.0.0"
