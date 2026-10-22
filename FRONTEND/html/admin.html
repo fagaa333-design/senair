@@ -89,6 +89,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Sistema y Ajustes
       </button>
+      <button type="button" class="admin-tab-btn" data-tab="survey">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Encuesta Feria
+      </button>
     </nav>
 
     <!-- ── SECCIÓN 1: DASHBOARD (Resumen y KPIs) ────────────────── -->
@@ -326,6 +330,144 @@
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Exportar Reservas (JSON)
           </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECCIÓN 6: ENCUESTA DE LA FERIA ──────────────────────── -->
+    <section class="admin-section" id="section-survey">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Encuesta Interactiva — Feria de Software</h2>
+          <p class="section-desc">Monitoreo en vivo de participantes, respuestas, métricas de usabilidad y código QR para visitantes.</p>
+        </div>
+        <div class="section-actions">
+          <button type="button" class="btn-secondary" id="refreshSurveyBtn">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Actualizar Métricas
+          </button>
+          <a href="/api/admin/survey/export.csv" class="btn-primary" download="senair_encuesta_feria_resultados.csv">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Descargar Resultados (CSV)
+          </a>
+        </div>
+      </div>
+
+      <!-- Métricas Superiores -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Total Participantes</span>
+            <span class="kpi-icon blue">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
+          </div>
+          <div class="kpi-value" id="kpiSurveyTotal">0</div>
+          <div class="kpi-subtext">Visitantes registrados en la feria</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Encuestas Completadas</span>
+            <span class="kpi-icon green">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </span>
+          </div>
+          <div class="kpi-value" id="kpiSurveyCompleted">0</div>
+          <div class="kpi-subtext" id="kpiSurveyCompletionRate">0% tasa de finalización</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Calificación Plataforma</span>
+            <span class="kpi-icon yellow">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </span>
+          </div>
+          <div class="kpi-value" id="kpiSurveyAvgRating">5.0 / 5</div>
+          <div class="kpi-subtext">Evaluación de experiencia web</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Base de Datos</span>
+            <span class="kpi-icon blue">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </span>
+          </div>
+          <div class="kpi-value" style="font-size:20px; color:#159570;">Persistencia Activa</div>
+          <div class="kpi-subtext">SQLite / libSQL en tiempo real</div>
+        </div>
+      </div>
+
+      <!-- Fila: Código QR y Distribución de Respuestas -->
+      <div class="survey-admin-layout">
+        
+        <!-- Tarjeta del Código QR -->
+        <div class="admin-qr-card" style="background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:24px;">
+          <h3 style="margin:0 0 8px; color:var(--navy); font-size:18px;">Código QR para la Feria</h3>
+          <p style="margin:0 0 16px; color:var(--muted); font-size:13.5px; line-height:1.5;">
+            Los visitantes escanean este QR con sus teléfonos para acceder directamente a la encuesta interactiva.
+          </p>
+
+          <div style="text-align:center; padding:16px; background:#f8fbff; border:1px solid #dbeafe; border-radius:12px; margin-bottom:16px;">
+            <img id="surveyQrPreview" src="" alt="Código QR Encuesta" style="width:200px; height:200px; display:inline-block; border-radius:8px; background:#fff; padding:6px; box-shadow:0 4px 12px rgba(0,0,0,0.06);" />
+            <div id="surveyQrUrlDisplay" style="margin-top:10px; font-size:12px; font-weight:700; color:var(--blue); word-break:break-all;"></div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:14px;">
+            <label style="font-size:13px; font-weight:700; color:var(--navy); display:block; margin-bottom:6px;">URL de Acceso para Celulares:</label>
+            <input type="text" id="surveyCustomUrlInput" class="form-control" style="width:100%; box-sizing:border-box; font-size:13px;" placeholder="Ej. http://192.168.1.15:3000/encuesta.html" />
+            <small style="color:var(--muted); font-size:11.5px; display:block; margin-top:4px;">Usa la IP local de tu equipo en la red Wi-Fi de la feria para que los celulares se conecten.</small>
+          </div>
+
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="btn-secondary" id="surveyRegenerateQrBtn" style="flex:1;">
+              Actualizar QR
+            </button>
+            <a id="surveyDownloadQrLink" href="#" download="senair_encuesta_qr.png" class="btn-primary" style="flex:1; text-align:center; text-decoration:none;">
+              Descargar PNG
+            </a>
+          </div>
+        </div>
+
+        <!-- Distribución de Respuestas Clave -->
+        <div style="background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:24px;">
+          <h3 style="margin:0 0 16px; color:var(--navy); font-size:18px;">Tendencias y Respuestas Clave</h3>
+          
+          <div id="surveyDistributionsContainer" style="display:flex; flex-direction:column; gap:20px;">
+            <p style="color:var(--muted); font-size:14px;">Cargando análisis de respuestas...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de Participantes Recientes -->
+      <div style="margin-top:32px;">
+        <div class="section-header" style="margin-bottom:16px;">
+          <div>
+            <h3 class="section-title">Participantes de la Feria de Software</h3>
+            <p class="section-desc">Historial en tiempo real de registros, perfiles de viajero asignados y consentimientos.</p>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Fecha y Hora</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Ciudad</th>
+                <th>Edad</th>
+                <th>Perfil Asignado</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="surveyParticipantsTableBody">
+              <tr><td colspan="8" class="empty-state"><p>Cargando participantes...</p></td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>

@@ -9,6 +9,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const rateLimit = require("express-rate-limit");
+const QRCode = require("qrcode");
 
 /* ── Configuration ────────────────────────────────────────────── */
 
@@ -128,6 +129,29 @@ async function initializeDatabase() {
       airline TEXT NOT NULL DEFAULT 'SENAIR',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
+    )`,
+    `CREATE TABLE IF NOT EXISTS survey_participants (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_token TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      email TEXT,
+      age_range TEXT,
+      city TEXT,
+      privacy_accepted INTEGER NOT NULL DEFAULT 1,
+      privacy_version TEXT NOT NULL DEFAULT 'v1.0',
+      status TEXT NOT NULL DEFAULT 'registered',
+      traveler_profile TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS survey_responses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      participant_id INTEGER NOT NULL,
+      question_id TEXT NOT NULL,
+      question_text TEXT NOT NULL,
+      answer TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (participant_id) REFERENCES survey_participants(id),
+      UNIQUE (participant_id, question_id)
     )`,
     ...demoFlights.map((flight) => ({
       sql: "INSERT OR IGNORE INTO flights (origin, destination, departure_date, departure_time, arrival_time, price, airline, stops) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -378,7 +402,7 @@ app.get("/api/me", requireAuth, (request, response) => {
   response.json({ success: true, name: request.user.name, email: request.user.email });
 });
 
-app.post("/register", authLimiter, async (request, response) => {
+app.post("/register", async (request, response) => {
   const name = String(request.body.name || "").trim();
   const email = String(request.body.email || "").trim().toLowerCase();
   const password = String(request.body.password || "");
@@ -411,7 +435,7 @@ app.post("/register", authLimiter, async (request, response) => {
   }
 });
 
-app.post("/login", authLimiter, async (request, response) => {
+app.post("/login", async (request, response) => {
   const email = String(request.body.email || "").trim().toLowerCase();
   const password = String(request.body.password || "");
 
@@ -836,6 +860,360 @@ app.post("/api/admin/maintenance", requireAdmin, (request, response) => {
     active: isMaintenanceModeActive,
     message: isMaintenanceModeActive ? "Modo mantenimiento ACTIVADO." : "Modo mantenimiento DESACTIVADO.",
   });
+});
+
+
+/* ── Encuesta Interactiva Feria de Software ─────────────────────── */
+
+app.post("/api/survey/register", async (request, response) => {
+  const { name, email, age_range, city, privacy_accepted } = request.body || {};
+  const cleanName = typeof name === "string" ? name.trim() : "";
+  const cleanEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+  const cleanAge = typeof age_range === "string" ? age_range.trim() : "";
+  const cleanCity = typeof city === "string" ? city.trim() : "";
+
+  if (!cleanName || cleanName.length < 2 || cleanName.length > 100) {
+    return response.status(400).json({ success: false, message: "Por favor ingresa un nombre válido (mínimo 2 caracteres)." });
+  }
+
+  if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+    return response.status(400).json({ success: false, message: "Por favor ingresa un correo electrónico válido." });
+  }
+
+  if (!privacy_accepted) {
+    return response.status(400).json({ success: false, message: "Debes aceptar el tratamiento de datos personales conforme a la Ley 1581 de 2012 para participar." });
+  }
+
+  try {
+    const sessionToken = crypto.randomBytes(24).toString("hex");
+    const result = await db.execute({
+      sql: `INSERT INTO survey_participants (session_token, name, email, age_range, city, privacy_accepted, privacy_version)
+            VALUES (?, ?, ?, ?, ?, 1, 'v1.0')`,
+      args: [sessionToken, cleanName, cleanEmail || null, cleanAge || null, cleanCity || null],
+    });
+
+    response.json({
+      success: true,
+      token: sessionToken,
+      participantId: Number(result.lastInsertRowid),
+      name: cleanName,
+    });
+  } catch (error) {
+    console.error("Error registrando participante de encuesta:", error);
+    response.status(500).json({ success: false, message: "No se pudo registrar la participación. Intenta de nuevo." });
+  }
+});
+
+app.get("/api/survey/state", async (request, response) => {
+  const token = request.headers["x-survey-token"] || request.query.token;
+  if (!token) return response.status(400).json({ success: false, message: "Token no proporcionado." });
+
+  try {
+    const pRes = await db.execute({
+      sql: "SELECT id, name, status, traveler_profile FROM survey_participants WHERE session_token = ?",
+      args: [token],
+    });
+    const participant = pRes.rows[0];
+    if (!participant) return response.status(404).json({ success: false, message: "Sesión de encuesta no encontrada." });
+
+    const ansRes = await db.execute({
+      sql: "SELECT question_id, question_text, answer FROM survey_responses WHERE participant_id = ?",
+      args: [participant.id],
+    });
+
+    const answers = {};
+    for (const row of ansRes.rows) {
+      answers[row.question_id] = row.answer;
+    }
+
+    response.json({
+      success: true,
+      participant: {
+        name: participant.name,
+        status: participant.status,
+        travelerProfile: participant.traveler_profile,
+      },
+      answers,
+    });
+  } catch (error) {
+    console.error("Error obteniendo estado de encuesta:", error);
+    response.status(500).json({ success: false, message: "Error al recuperar respuestas." });
+  }
+});
+
+app.post("/api/survey/answer", async (request, response) => {
+  const token = request.headers["x-survey-token"] || request.body.token;
+  const { question_id, question_text, answer } = request.body || {};
+
+  if (!token || !question_id || !answer) {
+    return response.status(400).json({ success: false, message: "Datos de respuesta incompletos." });
+  }
+
+  try {
+    const pRes = await db.execute({
+      sql: "SELECT id, status FROM survey_participants WHERE session_token = ?",
+      args: [token],
+    });
+    const participant = pRes.rows[0];
+    if (!participant) return response.status(404).json({ success: false, message: "Sesión de encuesta no válida." });
+
+    await db.execute({
+      sql: `INSERT INTO survey_responses (participant_id, question_id, question_text, answer)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(participant_id, question_id) DO UPDATE SET answer = excluded.answer, question_text = excluded.question_text`,
+      args: [participant.id, String(question_id), String(question_text || question_id), String(answer)],
+    });
+
+    if (participant.status === "registered") {
+      await db.execute({
+        sql: "UPDATE survey_participants SET status = 'in_progress' WHERE id = ?",
+        args: [participant.id],
+      });
+    }
+
+    response.json({ success: true, message: "Respuesta guardada con éxito." });
+  } catch (error) {
+    console.error("Error guardando respuesta de encuesta:", error);
+    response.status(500).json({ success: false, message: "Error al guardar la respuesta." });
+  }
+});
+
+app.post("/api/survey/complete", async (request, response) => {
+  const token = request.headers["x-survey-token"] || request.body.token;
+  if (!token) return response.status(400).json({ success: false, message: "Token requerido." });
+
+  try {
+    const pRes = await db.execute({
+      sql: "SELECT id, name FROM survey_participants WHERE session_token = ?",
+      args: [token],
+    });
+    const participant = pRes.rows[0];
+    if (!participant) return response.status(404).json({ success: false, message: "Participante no encontrado." });
+
+    const ansRes = await db.execute({
+      sql: "SELECT question_id, answer FROM survey_responses WHERE participant_id = ?",
+      args: [participant.id],
+    });
+
+    const answersMap = {};
+    for (const r of ansRes.rows) answersMap[r.question_id] = r.answer;
+
+    let profile = {
+      badge: "Viajero Inteligente SENAIR",
+      icon: "✈️",
+      description: "Buscas el equilibrio perfecto entre tecnología ágil, comodidad y tarifas justas para cada aventura.",
+    };
+
+    const dest = (answersMap["q2_destination"] || "").toLowerCase();
+    const cabin = (answersMap["q6_cabin"] || "").toLowerCase();
+    const factor = (answersMap["q3_factor"] || "").toLowerCase();
+
+    if (dest.includes("cartagena") || dest.includes("andrés")) {
+      profile = {
+        badge: "Explorador del Caribe",
+        icon: "🌴",
+        description: "Tu pasión es el sol, la brisa marina y desconectarte junto al mar con la mejor gastronomía y playas.",
+      };
+    } else if (dest.includes("madrid") || dest.includes("barcelona") || dest.includes("europa")) {
+      profile = {
+        badge: "Viajero Transatlántico",
+        icon: "🌍",
+        description: "No le temes a las largas distancias: te apasiona cruzar fronteras, descubrir historia y sumergirte en nuevas culturas.",
+      };
+    } else if (dest.includes("medellín") || factor.includes("online") || factor.includes("reservar")) {
+      profile = {
+        badge: "Viajero Digital & Conectado",
+        icon: "💡",
+        description: "Valoras la velocidad, la autogestión y las herramientas interactivas como AeroBot para tener el control total de tu viaje.",
+      };
+    } else if (cabin.includes("primera") || cabin.includes("ejecutiva")) {
+      profile = {
+        badge: "Viajero Confort Premium",
+        icon: "⭐",
+        description: "Para ti volar es una experiencia de principio a fin; priorizas el espacio, la tranquilidad y el servicio exclusivo.",
+      };
+    }
+
+    await db.execute({
+      sql: "UPDATE survey_participants SET status = 'completed', traveler_profile = ? WHERE id = ?",
+      args: [profile.badge, participant.id],
+    });
+
+    response.json({
+      success: true,
+      participantName: participant.name,
+      profile,
+    });
+  } catch (error) {
+    console.error("Error completando encuesta:", error);
+    response.status(500).json({ success: false, message: "Error al finalizar la encuesta." });
+  }
+});
+
+app.get("/api/survey/qr", async (request, response) => {
+  try {
+    let targetUrl = request.query.url;
+    if (!targetUrl) {
+      const host = request.get("host");
+      const proto = request.protocol;
+      targetUrl = `${proto}://${host}/html/encuesta.html`;
+    }
+
+    const qrDataUrl = await QRCode.toDataURL(targetUrl, {
+      width: 380,
+      margin: 2,
+      color: {
+        dark: "#062b55",
+        light: "#ffffff",
+      },
+    });
+
+    response.json({ success: true, qrDataUrl, targetUrl });
+  } catch (error) {
+    console.error("Error generando QR:", error);
+    response.status(500).json({ success: false, message: "No se pudo generar el código QR." });
+  }
+});
+
+app.get("/api/admin/survey/stats", requireAdmin, async (request, response) => {
+  try {
+    const totalP = await db.execute({ sql: "SELECT COUNT(*) as count FROM survey_participants", args: [] });
+    const compP = await db.execute({ sql: "SELECT COUNT(*) as count FROM survey_participants WHERE status = 'completed'", args: [] });
+    const inProgP = await db.execute({ sql: "SELECT COUNT(*) as count FROM survey_participants WHERE status = 'in_progress'", args: [] });
+
+    const total = Number(totalP.rows[0]?.count || 0);
+    const completed = Number(compP.rows[0]?.count || 0);
+    const inProgress = Number(inProgP.rows[0]?.count || 0);
+    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    const ratingRes = await db.execute({
+      sql: "SELECT AVG(CAST(answer AS REAL)) as avg_rating FROM survey_responses WHERE question_id = 'q4_web_rating'",
+      args: [],
+    });
+    const avgRating = ratingRes.rows[0]?.avg_rating ? Number(ratingRes.rows[0].avg_rating).toFixed(1) : "5.0";
+
+    const questionsRes = await db.execute({
+      sql: `SELECT question_id, question_text, answer, COUNT(*) as count
+            FROM survey_responses
+            GROUP BY question_id, answer
+            ORDER BY question_id, count DESC`,
+      args: [],
+    });
+
+    const distributions = {};
+    for (const r of questionsRes.rows) {
+      if (!distributions[r.question_id]) {
+        distributions[r.question_id] = {
+          title: r.question_text,
+          answers: [],
+        };
+      }
+      distributions[r.question_id].answers.push({
+        answer: r.answer,
+        count: Number(r.count),
+      });
+    }
+
+    const recentRes = await db.execute({
+      sql: `SELECT id, name, email, city, age_range, status, traveler_profile, created_at
+            FROM survey_participants
+            ORDER BY created_at DESC
+            LIMIT 50`,
+      args: [],
+    });
+
+    response.json({
+      success: true,
+      stats: {
+        total,
+        completed,
+        inProgress,
+        completionRate,
+        avgRating,
+        distributions,
+        recentParticipants: recentRes.rows,
+      },
+    });
+  } catch (error) {
+    console.error("Error obteniendo estadísticas de encuesta:", error);
+    response.status(500).json({ success: false, message: "Error al calcular estadísticas." });
+  }
+});
+
+app.get("/api/admin/survey/export.csv", requireAdmin, async (request, response) => {
+  try {
+    const participants = await db.execute({
+      sql: "SELECT id, name, email, age_range, city, status, traveler_profile, created_at FROM survey_participants ORDER BY id ASC",
+      args: [],
+    });
+
+    const responses = await db.execute({
+      sql: "SELECT participant_id, question_id, answer FROM survey_responses",
+      args: [],
+    });
+
+    const answersMap = {};
+    for (const r of responses.rows) {
+      if (!answersMap[r.participant_id]) answersMap[r.participant_id] = {};
+      answersMap[r.participant_id][r.question_id] = r.answer;
+    }
+
+    const headers = [
+      "ID",
+      "Fecha",
+      "Nombre",
+      "Correo",
+      "Rango de Edad",
+      "Ciudad",
+      "Estado",
+      "Perfil Asignado",
+      "Q1_Frecuencia",
+      "Q2_Destino",
+      "Q3_Factores",
+      "Q4_CalificacionWeb",
+      "Q5_Innovacion",
+      "Q6_Cabina",
+      "Q7_Probabilidad",
+      "Q8_Sugerencias",
+    ];
+
+    const escapeCsv = (val) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    let csv = "\uFEFF" + headers.join(",") + "\n";
+    for (const p of participants.rows) {
+      const a = answersMap[p.id] || {};
+      const row = [
+        p.id,
+        p.created_at,
+        p.name,
+        p.email || "",
+        p.age_range || "",
+        p.city || "",
+        p.status,
+        p.traveler_profile || "",
+        a["q1_frequency"] || "",
+        a["q2_destination"] || "",
+        a["q3_factor"] || "",
+        a["q4_web_rating"] || "",
+        a["q5_innovation"] || "",
+        a["q6_cabin"] || "",
+        a["q7_probability"] || "",
+        a["q8_feedback"] || "",
+      ].map(escapeCsv).join(",");
+      csv += row + "\n";
+    }
+
+    response.setHeader("Content-Type", "text/csv; charset=utf-8");
+    response.setHeader("Content-Disposition", 'attachment; filename="senair_encuesta_feria_resultados.csv"');
+    response.send(csv);
+  } catch (error) {
+    console.error("Error exportando CSV:", error);
+    response.status(500).send("Error al exportar los datos.");
+  }
 });
 
 /* ── 404 ──────────────────────────────────────────────────────── */

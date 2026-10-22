@@ -17,6 +17,10 @@
   display: flex;
 }
 
+.payment-overlay .modal {
+  display: block !important;
+}
+
 .modal {
   position: relative;
   width: 100%;

@@ -545,6 +545,7 @@
       else if (tabId === "reservations") loadReservations();
       else if (tabId === "users") loadUsers();
       else if (tabId === "dashboard") loadStats();
+      else if (tabId === "survey") loadSurveyData();
     });
   });
 
@@ -557,6 +558,145 @@
       } catch (_) {}
       window.sessionStorage.clear();
       window.location.href = "login.html";
+    });
+  }
+
+  // ── 11. Encuesta Interactiva Feria de Software ─────────────────
+  async function loadSurveyData() {
+    try {
+      const res = await fetch("/api/admin/survey/stats", { credentials: "include" });
+      if (!res.ok) throw new Error("Error HTTP " + res.status);
+      const data = await res.json();
+      if (!data.success) return;
+
+      const stats = data.stats;
+      const kpiTotal = document.getElementById("kpiSurveyTotal");
+      const kpiComp = document.getElementById("kpiSurveyCompleted");
+      const kpiRate = document.getElementById("kpiSurveyCompletionRate");
+      const kpiRating = document.getElementById("kpiSurveyAvgRating");
+
+      if (kpiTotal) kpiTotal.textContent = stats.total;
+      if (kpiComp) kpiComp.textContent = stats.completed;
+      if (kpiRate) kpiRate.textContent = stats.completionRate + "% tasa de finalización";
+      if (kpiRating) kpiRating.textContent = stats.avgRating + " / 5";
+
+      // Renderizar distribuciones
+      renderSurveyDistributions(stats.distributions || {});
+
+      // Renderizar participantes recientes
+      renderSurveyParticipants(stats.recentParticipants || []);
+
+      // Cargar código QR
+      loadSurveyQr();
+    } catch (e) {
+      console.error("Error al cargar datos de encuesta:", e);
+      showToast("Error al cargar datos de la encuesta", "error");
+    }
+  }
+
+  function renderSurveyDistributions(distributions) {
+    const container = document.getElementById("surveyDistributionsContainer");
+    if (!container) return;
+
+    const keys = Object.keys(distributions);
+    if (keys.length === 0) {
+      container.innerHTML = '<p style="color:var(--muted); font-size:14px;">Aún no se han registrado respuestas en la encuesta.</p>';
+      return;
+    }
+
+    let html = "";
+    keys.forEach((qid) => {
+      const dist = distributions[qid];
+      const totalAnswers = dist.answers.reduce((acc, a) => acc + a.count, 0);
+
+      html += `
+        <div style="border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+          <h4 style="margin: 0 0 10px; font-size: 14.5px; color: var(--navy);">${escapeHtml(dist.title)}</h4>
+          <div>
+            ${dist.answers.map((ans) => {
+              const pct = totalAnswers > 0 ? Math.round((ans.count / totalAnswers) * 100) : 0;
+              return `
+                <div class="survey-dist-bar-wrap">
+                  <div class="survey-dist-info">
+                    <span style="color:var(--text);">${escapeHtml(ans.answer)}</span>
+                    <span style="color:var(--muted);">${ans.count} (${pct}%)</span>
+                  </div>
+                  <div class="survey-dist-track">
+                    <div class="survey-dist-fill" style="width: ${pct}%;"></div>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function renderSurveyParticipants(participants) {
+    const tbody = document.getElementById("surveyParticipantsTableBody");
+    if (!tbody) return;
+
+    if (!participants || participants.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><p>No hay participantes registrados aún.</p></td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = participants.map((p) => `
+      <tr>
+        <td><strong>#${p.id}</strong></td>
+        <td>${formatTimestamp(p.created_at)}</td>
+        <td><strong>${escapeHtml(p.name)}</strong></td>
+        <td>${p.email ? escapeHtml(p.email) : '<span style="color:var(--muted); font-style:italic;">No provisto</span>'}</td>
+        <td>${escapeHtml(p.city || "--")}</td>
+        <td>${escapeHtml(p.age_range || "--")}</td>
+        <td><span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700;">${escapeHtml(p.traveler_profile || "Sin asignar")}</span></td>
+        <td><span class="badge badge-${p.status === 'completed' ? 'confirmed' : 'cancelled'}">${p.status === 'completed' ? 'Completada' : 'En progreso'}</span></td>
+      </tr>
+    `).join("");
+  }
+
+  async function loadSurveyQr(customUrl) {
+    const previewImg = document.getElementById("surveyQrPreview");
+    const downloadLink = document.getElementById("surveyDownloadQrLink");
+    const urlDisplay = document.getElementById("surveyQrUrlDisplay");
+    const urlInput = document.getElementById("surveyCustomUrlInput");
+
+    const targetUrl = customUrl || (urlInput && urlInput.value.trim()) || (window.location.origin + "/encuesta.html");
+    if (urlInput && !urlInput.value) {
+      urlInput.value = targetUrl;
+    }
+
+    try {
+      const res = await fetch(`/api/survey/qr?url=${encodeURIComponent(targetUrl)}`);
+      const data = await res.json();
+      if (data.success && data.qrDataUrl) {
+        if (previewImg) previewImg.src = data.qrDataUrl;
+        if (downloadLink) downloadLink.href = data.qrDataUrl;
+        if (urlDisplay) urlDisplay.textContent = data.targetUrl;
+      }
+    } catch (e) {
+      console.warn("No se pudo cargar QR:", e);
+    }
+  }
+
+  const refreshSurveyBtn = document.getElementById("refreshSurveyBtn");
+  if (refreshSurveyBtn) {
+    refreshSurveyBtn.addEventListener("click", () => {
+      loadSurveyData();
+      showToast("Métricas de encuesta actualizadas", "success");
+    });
+  }
+
+  const surveyRegenerateQrBtn = document.getElementById("surveyRegenerateQrBtn");
+  if (surveyRegenerateQrBtn) {
+    surveyRegenerateQrBtn.addEventListener("click", () => {
+      const input = document.getElementById("surveyCustomUrlInput");
+      const url = input?.value.trim();
+      loadSurveyQr(url);
+      showToast("Código QR actualizado con nueva URL", "success");
     });
   }
 

@@ -285,6 +285,8 @@ function openPaymentModal() {
 
   paymentOverlay.style.display = "flex";
   paymentOverlay.classList.add("is-open");
+  const modalEl = document.getElementById("paymentModal");
+  if (modalEl) modalEl.classList.add("open");
   paymentOverlay.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
 
@@ -296,6 +298,8 @@ function openPaymentModal() {
 function closePaymentModal() {
   if (!paymentOverlay) return;
   paymentOverlay.classList.remove("is-open");
+  const modalEl = document.getElementById("paymentModal");
+  if (modalEl) modalEl.classList.remove("open");
   paymentOverlay.style.display = "none";
   paymentOverlay.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";

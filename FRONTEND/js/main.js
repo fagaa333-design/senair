@@ -134,9 +134,42 @@ async function submitAuthForm(form, isRegistration) {
             return;
         }
 
+        if (isRegistration) {
+            const registeredEmail = String(formData.get("email") || "").toLowerCase().trim();
+            form.reset();
+
+            const toggle = document.querySelector(".card-switch .toggle");
+            if (toggle) {
+                toggle.checked = false;
+            }
+
+            const loginEmailInput = document.querySelector('form[action="/login"] input[name="email"]');
+            const loginPasswordInput = document.querySelector('form[action="/login"] input[name="password"]');
+            if (loginEmailInput) {
+                loginEmailInput.value = registeredEmail;
+            }
+
+            if (typeof window.senairAlert === "function") {
+                window.senairAlert({
+                    type: "success",
+                    title: "¡Registro exitoso!",
+                    message: "Tu cuenta ha sido creada exitosamente. Por favor, procede a iniciar sesión con tu correo y contraseña.",
+                    confirmText: "Iniciar sesión",
+                    onConfirm: () => {
+                        if (loginPasswordInput) {
+                            loginPasswordInput.focus();
+                        }
+                    }
+                });
+            } else {
+                window.alert("¡Registro exitoso! Por favor, procede a iniciar sesión.");
+            }
+            return;
+        }
+
         const email = String(formData.get("email") || "").toLowerCase().trim();
         const isAdminUser = Boolean(result.isAdmin || email === "freinergudino@gmail.com");
-        const name = isRegistration ? formData.get("name") : (result.name || formData.get("email"));
+        const name = result.name || formData.get("email");
 
         window.sessionStorage.setItem(authStorageKey, "true");
         window.sessionStorage.setItem("senairUserName", String(name || (isAdminUser ? "Administrador" : "Usuario")));

@@ -164,3 +164,110 @@
   });
   observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
+
+/**
+ * ═════════════════════════════════════════════════════════════════════════
+ * SENAIR — Sistema Global de Alertas Personalizadas (Branded Modals)
+ * ═════════════════════════════════════════════════════════════════════════
+ */
+window.senairAlert = function (options) {
+  return new Promise((resolve) => {
+    const opts = typeof options === "string" ? { message: options } : options || {};
+    const message = String(opts.message || "");
+    const isError =
+      opts.type === "error" ||
+      /error|falló|fallo|incorrect|expir|problema|no se pudo|inválid|bloquead|denegad/i.test(message) ||
+      /error|falló|fallo|incorrect|expir|problema|no se pudo|inválid/i.test(opts.title || "");
+    const isSuccess = opts.type === "success" || /éxito|exito|correctamente|guardad|completad/i.test(message);
+
+    const type = opts.type || (isSuccess ? "success" : isError ? "error" : "info");
+    const title =
+      opts.title ||
+      (type === "success" ? "¡Operación Exitosa!" : type === "error" ? "Atención" : "SENAIR");
+    const confirmText = opts.confirmText || "Entendido";
+
+    let overlay = document.getElementById("senairAlertOverlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "senairAlertOverlay";
+      overlay.className = "senair-alert-overlay";
+      overlay.innerHTML = `
+        <div class="senair-alert-box" role="dialog" aria-modal="true">
+          <button type="button" class="senair-alert-close" aria-label="Cerrar">&times;</button>
+          <div class="senair-alert-icon-wrap" id="senairAlertIcon"></div>
+          <h3 class="senair-alert-title" id="senairAlertTitle"></h3>
+          <p class="senair-alert-message" id="senairAlertMessage"></p>
+          <div class="senair-alert-actions">
+            <button type="button" class="senair-alert-btn" id="senairAlertBtn"></button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    const titleEl = overlay.querySelector("#senairAlertTitle");
+    const msgEl = overlay.querySelector("#senairAlertMessage");
+    const iconEl = overlay.querySelector("#senairAlertIcon");
+    const btnEl = overlay.querySelector("#senairAlertBtn");
+    const closeBtn = overlay.querySelector(".senair-alert-close");
+
+    titleEl.textContent = title;
+    msgEl.textContent = message;
+    btnEl.textContent = confirmText;
+
+    iconEl.className = "senair-alert-icon-wrap " + type;
+    if (type === "success") {
+      iconEl.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`;
+    } else if (type === "error") {
+      iconEl.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+    } else {
+      iconEl.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+    }
+
+    let closed = false;
+    function cleanup() {
+      if (closed) return;
+      closed = true;
+      overlay.classList.remove("is-visible");
+      document.removeEventListener("keydown", onKeyDown);
+      btnEl.onclick = null;
+      closeBtn.onclick = null;
+      overlay.onclick = null;
+      if (typeof opts.onConfirm === "function") {
+        try {
+          opts.onConfirm();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      resolve(true);
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape" || e.key === "Enter") {
+        e.preventDefault();
+        cleanup();
+      }
+    }
+
+    btnEl.onclick = cleanup;
+    closeBtn.onclick = cleanup;
+    overlay.onclick = (e) => {
+      if (e.target === overlay) cleanup();
+    };
+    document.addEventListener("keydown", onKeyDown);
+
+    overlay.classList.add("is-visible");
+    setTimeout(() => {
+      try {
+        btnEl.focus();
+      } catch (e) {}
+    }, 60);
+  });
+};
+
+if (typeof window !== "undefined") {
+  window.alert = function (message) {
+    return window.senairAlert(message);
+  };
+}
