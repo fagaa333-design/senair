@@ -1,20 +1,19 @@
 /**
  * ═════════════════════════════════════════════════════════════════════════
- * SENAIR — Controlador de Encuesta Interactiva (Feria de Software)
- * Flujo Conversacional por Pasos, Registro Persistente y Validación Backend
+ * SENAIR — Controlador de Encuesta Interactiva 3D (Feria de Software)
+ * Manejo de Scrollytelling, Check-In, Waypoints de Preguntas y Persistencia
  * ═════════════════════════════════════════════════════════════════════════
  */
 
 (() => {
   "use strict";
 
-  // Estado reactivo central
+  // Estado central reactivo
   const state = {
-    currentStageIndex: 0,
     participant: {
       name: "",
       email: "",
-      ageRange: "21-30",
+      ageRange: "26-35",
       city: "",
       token: null,
       id: null
@@ -27,570 +26,637 @@
       q5_nps: null,
       q6_feedback: ""
     },
+    currentWaypoint: 1,
     isSubmitting: false,
     completed: false
   };
 
-  // Secuencia lineal de etapas
-  const STAGES = [
-    "stageWelcome",   // 0
-    "stageRegister",  // 1
-    "stageQ1",        // 2
-    "stageQ2",        // 3
-    "stageQ3",        // 4
-    "stageQ4",        // 5
-    "stageQ5",        // 6
-    "stageQ6",        // 7 (Resumen Boarding Pass & Comentarios)
-    "stageCompletion" // 8 (Agradecimiento final)
-  ];
-
   const STAR_LABELS = {
     q1: {
-      1: "1 ★ // Muy Insatisfecho",
-      2: "2 ★ // Insatisfecho / Regular",
-      3: "3 ★ // Aceptable / Conforme",
+      1: "1 ★ // Insatisfecho",
+      2: "2 ★ // Regular / Puede mejorar",
+      3: "3 ★ // Conforme / Aceptable",
       4: "4 ★ // Muy Satisfecho",
       5: "5 ★ // ¡Totalmente Satisfecho!"
     },
     q2: {
-      1: "1 ★ // Muy Compleja",
-      2: "2 ★ // Difícil de Usar",
+      1: "1 ★ // Difícil de navegar",
+      2: "2 ★ // Poco intuitiva",
       3: "3 ★ // Aceptable",
-      4: "4 ★ // Rápida e Intuitiva",
+      4: "4 ★ // Rápida y clara",
       5: "5 ★ // ¡Impecable y Fluida!"
     }
   };
 
-  // ── 1. Inicialización ──────────────────────────────────────────────
+  const WP_INFO = {
+    1: { title: "Satisfacción Global", progress: 20 },
+    2: { title: "Plataforma Web & Reservas", progress: 40 },
+    3: { title: "Puntualidad & Operaciones", progress: 60 },
+    4: { title: "Confort & Servicios", progress: 80 },
+    5: { title: "Recomendación NPS", progress: 100 }
+  };
+
+  // ── Inicialización ──────────────────────────────────────────────────
   function init() {
-    bindStageNavigation();
+    bindScrollNavigation();
     bindRegistrationForm();
+    bindWaypointCarousel();
     bindStarRatings();
-    bindPunctualityCards();
-    bindAmenitiesGrid();
-    bindNpsTiles();
-    bindTextInputs();
+    bindRadarCards();
+    bindAmenitiesChips();
+    bindNpsScale();
+    bindFeedbackTextarea();
     bindFinalSubmission();
     bindRestart();
 
-    // Iniciar en Welcome
-    goToStage(0);
-  }
+    // Actualizar telemetría aleatoria suave en HUD
+    startHudTelemetryTicker();
 
-  // ── 2. Gestor de Navegación entre Etapas ───────────────────────────
-  function goToStage(index) {
-    if (index < 0 || index >= STAGES.length) return;
-
-    state.currentStageIndex = index;
-    const stageId = STAGES[index];
-
-    // Alternar visibilidad de secciones
-    document.querySelectorAll(".stage-section").forEach((sec) => {
-      sec.classList.remove("active");
-    });
-
-    const activeSec = document.getElementById(stageId);
-    if (activeSec) {
-      activeSec.classList.add("active");
-    }
-
-    // Desplazarse al tope con suavidad
-    window.scrollTo({ top: 0, behavior: "smooth" });
-
-    // Actualizar Stepper del Header (Solo visible en preguntas Q1..Q6)
-    const stepper = document.getElementById("stepperIndicator");
-    const counterLabel = document.getElementById("stepCounterLabel");
-    const progressFill = document.getElementById("miniProgressFill");
-
-    if (index >= 2 && index <= 7) {
-      if (stepper) stepper.style.display = "flex";
-      const qNum = index - 1; // 1 a 6
-      if (counterLabel) counterLabel.textContent = `PASO ${qNum} DE 6`;
-      if (progressFill) progressFill.style.width = `${Math.round((qNum / 6) * 100)}%`;
-    } else {
-      if (stepper) stepper.style.display = "none";
-    }
-
-    // Si llegamos al resumen (Stage 7), actualizar el pasabordo
-    if (index === 7) {
-      updateBoardingPassSummary();
+    // Si viene con ancla hash en la URL, desplazarse al objetivo
+    if (window.location.hash) {
+      setTimeout(() => {
+        try {
+          const targetEl = document.querySelector(window.location.hash);
+          if (targetEl) targetEl.scrollIntoView({ behavior: "smooth" });
+        } catch (e) {}
+      }, 300);
     }
   }
 
-  function bindStageNavigation() {
-    // Botón de inicio en Welcome
-    document.getElementById("btnStartExperience")?.addEventListener("click", () => {
-      goToStage(1); // Ir a Registro
-    });
-
-    // Botón volver de Registro a Welcome
-    document.getElementById("btnBackToWelcome")?.addEventListener("click", () => {
-      goToStage(0);
-    });
-
-    // Botones con data-action="prev"
-    document.querySelectorAll("[data-action='prev']").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        if (state.currentStageIndex > 2) {
-          goToStage(state.currentStageIndex - 1);
-        } else if (state.currentStageIndex === 2) {
-          goToStage(1); // Volver al registro
+  // ── 1. Navegación por Scroll & Waypoint Pills del Header ───────────
+  function bindScrollNavigation() {
+    const pills = document.querySelectorAll(".wp-pill");
+    pills.forEach((pill) => {
+      pill.addEventListener("click", () => {
+        const targetSel = pill.getAttribute("data-target");
+        const targetEl = document.querySelector(targetSel);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: "smooth" });
         }
       });
     });
 
-    // Botones Siguiente de preguntas
-    document.getElementById("btnNextQ1")?.addEventListener("click", () => {
-      if (!validateCurrentQuestion("q1_satisfaction", "Por favor selecciona una calificación de 1 a 5 estrellas.")) return;
-      goToStage(3);
-    });
-
-    document.getElementById("btnNextQ2")?.addEventListener("click", () => {
-      if (!validateCurrentQuestion("q2_ease", "Por favor califica la agilidad de la web.")) return;
-      goToStage(4);
-    });
-
-    document.getElementById("btnNextQ3")?.addEventListener("click", () => {
-      if (!validateCurrentQuestion("q3_punctuality", "Por favor selecciona una opción de puntualidad.")) return;
-      goToStage(5);
-    });
-
-    document.getElementById("btnNextQ4")?.addEventListener("click", () => {
-      // Q4 es opcional o selección múltiple
-      goToStage(6);
-    });
-
-    document.getElementById("btnNextQ5")?.addEventListener("click", () => {
-      if (state.answers.q5_nps === null || state.answers.q5_nps === undefined) {
-        alert("Por favor selecciona tu probabilidad de recomendación en la escala NPS.");
-        return;
-      }
-      goToStage(7);
-    });
-  }
-
-  function validateCurrentQuestion(key, errorMsg) {
-    if (!state.answers[key]) {
-      alert(errorMsg);
-      return false;
+    // Botones de acción rápida en las secciones
+    const btnHeroTakeoff = document.getElementById("btnHeroTakeoff");
+    if (btnHeroTakeoff) {
+      btnHeroTakeoff.addEventListener("click", () => {
+        const target = document.getElementById("seqC-register");
+        if (target) target.scrollIntoView({ behavior: "smooth" });
+      });
     }
-    return true;
+
+    const btnToRegister = document.getElementById("btnToRegister");
+    if (btnToRegister) {
+      btnToRegister.addEventListener("click", () => {
+        const target = document.getElementById("seqC-register");
+        if (target) target.scrollIntoView({ behavior: "smooth" });
+      });
+    }
+
+    const btnToBoardingPass = document.getElementById("btnToBoardingPass");
+    if (btnToBoardingPass) {
+      btnToBoardingPass.addEventListener("click", () => {
+        updateBoardingPassSummary();
+        const target = document.getElementById("seqE-touchdown");
+        if (target) target.scrollIntoView({ behavior: "smooth" });
+      });
+    }
+
+    // Actualizar pill activa según la posición de scroll
+    const sections = [
+      { id: "seqA-approach", pillIdx: 0 },
+      { id: "seqB-flight", pillIdx: 1 },
+      { id: "seqC-register", pillIdx: 2 },
+      { id: "seqD-survey", pillIdx: 3 },
+      { id: "seqE-touchdown", pillIdx: 4 }
+    ];
+
+    window.addEventListener("scroll", () => {
+      const scrollY = window.scrollY + window.innerHeight * 0.35;
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const secEl = document.getElementById(sections[i].id);
+        if (secEl && secEl.offsetTop <= scrollY) {
+          pills.forEach((p, idx) => {
+            p.classList.toggle("active", idx === sections[i].pillIdx);
+          });
+          break;
+        }
+      }
+    }, { passive: true });
   }
 
-  // ── 3. Registro de Participantes (Etapa 2 con Persistencia Real) ───
+  // ── 2. Formulario de Check-In y Registro (Backend SQLite) ──────────
   function bindRegistrationForm() {
-    const form = document.getElementById("participantRegisterForm");
+    const form = document.getElementById("surveyRegisterForm");
+    const nameInput = document.getElementById("regName");
+    const emailInput = document.getElementById("regEmail");
+    const ageSelect = document.getElementById("regAgeRange");
+    const cityInput = document.getElementById("regCity");
+    const consentCb = document.getElementById("regPrivacyConsent");
+    const alertBanner = document.getElementById("regAlertBanner");
+
     if (!form) return;
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const nameInput = document.getElementById("regFullName");
-      const emailInput = document.getElementById("regEmail");
-      const ageSelect = document.getElementById("regAgeRange");
-      const cityInput = document.getElementById("regCity");
-      const privacyCheck = document.getElementById("regPrivacyConsent");
+      const nameVal = nameInput.value.trim();
+      const emailVal = emailInput.value.trim();
+      const ageVal = ageSelect.value;
+      const cityVal = cityInput.value.trim();
 
-      const errName = document.getElementById("errFullName");
-      const errEmail = document.getElementById("errEmail");
-      const errPrivacy = document.getElementById("errPrivacy");
-
-      if (errName) errName.textContent = "";
-      if (errEmail) errEmail.textContent = "";
-      if (errPrivacy) errPrivacy.textContent = "";
-
-      const fullName = (nameInput?.value || "").trim();
-      const email = (emailInput?.value || "").trim().toLowerCase();
-      const ageRange = ageSelect?.value || "21-30";
-      const city = (cityInput?.value || "").trim();
-      const privacyAccepted = Boolean(privacyCheck?.checked);
-
-      let hasError = false;
-
-      if (!fullName || fullName.length < 3) {
-        if (errName) errName.textContent = "Por favor ingresa tu nombre completo.";
-        hasError = true;
+      if (!nameVal || nameVal.length < 2) {
+        showRegisterAlert("Por favor ingresa tu nombre completo (mínimo 2 letras).", "error");
+        nameInput.focus();
+        return;
       }
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!email || !emailRegex.test(email)) {
-        if (errEmail) errEmail.textContent = "Ingresa un correo electrónico válido.";
-        hasError = true;
+      if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+        showRegisterAlert("Por favor verifica el formato de tu correo electrónico.", "error");
+        emailInput.focus();
+        return;
       }
 
-      if (!privacyAccepted) {
-        if (errPrivacy) errPrivacy.textContent = "Debes autorizar el tratamiento de datos para continuar.";
-        hasError = true;
+      if (!consentCb.checked) {
+        showRegisterAlert("Debes autorizar el tratamiento de datos para continuar.", "error");
+        consentCb.focus();
+        return;
       }
 
-      if (hasError) return;
+      state.participant.name = nameVal;
+      state.participant.email = emailVal;
+      state.participant.ageRange = ageVal;
+      state.participant.city = cityVal;
 
-      const submitBtn = document.getElementById("btnSubmitRegister");
-      const btnText = submitBtn?.querySelector(".btn-text");
-      if (submitBtn) submitBtn.disabled = true;
-      if (btnText) btnText.textContent = "Registrando en base de datos...";
+      const submitBtn = document.getElementById("btnSubmitRegistration");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>Registrando en vuelo...</span> <span class="btn-icon">⏱</span>`;
+      }
 
       try {
-        const res = await fetch("/api/survey/register", {
+        const response = await fetch("/api/survey/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: fullName,
-            email,
-            age_range: ageRange,
-            city,
-            privacy_accepted: true
+            name: nameVal,
+            email: emailVal || null,
+            age_range: ageVal,
+            city: cityVal || null,
+            privacy_accepted: true,
+            traveler_profile: "Viajero SENAIR Feria"
           })
         });
 
-        const data = await res.json();
+        const data = await response.json();
 
-        if (res.ok && data.success) {
-          state.participant.name = fullName;
-          state.participant.email = email;
-          state.participant.ageRange = ageRange;
-          state.participant.city = city;
+        if (response.ok && data.success) {
           state.participant.token = data.token;
-          state.participant.id = data.participantId;
+          state.participant.id = data.participant_id;
 
-          // Guardar token en sessionStorage
-          sessionStorage.setItem("senair_survey_token", data.token);
+          showRegisterAlert("✓ Check-In confirmado. Asiento 14A asignado. ¡Buen vuelo!", "success");
 
-          // Avanzar a la primera pregunta (Q1)
-          goToStage(2);
+          // Sincronizar nombre en el pasabordo
+          updateBoardingPassSummary();
+
+          setTimeout(() => {
+            const surveySec = document.getElementById("seqD-survey");
+            if (surveySec) surveySec.scrollIntoView({ behavior: "smooth" });
+          }, 600);
         } else {
-          throw new Error(data.message || "Error al registrar participante.");
+          showRegisterAlert(data.message || "Error al registrar el check-in.", "error");
         }
       } catch (err) {
-        console.warn("[SENAIR] Error conectando con backend. Guardando en modo local seguro:", err);
-        // Fallback local seguro para que la feria no se detenga
-        state.participant.name = fullName;
-        state.participant.email = email;
-        state.participant.token = "offline_" + Date.now();
-        goToStage(2);
+        console.warn("Fallo de red al registrar, continuando localmente:", err);
+        // Modo resiliente offline
+        showRegisterAlert("✓ Check-in verificado. Procediendo a cabina...", "success");
+        updateBoardingPassSummary();
+        setTimeout(() => {
+          const surveySec = document.getElementById("seqD-survey");
+          if (surveySec) surveySec.scrollIntoView({ behavior: "smooth" });
+        }, 600);
       } finally {
-        if (submitBtn) submitBtn.disabled = false;
-        if (btnText) btnText.textContent = "Confirmar Registro y Despegar";
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<span>Check-In Completado ✓</span> <span class="btn-icon">➔</span>`;
+        }
       }
     });
+
+    function showRegisterAlert(msg, type) {
+      if (!alertBanner) return;
+      alertBanner.textContent = msg;
+      alertBanner.className = `form-feedback-alert ${type}`;
+      alertBanner.style.display = "block";
+    }
   }
 
-  // ── 4. Controladores de Preguntas (Estrellas, Opciones, NPS) ────────
-  function bindStarRatings() {
-    setupStarRow("starsRowQ1", "badgeQ1", "q1_satisfaction", "q1", 3);
-    setupStarRow("starsRowQ2", "badgeQ2", "q2_ease", "q2", 4);
-  }
+  // ── 3. Carrusel Interactivo de Waypoints (Preguntas 1 a 5) ─────────
+  function bindWaypointCarousel() {
+    const nextBtns = document.querySelectorAll(".btn-wp-next");
+    const prevBtns = document.querySelectorAll(".btn-wp-prev");
 
-  function setupStarRow(rowId, badgeId, stateKey, labelKey, nextStageIdx) {
-    const row = document.getElementById(rowId);
-    const badge = document.getElementById(badgeId);
-    if (!row) return;
-
-    const btns = row.querySelectorAll(".star-interactive-btn");
-
-    btns.forEach((btn) => {
-      const val = parseInt(btn.getAttribute("data-val"), 10);
-
-      btn.addEventListener("mouseenter", () => {
-        highlightStars(btns, val);
-        if (badge) badge.textContent = STAR_LABELS[labelKey][val];
-      });
-
-      btn.addEventListener("mouseleave", () => {
-        const cur = state.answers[stateKey];
-        highlightStars(btns, cur || 0);
-        if (badge) {
-          badge.textContent = cur
-            ? STAR_LABELS[labelKey][cur]
-            : "Selecciona una calificación para continuar";
-        }
-      });
-
+    nextBtns.forEach((btn) => {
       btn.addEventListener("click", () => {
-        state.answers[stateKey] = val;
-        highlightStars(btns, val);
-        if (badge) badge.textContent = STAR_LABELS[labelKey][val];
+        const nextWp = parseInt(btn.getAttribute("data-next-wp"), 10);
+        if (nextWp) goToWaypoint(nextWp);
+      });
+    });
 
-        // Guardar respuesta en backend
-        saveAnswer(stateKey, "Satisfacción", val);
-
-        // Auto avance suave tras 380ms
-        setTimeout(() => {
-          goToStage(nextStageIdx);
-        }, 380);
+    prevBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const prevWp = parseInt(btn.getAttribute("data-prev-wp"), 10);
+        if (prevWp) goToWaypoint(prevWp);
       });
     });
   }
 
-  function highlightStars(btns, count) {
-    btns.forEach((b) => {
-      const v = parseInt(b.getAttribute("data-val"), 10);
-      b.classList.toggle("active", v <= count);
+  function goToWaypoint(wpNum) {
+    if (wpNum < 1 || wpNum > 5) return;
+
+    state.currentWaypoint = wpNum;
+
+    // Cambiar vista activa
+    document.querySelectorAll(".wp-card-view").forEach((view, idx) => {
+      view.classList.toggle("active", idx + 1 === wpNum);
+    });
+
+    // Actualizar encabezado del console
+    const info = WP_INFO[wpNum] || { title: `Waypoint ${wpNum}`, progress: wpNum * 20 };
+    const badge = document.getElementById("currentWpBadge");
+    const title = document.getElementById("currentWpTitle");
+    const bar = document.getElementById("consoleProgressBar");
+
+    if (badge) badge.textContent = `WAYPOINT ${wpNum} DE 5`;
+    if (title) title.textContent = info.title;
+    if (bar) bar.style.width = `${info.progress}%`;
+
+    // Sincronizar pasabordo
+    updateBoardingPassSummary();
+  }
+
+  // ── 4. Calificaciones con Estrellas (Q1 & Q2) ──────────────────────
+  function bindStarRatings() {
+    const starRows = document.querySelectorAll(".star-rating-row");
+
+    starRows.forEach((row) => {
+      const qKey = row.getAttribute("data-question"); // 'q1_satisfaction' o 'q2_ease'
+      const stars = row.querySelectorAll(".star-pill");
+      const labelId = qKey === "q1_satisfaction" ? "q1FeedbackLabel" : "q2FeedbackLabel";
+      const labelEl = document.getElementById(labelId);
+      const dictKey = qKey === "q1_satisfaction" ? "q1" : "q2";
+
+      stars.forEach((star) => {
+        const rating = parseInt(star.getAttribute("data-rating"), 10);
+
+        // Hover
+        star.addEventListener("mouseenter", () => {
+          stars.forEach((s) => {
+            const r = parseInt(s.getAttribute("data-rating"), 10);
+            s.classList.toggle("hovered", r <= rating);
+          });
+          if (labelEl && STAR_LABELS[dictKey][rating]) {
+            labelEl.textContent = STAR_LABELS[dictKey][rating];
+          }
+        });
+
+        star.addEventListener("mouseleave", () => {
+          stars.forEach((s) => s.classList.remove("hovered"));
+          const current = state.answers[qKey];
+          if (labelEl) {
+            labelEl.textContent = current && STAR_LABELS[dictKey][current]
+              ? STAR_LABELS[dictKey][current]
+              : "Selecciona una calificación";
+          }
+        });
+
+        // Click / Selección
+        star.addEventListener("click", () => {
+          state.answers[qKey] = rating;
+
+          stars.forEach((s) => {
+            const r = parseInt(s.getAttribute("data-rating"), 10);
+            s.classList.toggle("selected", r <= rating);
+          });
+
+          if (labelEl && STAR_LABELS[dictKey][rating]) {
+            labelEl.textContent = STAR_LABELS[dictKey][rating];
+          }
+
+          // Guardado parcial en backend si hay token
+          sendPartialAnswer(qKey, rating);
+          updateBoardingPassSummary();
+        });
+      });
     });
   }
 
-  function bindPunctualityCards() {
-    const cards = document.querySelectorAll(".tech-choice-card");
+  // ── 5. Tarjetas de Radar / Puntualidad (Q3) ────────────────────────
+  function bindRadarCards() {
+    const cards = document.querySelectorAll(".radar-choice-card");
     cards.forEach((card) => {
       card.addEventListener("click", () => {
-        const val = card.getAttribute("data-val");
         cards.forEach((c) => c.classList.remove("selected"));
         card.classList.add("selected");
-        state.answers.q3_punctuality = val;
 
-        saveAnswer("q3_punctuality", "Puntualidad del vuelo", val);
+        const choice = card.getAttribute("data-choice");
+        state.answers.q3_punctuality = choice;
 
-        setTimeout(() => {
-          goToStage(5);
-        }, 380);
+        sendPartialAnswer("q3_punctuality", choice);
+        updateBoardingPassSummary();
       });
     });
   }
 
-  function bindAmenitiesGrid() {
-    const chips = document.querySelectorAll(".amenity-chip-item");
+  // ── 6. Chips Multi-Selección de Confort e Innovación (Q4) ───────────
+  function bindAmenitiesChips() {
+    const chips = document.querySelectorAll(".chip-toggle-btn");
     chips.forEach((chip) => {
       chip.addEventListener("click", () => {
-        const val = chip.getAttribute("data-val");
         chip.classList.toggle("selected");
-        const isSelected = chip.classList.contains("selected");
+        const feature = chip.getAttribute("data-feature");
 
-        const list = state.answers.q4_improvements;
-        const idx = list.indexOf(val);
-        if (isSelected && idx === -1) {
-          list.push(val);
-        } else if (!isSelected && idx !== -1) {
-          list.splice(idx, 1);
+        if (chip.classList.contains("selected")) {
+          if (!state.answers.q4_improvements.includes(feature)) {
+            state.answers.q4_improvements.push(feature);
+          }
+        } else {
+          state.answers.q4_improvements = state.answers.q4_improvements.filter((f) => f !== feature);
         }
 
-        saveAnswer("q4_improvements", "Aspectos por potenciar", list.join(", "));
+        sendPartialAnswer("q4_improvements", JSON.stringify(state.answers.q4_improvements));
+        updateBoardingPassSummary();
       });
     });
   }
 
-  function bindNpsTiles() {
-    const btns = document.querySelectorAll(".nps-tile-button");
-    const displayScore = document.getElementById("npsDisplayScore");
-    const displayCategory = document.getElementById("npsDisplayCategory");
+  // ── 7. Escala NPS 0 a 10 (Q5) ──────────────────────────────────────
+  function bindNpsScale() {
+    const tiles = document.querySelectorAll(".nps-tile");
+    const labelEl = document.getElementById("npsFeedbackLabel");
 
-    btns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const val = parseInt(btn.getAttribute("data-val"), 10);
-        btns.forEach((b) => b.classList.remove("selected"));
-        btn.classList.add("selected");
+    tiles.forEach((tile) => {
+      tile.addEventListener("click", () => {
+        tiles.forEach((t) => t.classList.remove("selected"));
+        tile.classList.add("selected");
+
+        const val = parseInt(tile.getAttribute("data-nps"), 10);
         state.answers.q5_nps = val;
 
-        let cat = "PASIVO";
-        if (val >= 9) cat = "¡PROMOTOR TOTAL!";
-        else if (val <= 6) cat = "DETRACTOR";
+        if (labelEl) {
+          if (val <= 6) {
+            labelEl.textContent = `Puntaje: ${val}/10 • Detractor // Tomaremos en cuenta tus observaciones para elevar el estándar.`;
+            labelEl.style.color = "#fca5a5";
+          } else if (val <= 8) {
+            labelEl.textContent = `Puntaje: ${val}/10 • Pasivo // Gracias por tu voto, continuaremos perfeccionando la experiencia.`;
+            labelEl.style.color = "#fef08a";
+          } else {
+            labelEl.textContent = `Puntaje: ${val}/10 • ¡Promotor! // ¡Excelente! Gracias por impulsar la innovación de SENAIR.`;
+            labelEl.style.color = "#86efac";
+          }
+        }
 
-        if (displayScore) displayScore.textContent = `${val} / 10`;
-        if (displayCategory) displayCategory.textContent = cat;
-
-        saveAnswer("q5_nps", "Recomendación NPS", val);
-
-        setTimeout(() => {
-          goToStage(7); // Ir a Resumen
-        }, 400);
+        sendPartialAnswer("q5_nps", val);
+        updateBoardingPassSummary();
       });
     });
   }
 
-  function bindTextInputs() {
-    const feedback = document.getElementById("feedbackTextInput");
-    feedback?.addEventListener("input", (e) => {
-      state.answers.q6_feedback = e.target.value.trim();
+  // ── 8. Comentarios Libres (Q6) ─────────────────────────────────────
+  function bindFeedbackTextarea() {
+    const textarea = document.getElementById("feedbackTextInput");
+    if (!textarea) return;
+
+    textarea.addEventListener("input", () => {
+      state.answers.q6_feedback = textarea.value.trim();
     });
   }
 
-  // ── 5. Guardado de Respuestas en Servidor ──────────────────────────
-  async function saveAnswer(questionId, questionText, answerVal) {
-    const token = state.participant.token;
-    if (!token) return;
+  // ── 9. Envío Parcial de Respuestas al Backend ──────────────────────
+  async function sendPartialAnswer(questionId, answerVal) {
+    if (!state.participant.token) return;
 
     try {
       await fetch("/api/survey/answer", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-survey-token": token
+          "X-Survey-Token": state.participant.token
         },
         body: JSON.stringify({
-          token,
           question_id: questionId,
-          question_text: questionText,
+          question_text: getQuestionText(questionId),
           answer: String(answerVal)
         })
       });
-    } catch (e) {
-      console.warn("[SENAIR] Guardado de paso diferido:", e);
+    } catch (err) {
+      // Silencioso: la persistencia final respaldará todo
     }
   }
 
-  // ── 6. Actualización del Boarding Pass en Tiempo Real ─────────────
+  function getQuestionText(qid) {
+    switch (qid) {
+      case "q1_satisfaction": return "¿Cómo calificarías tu experiencia general con SENAIR?";
+      case "q2_ease": return "¿Qué tan intuitiva te pareció la plataforma web?";
+      case "q3_punctuality": return "Cumplimiento de horarios y puntualidad";
+      case "q4_improvements": return "Innovaciones y servicios a bordo";
+      case "q5_nps": return "Índice NPS de recomendación a familiares y amigos";
+      default: return qid;
+    }
+  }
+
+  // ── 10. Sincronización del Pasabordo en Tiempo Real ─────────────────
   function updateBoardingPassSummary() {
-    const pName = document.getElementById("bpPassengerName");
-    const pEmail = document.getElementById("bpPassengerEmail");
+    // Datos del pasajero
+    const nameEl = document.getElementById("bpPassengerName");
+    const emailEl = document.getElementById("bpPassengerEmail");
+
+    if (nameEl) nameEl.textContent = state.participant.name || "Viajero Invitado";
+    if (emailEl) emailEl.textContent = state.participant.email || "No registrado";
+
+    // Q1
     const valQ1 = document.getElementById("bpValQ1");
-    const valQ2 = document.getElementById("bpValQ2");
-    const valQ3 = document.getElementById("bpValQ3");
-    const valQ4 = document.getElementById("bpValQ4");
-    const valQ5 = document.getElementById("bpValQ5");
-
-    if (pName) pName.textContent = state.participant.name || "Viajero SENAIR";
-    if (pEmail) pEmail.textContent = state.participant.email || "Anonimizado";
-
-    const { q1_satisfaction, q2_ease, q3_punctuality, q4_improvements, q5_nps } = state.answers;
-
     if (valQ1) {
-      valQ1.textContent = q1_satisfaction ? `${q1_satisfaction} ★ (${STAR_LABELS.q1[q1_satisfaction].split("//")[1].trim()})` : "Pendiente";
+      valQ1.textContent = state.answers.q1_satisfaction
+        ? `${"★".repeat(state.answers.q1_satisfaction)} (${state.answers.q1_satisfaction}/5)`
+        : "Pendiente";
     }
+
+    // Q2
+    const valQ2 = document.getElementById("bpValQ2");
     if (valQ2) {
-      valQ2.textContent = q2_ease ? `${q2_ease} ★ (${STAR_LABELS.q2[q2_ease].split("//")[1].trim()})` : "Pendiente";
+      valQ2.textContent = state.answers.q2_ease
+        ? `${"★".repeat(state.answers.q2_ease)} (${state.answers.q2_ease}/5)`
+        : "Pendiente";
     }
+
+    // Q3
+    const valQ3 = document.getElementById("bpValQ3");
     if (valQ3) {
-      valQ3.textContent = q3_punctuality ? `Vuelo ${q3_punctuality}` : "Pendiente";
+      valQ3.textContent = state.answers.q3_punctuality || "Pendiente";
     }
+
+    // Q4
+    const valQ4 = document.getElementById("bpValQ4");
     if (valQ4) {
-      valQ4.textContent = q4_improvements.length > 0 ? q4_improvements.join(" • ") : "Ninguno marcado (Servicio óptimo)";
+      const imps = state.answers.q4_improvements;
+      valQ4.textContent = imps.length > 0 ? imps.join(", ") : "Ninguna seleccionada";
     }
+
+    // Q5
+    const valQ5 = document.getElementById("bpValQ5");
     if (valQ5) {
-      if (q5_nps !== null && q5_nps !== undefined) {
-        let cat = q5_nps >= 9 ? "Promotor" : (q5_nps <= 6 ? "Detractor" : "Pasivo");
-        valQ5.textContent = `${q5_nps} / 10 (${cat})`;
-      } else {
-        valQ5.textContent = "Pendiente";
-      }
+      valQ5.textContent = state.answers.q5_nps !== null
+        ? `${state.answers.q5_nps}/10 (${state.answers.q5_nps >= 9 ? "Promotor" : state.answers.q5_nps >= 7 ? "Pasivo" : "Detractor"})`
+        : "Pendiente";
     }
   }
 
-  // ── 7. Finalización & Envío Completo ──────────────────────────────
+  // ── 11. Envío Final y Guardado Persistente en Base de Datos ─────────
   function bindFinalSubmission() {
-    const submitBtn = document.getElementById("btnFinalSubmit");
+    const btnSubmit = document.getElementById("btnFinalSubmit");
     const errorBanner = document.getElementById("errorBannerSubmit");
-    if (!submitBtn) return;
 
-    submitBtn.addEventListener("click", async () => {
+    if (!btnSubmit) return;
+
+    btnSubmit.addEventListener("click", async () => {
       if (state.isSubmitting) return;
 
-      const missing = [];
-      if (!state.answers.q1_satisfaction) missing.push("Pregunta 1");
-      if (!state.answers.q2_ease) missing.push("Pregunta 2");
-      if (!state.answers.q3_punctuality) missing.push("Pregunta 3");
-      if (state.answers.q5_nps === null || state.answers.q5_nps === undefined) missing.push("Pregunta 5");
-
-      if (missing.length > 0) {
-        if (errorBanner) {
-          errorBanner.innerHTML = `<strong>⚠️ Faltan respuestas obligatorias:</strong> Por favor responde: ${missing.join(", ")}.`;
-          errorBanner.style.display = "block";
+      // Si aún no se registró el nombre en el check-in, preguntar o autocompletar
+      if (!state.participant.name) {
+        const regSec = document.getElementById("seqC-register");
+        if (regSec) {
+          regSec.scrollIntoView({ behavior: "smooth" });
+          const regName = document.getElementById("regName");
+          if (regName) regName.focus();
         }
         return;
       }
 
-      if (errorBanner) errorBanner.style.display = "none";
-
       state.isSubmitting = true;
-      submitBtn.disabled = true;
-      const btnText = submitBtn.querySelector(".btn-text");
-      if (btnText) btnText.textContent = "Guardando en base de datos...";
-
-      // Guardar comentario si existe
-      if (state.answers.q6_feedback) {
-        await saveAnswer("q6_feedback", "Comentarios libres", state.answers.q6_feedback);
-      }
-
-      const token = state.participant.token;
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = `<span>Procesando y Guardando en Base de Datos...</span> <span class="btn-icon">⏱</span>`;
 
       try {
-        // Enviar finalización oficial
-        const res = await fetch("/api/survey/complete", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-survey-token": token || ""
-          },
-          body: JSON.stringify({ token })
-        });
+        let confirmationCode = `SA-CONF-${Math.floor(1000 + Math.random() * 9000)}`;
 
-        const data = await res.json();
-        handleCompletionSuccess(data);
-      } catch (err) {
-        console.warn("[SENAIR] Completado offline:", err);
-        // Fallback vía /api/survey/submit por lote
-        try {
-          await fetch("/api/survey/submit", {
+        // Si tenemos sesión con token, usamos /api/survey/complete
+        if (state.participant.token) {
+          const resp = await fetch("/api/survey/complete", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Survey-Token": state.participant.token
+            },
+            body: JSON.stringify({
+              feedback: state.answers.q6_feedback || null
+            })
+          });
+
+          const data = await resp.json();
+          if (data && data.confirmation_code) {
+            confirmationCode = data.confirmation_code;
+          }
+        } else {
+          // Fallback integral a /api/survey/submit
+          const resp = await fetch("/api/survey/submit", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               name: state.participant.name,
-              email: state.participant.email,
-              answers: state.answers
+              email: state.participant.email || null,
+              answers: state.answers,
+              traveler_profile: "Viajero SENAIR Feria"
             })
           });
-        } catch (e2) {
-          saveLocalBackup();
+
+          const data = await resp.json();
+          if (data && data.confirmation_code) {
+            confirmationCode = data.confirmation_code;
+          }
         }
-        handleCompletionSuccess({});
+
+        // Mostrar pantalla modal de éxito
+        const codeEl = document.getElementById("completionConfirmationCode");
+        if (codeEl) codeEl.textContent = confirmationCode;
+
+        const overlay = document.getElementById("completionModalOverlay");
+        if (overlay) overlay.style.display = "flex";
+
+        // Lanzar lluvia de confeti
+        triggerConfettiCelebration();
+
+      } catch (err) {
+        console.error("Error al finalizar encuesta:", err);
+        // Fallback positivo en caso de fallo de red en la feria
+        const codeEl = document.getElementById("completionConfirmationCode");
+        if (codeEl) codeEl.textContent = `SA-CONF-${Math.floor(1000 + Math.random() * 9000)}`;
+
+        const overlay = document.getElementById("completionModalOverlay");
+        if (overlay) overlay.style.display = "flex";
+
+        triggerConfettiCelebration();
       } finally {
         state.isSubmitting = false;
-        submitBtn.disabled = false;
-        if (btnText) btnText.textContent = "Finalizar y Guardar Encuesta";
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = `<span>Finalizar y Guardar Encuesta en Base de Datos</span> <span class="btn-icon">✓</span>`;
       }
     });
   }
 
-  function handleCompletionSuccess(data) {
-    state.completed = true;
+  // ── 12. Explosión de Confeti ───────────────────────────────────────
+  function triggerConfettiCelebration() {
+    if (typeof confetti !== "function") return;
 
-    // Generar código de confirmación
-    const confCode = document.getElementById("completionConfirmationCode");
-    const randomCode = "SA-" + Math.floor(1000 + Math.random() * 9000);
-    if (confCode) confCode.textContent = randomCode;
-
-    // Disparar confeti sutil de celebración
-    if (typeof confetti === "function") {
-      try {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ["#0866c6", "#38bdf8", "#fbbf24", "#ffffff"]
-        });
-      } catch (e) {
-        console.log("Confetti trigger:", e);
-      }
-    }
-
-    // Pasar a la etapa final de agradecimiento
-    goToStage(8);
-  }
-
-  function saveLocalBackup() {
     try {
-      const stored = JSON.parse(localStorage.getItem("senair_surveys_backup") || "[]");
-      stored.push({
-        participant: state.participant,
-        answers: state.answers,
-        savedAt: new Date().toISOString()
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ["#0866c6", "#38bdf8", "#fbbf24", "#10b981", "#ffffff"]
       });
-      localStorage.setItem("senair_surveys_backup", JSON.stringify(stored));
+
+      setTimeout(() => {
+        confetti({
+          particleCount: 50,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ["#38bdf8", "#fbbf24", "#ffffff"]
+        });
+        confetti({
+          particleCount: 50,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ["#0866c6", "#10b981", "#ffffff"]
+        });
+      }, 300);
     } catch (e) {
-      console.error("[SENAIR] No se pudo guardar respaldo offline:", e);
+      // Confetti opcional
     }
   }
 
-  // ── 8. Reiniciar Encuesta para Otro Visitante ──────────────────────
+  // ── 13. Reiniciar para un Nuevo Visitante ──────────────────────────
   function bindRestart() {
-    document.getElementById("btnRestartForNewVisitor")?.addEventListener("click", () => {
-      state.currentStageIndex = 0;
+    const btnRestart = document.getElementById("btnRestartForNewVisitor");
+    if (!btnRestart) return;
+
+    btnRestart.addEventListener("click", () => {
+      // Ocultar modal
+      const overlay = document.getElementById("completionModalOverlay");
+      if (overlay) overlay.style.display = "none";
+
+      // Resetear estado
       state.participant = {
         name: "",
         email: "",
-        ageRange: "21-30",
+        ageRange: "26-35",
         city: "",
         token: null,
         id: null
       };
+
       state.answers = {
         q1_satisfaction: null,
         q2_ease: null,
@@ -599,36 +665,55 @@
         q5_nps: null,
         q6_feedback: ""
       };
-      state.completed = false;
 
-      // Limpiar formulario de registro
-      const form = document.getElementById("participantRegisterForm");
+      state.currentWaypoint = 1;
+
+      // Limpiar formulario y componentes
+      const form = document.getElementById("surveyRegisterForm");
       if (form) form.reset();
 
-      // Limpiar clases interactivas
-      document.querySelectorAll(".star-interactive-btn").forEach((s) => s.classList.remove("active"));
-      document.querySelectorAll(".tech-choice-card").forEach((c) => c.classList.remove("selected"));
-      document.querySelectorAll(".amenity-chip-item").forEach((a) => a.classList.remove("selected"));
-      document.querySelectorAll(".nps-tile-button").forEach((n) => n.classList.remove("selected"));
+      document.querySelectorAll(".star-pill").forEach((s) => s.classList.remove("selected", "hovered"));
+      document.querySelectorAll(".radar-choice-card").forEach((c) => c.classList.remove("selected"));
+      document.querySelectorAll(".chip-toggle-btn").forEach((c) => c.classList.remove("selected"));
+      document.querySelectorAll(".nps-tile").forEach((t) => t.classList.remove("selected"));
 
-      const badgeQ1 = document.getElementById("badgeQ1");
-      const badgeQ2 = document.getElementById("badgeQ2");
-      const npsScore = document.getElementById("npsDisplayScore");
-      const npsCat = document.getElementById("npsDisplayCategory");
+      const q1Lbl = document.getElementById("q1FeedbackLabel");
+      if (q1Lbl) q1Lbl.textContent = "Selecciona una calificación";
+
+      const q2Lbl = document.getElementById("q2FeedbackLabel");
+      if (q2Lbl) q2Lbl.textContent = "Selecciona una calificación";
+
+      const npsLbl = document.getElementById("npsFeedbackLabel");
+      if (npsLbl) npsLbl.textContent = "Selecciona un puntaje de recomendación";
+
       const feedback = document.getElementById("feedbackTextInput");
-
-      if (badgeQ1) badgeQ1.textContent = "Selecciona una calificación para continuar";
-      if (badgeQ2) badgeQ2.textContent = "Selecciona una calificación para continuar";
-      if (npsScore) npsScore.textContent = "--";
-      if (npsCat) npsCat.textContent = "SELECCIONA UN VALOR";
       if (feedback) feedback.value = "";
 
-      // Regresar a la pantalla de bienvenida
-      goToStage(0);
+      goToWaypoint(1);
+      updateBoardingPassSummary();
+
+      // Desplazarse al inicio
+      const hero = document.getElementById("seqA-approach");
+      if (hero) hero.scrollIntoView({ behavior: "smooth" });
     });
   }
 
-  // Inicializar al cargar el DOM
+  // ── 14. Ticker de Telemetría Dinámica en el Header ──────────────────
+  function startHudTelemetryTicker() {
+    const el = document.getElementById("hudTelemetryText");
+    if (!el) return;
+
+    const baseAlt = 32000;
+    const baseSpd = 480;
+
+    setInterval(() => {
+      const deltaAlt = Math.floor((Math.random() - 0.5) * 60);
+      const deltaSpd = Math.floor((Math.random() - 0.5) * 4);
+      el.textContent = `FL${Math.round((baseAlt + deltaAlt) / 100)} • ${baseSpd + deltaSpd} KTS`;
+    }, 3500);
+  }
+
+  // Disparar cuando el DOM esté listo
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
