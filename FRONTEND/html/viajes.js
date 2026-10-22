@@ -198,6 +198,7 @@ async function renderReservations() {
         seat: r.seat,
         price: r.price,
         airline: r.airline,
+        passengerName: r.passenger_name || "",
       }));
       if (userEmail) {
         window.sessionStorage.setItem(`senairReservations_${userEmail}`, JSON.stringify(reservations));
@@ -241,6 +242,7 @@ async function renderReservations() {
         <dl>
           <div><dt>${Array.isArray(reservation.seat) ? "Asientos" : "Asiento"}</dt><dd>${escapeHtml(seats)}</dd></div>
           <div><dt>Reserva</dt><dd>${escapeHtml(String(reservation.id).slice(-6).toUpperCase())}</dd></div>
+          ${reservation.passengerName ? `<div style="grid-column: 1 / -1;"><dt>Titular del Boleto</dt><dd style="color:var(--blue); font-weight:700;">${escapeHtml(reservation.passengerName)}</dd></div>` : ""}
         </dl>
       </div>
     `;

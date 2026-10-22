@@ -8,6 +8,15 @@ const purchaseBtn = document.getElementById("purchaseBtn");
 const currency = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
 const passengerCount = Math.max(1, Number(selectedFlight?.passengers || 1));
 const selectedSeats = [];
+const passengerDataStore = {};
+const passengersCardsContainer = document.getElementById("passengersCardsContainer") || document.getElementById("passengersForm");
+const passengersEmptyHint = document.getElementById("passengersEmptyHint");
+const passengerActionRow = document.getElementById("passengerActionRow");
+const proceedToPaymentBtn = document.getElementById("proceedToPaymentBtn");
+const passengerStep = document.getElementById("passengerStep");
+const summaryPassengersPreview = document.getElementById("summaryPassengersPreview");
+const summaryPassengersList = document.getElementById("summaryPassengersList");
+const openModalBtnSeat = document.getElementById("openModalBtnSeat");
 
 // Definición de Clases de Cabina
 const CABIN_CLASSES = {
@@ -268,14 +277,290 @@ function showAuthRequiredModal(redirectUrl = "login.html?redirect=checkout.html&
   }, 4000);
 }
 
+
+// ══════════════════════════════════════════════════════════════════
+// LÓGICA DEL APARTADO DE PASAJEROS (PASO 2)
+// ══════════════════════════════════════════════════════════════════
+
+function getPassengersData() {
+  return selectedSeats.map((seat, idx) => {
+    const store = passengerDataStore[seat] || {};
+    return {
+      seat,
+      seatClass: CABIN_CLASSES[getSeatClass(seat)]?.name || "Clase Normal",
+      badgeClass: CABIN_CLASSES[getSeatClass(seat)]?.badgeClass || "badge-economy",
+      name: (store.name || "").trim(),
+      docType: store.docType || "CC",
+      docNumber: (store.docNumber || "").trim(),
+      email: (store.email || "").trim(),
+      phone: (store.phone || "").trim(),
+    };
+  });
+}
+
+function validateAllPassengers() {
+  if (selectedSeats.length !== passengerCount || selectedSeats.length === 0) return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return selectedSeats.every((seat) => {
+    const p = passengerDataStore[seat];
+    if (!p) return false;
+    const nameValid = (p.name || "").trim().length >= 3;
+    const docValid = (p.docNumber || "").trim().length >= 4;
+    const emailValid = emailRegex.test((p.email || "").trim());
+    const phoneValid = (p.phone || "").replace(/\D/g, "").length >= 7;
+    return nameValid && docValid && emailValid && phoneValid;
+  });
+}
+
+function updateSummaryPassengers() {
+  if (!summaryPassengersPreview || !summaryPassengersList) return;
+  if (selectedSeats.length === 0) {
+    summaryPassengersPreview.style.display = "none";
+    summaryPassengersList.innerHTML = "";
+    return;
+  }
+
+  summaryPassengersPreview.style.display = "block";
+  summaryPassengersList.innerHTML = selectedSeats.map((seat) => {
+    const p = passengerDataStore[seat];
+    const nameText = p && p.name ? p.name.trim() : "Por asignar...";
+    return `
+      <div class="summary-pass-item">
+        <strong>${escapeHtml(nameText)}</strong>
+        <span>${seat}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+function syncPassengerValidationUI() {
+  const isComplete = validateAllPassengers();
+  const seatsComplete = selectedSeats.length === passengerCount;
+  const totalFormatted = currency.format(calculateTotalPrice());
+  const authStorageKey = "senairAuthenticated";
+  const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
+
+  if (proceedToPaymentBtn) {
+    proceedToPaymentBtn.disabled = !isComplete;
+    if (isComplete) {
+      proceedToPaymentBtn.classList.add("ready");
+      if (!isAuthenticated) {
+        proceedToPaymentBtn.textContent = `Iniciar sesión para pagar • ${totalFormatted}`;
+      } else {
+        proceedToPaymentBtn.textContent = `Proceder al Pago Seguro • ${totalFormatted}`;
+      }
+    } else {
+      proceedToPaymentBtn.classList.remove("ready");
+      if (!seatsComplete) {
+        proceedToPaymentBtn.textContent = `Selecciona todos tus asientos arriba primero`;
+      } else {
+        proceedToPaymentBtn.textContent = `Completa los datos de todos los pasajeros para pagar`;
+      }
+    }
+  }
+
+  updateSummaryPassengers();
+}
+
+function renderPassengerForms() {
+  if (!passengersCardsContainer || !passengersEmptyHint) return;
+
+  if (selectedSeats.length === 0) {
+    passengersEmptyHint.style.display = "flex";
+    passengersCardsContainer.style.display = "none";
+    if (passengerActionRow) passengerActionRow.style.display = "none";
+    if (passengerStep) passengerStep.classList.remove("is-active");
+    updateSummaryPassengers();
+    return;
+  }
+
+  passengersEmptyHint.style.display = "none";
+  passengersCardsContainer.style.display = "flex";
+  if (passengerActionRow) passengerActionRow.style.display = "flex";
+  if (passengerStep) passengerStep.classList.add("is-active");
+
+  const loggedUser = window.sessionStorage.getItem("senairUserName") || "";
+  const loggedEmail = window.sessionStorage.getItem("senairUserEmail") || "";
+
+  // Crear tarjetas para cada asiento seleccionado
+  passengersCardsContainer.innerHTML = selectedSeats.map((seat, index) => {
+    if (!passengerDataStore[seat]) {
+      passengerDataStore[seat] = {
+        name: index === 0 && loggedUser ? loggedUser : "",
+        docType: "CC",
+        docNumber: "",
+        email: index === 0 && loggedEmail ? loggedEmail : "",
+        phone: ""
+      };
+    }
+    const store = passengerDataStore[seat];
+    const seatClassKey = getSeatClass(seat);
+    const classInfo = CABIN_CLASSES[seatClassKey];
+    const column = seat.slice(-1);
+    const locLabel = column === "A" || column === "F" ? "Ventana" : column === "C" || column === "D" ? "Pasillo" : "Medio";
+
+    return `
+      <article class="passenger-card" data-seat="${seat}">
+        <div class="passenger-card-header">
+          <div class="passenger-seat-badge">
+            <span class="seat-pill">${seat}</span>
+            <span class="class-pill ${classInfo.badgeClass}">${classInfo.badgeLabel}</span>
+            <span class="location-pill">${locLabel}</span>
+          </div>
+          <span class="ticket-num-label">Boleto #${index + 1} de ${passengerCount}</span>
+        </div>
+
+        <div class="passenger-form-grid">
+          <!-- Nombre Completo -->
+          <div class="passenger-form-group full-width">
+            <label for="pass_name_${seat}" class="pass-label">
+              Nombre y Apellidos del Pasajero <span class="req">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="pass_name_${seat}" 
+              class="pass-input pass-input-name" 
+              data-seat="${seat}" 
+              placeholder="Ej. Juan Andrés Pérez Gómez" 
+              value="${escapeHtml(store.name)}" 
+              required 
+              autocomplete="name"
+            />
+          </div>
+
+          <!-- Tipo de Documento -->
+          <div class="passenger-form-group">
+            <label for="pass_doctype_${seat}" class="pass-label">
+              Tipo de Documento <span class="req">*</span>
+            </label>
+            <select id="pass_doctype_${seat}" class="pass-select pass-select-doctype" data-seat="${seat}">
+              <option value="CC" ${store.docType === "CC" ? "selected" : ""}>Cédula de Ciudadanía (CC)</option>
+              <option value="CE" ${store.docType === "CE" ? "selected" : ""}>Cédula de Extranjería (CE)</option>
+              <option value="PA" ${store.docType === "PA" ? "selected" : ""}>Pasaporte (PA)</option>
+              <option value="TI" ${store.docType === "TI" ? "selected" : ""}>Tarjeta de Identidad (TI)</option>
+              <option value="PEP" ${store.docType === "PEP" ? "selected" : ""}>Permiso Especial (PEP)</option>
+            </select>
+          </div>
+
+          <!-- Número de Documento -->
+          <div class="passenger-form-group">
+            <label for="pass_doc_${seat}" class="pass-label">
+              Número de Documento <span class="req">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="pass_doc_${seat}" 
+              class="pass-input pass-input-doc" 
+              data-seat="${seat}" 
+              placeholder="Ej. 1020304050" 
+              value="${escapeHtml(store.docNumber)}" 
+              required 
+              inputmode="numeric"
+            />
+          </div>
+
+          <!-- Correo Electrónico -->
+          <div class="passenger-form-group">
+            <label for="pass_email_${seat}" class="pass-label">
+              Correo Electrónico <span class="req">*</span>
+            </label>
+            <input 
+              type="email" 
+              id="pass_email_${seat}" 
+              class="pass-input pass-input-email" 
+              data-seat="${seat}" 
+              placeholder="correo@ejemplo.com" 
+              value="${escapeHtml(store.email)}" 
+              required 
+              autocomplete="email"
+            />
+          </div>
+
+          <!-- Teléfono / Celular -->
+          <div class="passenger-form-group">
+            <label for="pass_phone_${seat}" class="pass-label">
+              Teléfono / Celular <span class="req">*</span>
+            </label>
+            <input 
+              type="tel" 
+              id="pass_phone_${seat}" 
+              class="pass-input pass-input-phone" 
+              data-seat="${seat}" 
+              placeholder="Ej. 300 123 4567" 
+              value="${escapeHtml(store.phone)}" 
+              required 
+              autocomplete="tel"
+            />
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  // Añadir listeners para cada campo
+  passengersCardsContainer.querySelectorAll(".pass-input, .pass-select").forEach((el) => {
+    const seat = el.dataset.seat;
+    el.addEventListener("input", () => {
+      if (!passengerDataStore[seat]) passengerDataStore[seat] = {};
+      if (el.classList.contains("pass-input-name")) {
+        passengerDataStore[seat].name = el.value;
+        el.classList.toggle("is-valid", el.value.trim().length >= 3);
+        el.classList.toggle("is-invalid", el.value.trim().length > 0 && el.value.trim().length < 3);
+      } else if (el.classList.contains("pass-select-doctype")) {
+        passengerDataStore[seat].docType = el.value;
+      } else if (el.classList.contains("pass-input-doc")) {
+        const cleanDoc = el.value.replace(/[^0-9A-Za-z-]/g, "");
+        el.value = cleanDoc;
+        passengerDataStore[seat].docNumber = cleanDoc;
+        el.classList.toggle("is-valid", cleanDoc.length >= 4);
+        el.classList.toggle("is-invalid", cleanDoc.length > 0 && cleanDoc.length < 4);
+      } else if (el.classList.contains("pass-input-email")) {
+        passengerDataStore[seat].email = el.value.trim();
+        const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+        el.classList.toggle("is-valid", valid);
+        el.classList.toggle("is-invalid", el.value.trim().length > 0 && !valid);
+      } else if (el.classList.contains("pass-input-phone")) {
+        passengerDataStore[seat].phone = el.value;
+        const validPhone = el.value.replace(/\D/g, "").length >= 7;
+        el.classList.toggle("is-valid", validPhone);
+        el.classList.toggle("is-invalid", el.value.trim().length > 0 && !validPhone);
+      }
+
+      syncPassengerValidationUI();
+    });
+  });
+
+  syncPassengerValidationUI();
+}
+
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>'"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[c]);
+}
+
 function openPaymentModal() {
   if (selectedSeats.length !== passengerCount) return;
+
+  if (!validateAllPassengers()) {
+    if (passengerStep) {
+      passengerStep.scrollIntoView({ behavior: "smooth", block: "center" });
+      const firstInvalid = passengerStep.querySelector(".pass-input:invalid, .pass-input.is-invalid") || passengerStep.querySelector(".pass-input");
+      if (firstInvalid) firstInvalid.focus();
+    }
+    alert("Por favor completa los datos reglamentarios de todos los pasajeros antes de realizar el pago.");
+    return;
+  }
 
   const authStorageKey = "senairAuthenticated";
   const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
   if (!isAuthenticated) {
     showAuthRequiredModal("login.html?redirect=checkout.html&msg=auth_required");
     return;
+  }
+
+  // Prellenar nombre del titular de tarjeta con el primer pasajero si está vacío
+  const firstPass = passengerDataStore[selectedSeats[0]];
+  if (nameInput && !nameInput.value.trim() && firstPass && firstPass.name) {
+    nameInput.value = firstPass.name;
   }
 
   if (!paymentOverlay) return;
@@ -305,9 +590,21 @@ function closePaymentModal() {
   document.body.style.overflow = "";
 }
 
-openModalBtns.forEach((btn) => {
-  btn.addEventListener("click", openPaymentModal);
-});
+if (openModalBtnSeat) {
+  openModalBtnSeat.addEventListener("click", () => {
+    if (selectedSeats.length === passengerCount && passengerStep) {
+      passengerStep.scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(() => {
+        const firstInput = passengerStep.querySelector(".pass-input");
+        if (firstInput) firstInput.focus();
+      }, 350);
+    }
+  });
+}
+
+if (proceedToPaymentBtn) {
+  proceedToPaymentBtn.addEventListener("click", openPaymentModal);
+}
 
 if (closeModalBtn) {
   closeModalBtn.addEventListener("click", closePaymentModal);
@@ -346,24 +643,20 @@ function updateSelectedSeatClassSummary() {
 function updatePayButtons() {
   const seatsComplete = selectedSeats.length === passengerCount;
   const remaining = passengerCount - selectedSeats.length;
-  const totalFormatted = currency.format(calculateTotalPrice());
-  const authStorageKey = "senairAuthenticated";
-  const isAuthenticated = window.sessionStorage.getItem(authStorageKey) === "true";
 
-  openModalBtns.forEach((btn) => {
-    btn.disabled = !seatsComplete;
+  if (openModalBtnSeat) {
+    openModalBtnSeat.disabled = !seatsComplete;
     if (seatsComplete) {
-      if (!isAuthenticated) {
-        btn.textContent = `Iniciar sesión para pagar • ${totalFormatted}`;
-      } else {
-        btn.textContent = `Realizar Pago • ${totalFormatted}`;
-      }
-      btn.classList.add("ready");
+      openModalBtnSeat.textContent = `Confirmar Asientos e Ingresar Datos de Pasajeros (${selectedSeats.join(", ")}) ↓`;
+      openModalBtnSeat.classList.add("ready");
     } else {
-      btn.textContent = `Selecciona ${remaining} asiento${remaining === 1 ? "" : "s"} más para continuar`;
-      btn.classList.remove("ready");
+      openModalBtnSeat.textContent = `Selecciona ${remaining} asiento${remaining === 1 ? "" : "s"} más para continuar`;
+      openModalBtnSeat.classList.remove("ready");
     }
-  });
+  }
+
+  renderPassengerForms();
+  syncPassengerValidationUI();
 }
 
 if (!selectedFlight) {
@@ -523,6 +816,10 @@ if (paymentForm) {
 
     const calculatedTotal = calculateTotalPrice();
     const classNamesUsed = [...new Set(selectedSeats.map(getSeatClass))].map((c) => CABIN_CLASSES[c].name).join(", ");
+    const passengersList = getPassengersData();
+    const passengerNamesStr = passengersList.map((p) => `${p.name} (${p.seat})`).join(", ");
+    const passengerDocsStr = passengersList.map((p) => `${p.docType} ${p.docNumber}`).join(", ");
+    const primaryPassenger = passengersList[0] || {};
 
     const reservation = {
       origin: selectedFlight.origin,
@@ -535,6 +832,11 @@ if (paymentForm) {
       price: calculatedTotal,
       airline: selectedFlight.airline,
       flightId: selectedFlight.id,
+      passengerName: passengerNamesStr,
+      passengerDoc: passengerDocsStr,
+      passengerEmail: primaryPassenger.email || "",
+      passengerPhone: primaryPassenger.phone || "",
+      passengers: passengersList,
     };
 
     try {
@@ -603,10 +905,29 @@ if (paymentForm) {
     if (invoiceDateEl) invoiceDateEl.textContent = `Fecha: ${invoiceDateStr}`;
 
     const invoiceCustNameEl = document.getElementById("invoiceCustomerName");
-    if (invoiceCustNameEl) invoiceCustNameEl.textContent = userName;
+    if (invoiceCustNameEl) invoiceCustNameEl.textContent = primaryPassenger.name || userName;
 
     const invoiceCustEmailEl = document.getElementById("invoiceCustomerEmail");
-    if (invoiceCustEmailEl) invoiceCustEmailEl.textContent = userEmail;
+    if (invoiceCustEmailEl) invoiceCustEmailEl.textContent = primaryPassenger.email || userEmail;
+
+    const invoiceCustDocEl = document.getElementById("invoiceCustomerDoc");
+    if (invoiceCustDocEl && primaryPassenger.docNumber) {
+      invoiceCustDocEl.textContent = `Doc: ${primaryPassenger.docType} ${primaryPassenger.docNumber}`;
+    }
+
+    // Llenar grilla de boletos por pasajero en la factura
+    const invoicePassGrid = document.getElementById("invoicePassengersGrid");
+    if (invoicePassGrid) {
+      invoicePassGrid.innerHTML = passengersList.map((p) => `
+        <div class="invoice-pass-card">
+          <div class="invoice-pass-seat-badge">${p.seat}</div>
+          <div class="invoice-pass-details">
+            <strong>${escapeHtml(p.name)}</strong>
+            <span>${p.docType}: ${escapeHtml(p.docNumber)} · ${p.seatClass}</span>
+          </div>
+        </div>
+      `).join("");
+    }
 
     const invoicePaymentEl = document.getElementById("invoicePaymentMethod");
     if (invoicePaymentEl) invoicePaymentEl.textContent = paymentMethodLabel;
@@ -649,7 +970,8 @@ if (paymentForm) {
     // 2. Llenar sección de confirmación (debajo de la factura)
     const cuotasInfo = nCuotas > 1 ? ` (diferido a ${nCuotas} cuotas)` : "";
     if (confirmationText) {
-      confirmationText.textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")} (${classNamesUsed})${cuotasInfo}. Te hemos enviado los detalles al correo ${userEmail}.`;
+      const targetEmail = primaryPassenger.email || userEmail;
+      confirmationText.textContent = `${selectedFlight.origin} a ${selectedFlight.destination}, asiento${selectedSeats.length === 1 ? "" : "s"} ${selectedSeats.join(", ")} (${classNamesUsed})${cuotasInfo}. Boleto emitido para: ${passengerNamesStr}. Te hemos enviado el comprobante oficial al correo ${targetEmail}.`;
     }
 
     if (checkoutLayout) checkoutLayout.style.display = "none";

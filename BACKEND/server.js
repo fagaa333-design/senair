@@ -167,6 +167,24 @@ async function initializeDatabase() {
   if (!hasRoleColumn) {
     await db.execute({ sql: "ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'", args: [] });
   }
+  // Columnas para información de pasajeros en cada reserva
+  const reservationsColumns = await db.execute({ sql: "PRAGMA table_info(reservations)", args: [] });
+  const resColNames = reservationsColumns.rows.map((c) => c.name);
+  if (!resColNames.includes("passenger_name")) {
+    try { await db.execute({ sql: "ALTER TABLE reservations ADD COLUMN passenger_name TEXT", args: [] }); } catch (_) {}
+  }
+  if (!resColNames.includes("passenger_doc")) {
+    try { await db.execute({ sql: "ALTER TABLE reservations ADD COLUMN passenger_doc TEXT", args: [] }); } catch (_) {}
+  }
+  if (!resColNames.includes("passenger_email")) {
+    try { await db.execute({ sql: "ALTER TABLE reservations ADD COLUMN passenger_email TEXT", args: [] }); } catch (_) {}
+  }
+  if (!resColNames.includes("passenger_phone")) {
+    try { await db.execute({ sql: "ALTER TABLE reservations ADD COLUMN passenger_phone TEXT", args: [] }); } catch (_) {}
+  }
+  if (!resColNames.includes("passengers_json")) {
+    try { await db.execute({ sql: "ALTER TABLE reservations ADD COLUMN passengers_json TEXT", args: [] }); } catch (_) {}
+  }
 
   await db.execute({
     sql: "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'admin') ON CONFLICT(email) DO UPDATE SET name = excluded.name, password = excluded.password, role = 'admin'",
@@ -573,6 +591,11 @@ app.post("/api/reservations", requireAuth, async (request, response) => {
     price: Number(request.body.price),
     airline: String(request.body.airline || "SENAIR").trim().slice(0, 50).replace(/[<>'"\\;]/g, ""),
     flightId: request.body.flightId ? Number(request.body.flightId) : null,
+    passengerName: String(request.body.passengerName || "").trim().slice(0, 200).replace(/[<>'"\\;]/g, ""),
+    passengerDoc: String(request.body.passengerDoc || "").trim().slice(0, 60).replace(/[<>'"\\;]/g, ""),
+    passengerEmail: String(request.body.passengerEmail || "").trim().slice(0, 120).replace(/[<>'"\\;]/g, ""),
+    passengerPhone: String(request.body.passengerPhone || "").trim().slice(0, 50).replace(/[<>'"\\;]/g, ""),
+    passengersJson: request.body.passengers ? JSON.stringify(request.body.passengers) : null,
   };
 
   if (
@@ -591,8 +614,8 @@ app.post("/api/reservations", requireAuth, async (request, response) => {
 
   try {
     const result = await db.execute({
-      sql: "INSERT INTO reservations (user_id, flight_id, origin, destination, departure_date, departure_time, arrival_time, seat, price, airline) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      args: [request.user.id, reservation.flightId, reservation.origin, reservation.destination, reservation.departureDate, reservation.departureTime, reservation.arrivalTime, reservation.seat, reservation.price, reservation.airline],
+      sql: "INSERT INTO reservations (user_id, flight_id, origin, destination, departure_date, departure_time, arrival_time, seat, price, airline, passenger_name, passenger_doc, passenger_email, passenger_phone, passengers_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      args: [request.user.id, reservation.flightId, reservation.origin, reservation.destination, reservation.departureDate, reservation.departureTime, reservation.arrivalTime, reservation.seat, reservation.price, reservation.airline, reservation.passengerName, reservation.passengerDoc, reservation.passengerEmail, reservation.passengerPhone, reservation.passengersJson],
     });
     return response.status(201).json({ success: true, id: Number(result.lastInsertRowid), message: "Reserva confirmada." });
   } catch {
@@ -603,7 +626,7 @@ app.post("/api/reservations", requireAuth, async (request, response) => {
 app.get("/api/reservations", requireAuth, async (request, response) => {
   try {
     const result = await db.execute({
-      sql: "SELECT id, origin, destination, departure_date, departure_time, arrival_time, seat, price, airline, created_at FROM reservations WHERE user_id = ? ORDER BY created_at DESC",
+      sql: "SELECT id, origin, destination, departure_date, departure_time, arrival_time, seat, price, airline, passenger_name, passenger_doc, passenger_email, passenger_phone, passengers_json, created_at FROM reservations WHERE user_id = ? ORDER BY created_at DESC",
       args: [request.user.id],
     });
     return response.json({ success: true, reservations: result.rows.map((row) => ({ ...row })) });
