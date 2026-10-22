@@ -945,7 +945,7 @@ if (paymentForm) {
           <div class="invoice-pass-seat-badge">${p.seat}</div>
           <div class="invoice-pass-details">
             <strong>${escapeHtml(p.name)}</strong>
-            <span>${p.docType}: ${escapeHtml(p.docNumber)} · ${p.seatClass}</span>
+            <span>${p.docType}: ${escapeHtml(p.docNumber)} · <span class="seat-class-badge">${escapeHtml(p.seatClass)}</span></span>
           </div>
         </div>
       `).join("");
@@ -1004,6 +1004,15 @@ if (paymentForm) {
       postCheckoutContainer.hidden = false;
       postCheckoutContainer.style.display = "flex";
       postCheckoutContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+
+  // Manejador funcional para imprimir factura
+  document.addEventListener("click", (e) => {
+    const printBtn = e.target.closest("#btnPrintInvoice, .btn-print-invoice");
+    if (printBtn) {
+      e.preventDefault();
+      window.print();
     }
   });
 }

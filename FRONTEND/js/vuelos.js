@@ -136,9 +136,9 @@ function renderFlights() {
 			<div class="flight-price">
 				<div class="flight-price-wrap">
 					<strong>${moneyFormatter.format(flight.price)}</strong>
-					<span>por pasajero</span>
+					<span>${window.SenairI18n && window.SenairI18n.getLanguage() === "en" ? "per passenger" : "por pasajero"}</span>
 				</div>
-				<button type="button" class="choose-flight">Seleccionar</button>
+				<button type="button" class="choose-flight">${window.SenairI18n && window.SenairI18n.getLanguage() === "en" ? "Select" : "Seleccionar"}</button>
 			</div>
 		`;
 		resultsContainer.append(card);
@@ -273,3 +273,10 @@ sortButtons.forEach((button) => button.addEventListener("click", () => {
 }));
 
 loadFlights();
+
+
+window.addEventListener("senair:langchange", () => {
+	if (typeof renderFlights === "function" && Array.isArray(flights) && flights.length) {
+		renderFlights();
+	}
+});

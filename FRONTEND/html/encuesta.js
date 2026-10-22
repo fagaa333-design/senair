@@ -344,9 +344,82 @@
     });
   }
 
-  // ── 7. Pregunta 3: Opciones de Puntualidad ─────────────────────────
+  // ── 7. Pregunta 3: Calificación y Retroalimentación de la Web ───────
   function bindQuestion3Status() {
-    const rows = document.querySelectorAll(".status-choice-row");
+    const rows = document.querySelectorAll("#paneQ3 .status-choice-row");
+    const starBtns = document.querySelectorAll(".q3-star-btn");
+    const feedbackLbl = document.getElementById("q3FeedbackLabel");
+
+    const STAR_LABELS = {
+      1: "⭐ 1 Estrella - Difícil de usar o confusa",
+      2: "⭐⭐ 2 Estrellas - Regular, requiere mejoras",
+      3: "⭐⭐⭐ 3 Estrellas - Aceptable, cumple su función",
+      4: "⭐⭐⭐⭐ 4 Estrellas - Muy buena, moderna y rápida",
+      5: "⭐⭐⭐⭐⭐ 5 Estrellas - ¡Excelente! Visualmente atractiva e intuitiva"
+    };
+
+    function highlightStars(count) {
+      starBtns.forEach((btn) => {
+        const val = parseInt(btn.getAttribute("data-value"), 10);
+        btn.classList.toggle("selected", val <= count);
+        btn.setAttribute("aria-checked", val === count ? "true" : "false");
+      });
+    }
+
+    // Estrellas de Q3
+    starBtns.forEach((btn) => {
+      const val = parseInt(btn.getAttribute("data-value"), 10);
+
+      btn.addEventListener("mouseenter", () => {
+        starBtns.forEach((s) => {
+          const sVal = parseInt(s.getAttribute("data-value"), 10);
+          s.classList.toggle("hovered", sVal <= val);
+        });
+        if (feedbackLbl && STAR_LABELS[val]) {
+          feedbackLbl.textContent = STAR_LABELS[val];
+        }
+      });
+
+      btn.addEventListener("mouseleave", () => {
+        starBtns.forEach((s) => s.classList.remove("hovered"));
+        if (state.answers.q3_punctuality) {
+          if (feedbackLbl) feedbackLbl.textContent = state.answers.q3_punctuality;
+        } else {
+          if (feedbackLbl) feedbackLbl.textContent = "Toca las estrellas o selecciona una opción abajo:";
+        }
+      });
+
+      btn.addEventListener("click", () => {
+        highlightStars(val);
+
+        // Buscar fila correspondiente por estrellas
+        let matchedRow = document.querySelector(`#paneQ3 .status-choice-row[data-stars="${val}"]`);
+        if (!matchedRow && val <= 2) {
+          matchedRow = document.querySelector('#paneQ3 .status-choice-row[data-stars="2"]');
+        }
+
+        rows.forEach((r) => {
+          r.classList.remove("selected");
+          r.setAttribute("aria-checked", "false");
+        });
+
+        let finalVal = STAR_LABELS[val] || `${val} Estrellas`;
+        if (matchedRow) {
+          matchedRow.classList.add("selected");
+          matchedRow.setAttribute("aria-checked", "true");
+          finalVal = matchedRow.getAttribute("data-value");
+        }
+
+        if (feedbackLbl) {
+          feedbackLbl.textContent = finalVal;
+        }
+
+        state.answers.q3_punctuality = finalVal;
+        sendPartialAnswer("q3_punctuality", finalVal);
+      });
+    });
+
+    // Filas detalladas de Q3
     rows.forEach((row) => {
       row.addEventListener("click", () => {
         rows.forEach((r) => {
@@ -357,9 +430,15 @@
         row.classList.add("selected");
         row.setAttribute("aria-checked", "true");
 
-        const val = row.getAttribute("data-value");
-        state.answers.q3_punctuality = val;
+        const stars = parseInt(row.getAttribute("data-stars"), 10) || 5;
+        highlightStars(stars);
 
+        const val = row.getAttribute("data-value");
+        if (feedbackLbl) {
+          feedbackLbl.textContent = val;
+        }
+
+        state.answers.q3_punctuality = val;
         sendPartialAnswer("q3_punctuality", val);
       });
     });
@@ -471,7 +550,7 @@
     switch (qid) {
       case "q1_satisfaction": return "¿Cómo calificarías tu experiencia general con SENAIR?";
       case "q2_ease": return "¿Qué fue lo que más te gustó de la página web?";
-      case "q3_punctuality": return "Puntualidad y cumplimiento de itinerarios";
+      case "q3_punctuality": return "¿Cómo calificarías tu experiencia navegando en el sitio web de SENAIR?";
       case "q4_improvements": return "Comodidades deseadas en los aviones";
       case "q5_nps": return "Índice de recomendación NPS";
       default: return qid;
@@ -669,6 +748,7 @@
 
       // Desmarcar selecciones visuales
       document.querySelectorAll(".scale-star-btn").forEach((s) => s.classList.remove("selected", "hovered"));
+      document.querySelectorAll(".q3-star-btn").forEach((s) => s.classList.remove("selected", "hovered"));
       document.querySelectorAll(".editorial-choice-card").forEach((c) => c.classList.remove("selected"));
       document.querySelectorAll(".status-choice-row").forEach((r) => r.classList.remove("selected"));
       document.querySelectorAll(".amenity-chip-item").forEach((c) => c.classList.remove("selected"));
@@ -676,6 +756,9 @@
 
       const q1Lbl = document.getElementById("q1FeedbackLabel");
       if (q1Lbl) q1Lbl.textContent = "Toca una estrella para calificar tu experiencia";
+
+      const q3Lbl = document.getElementById("q3FeedbackLabel");
+      if (q3Lbl) q3Lbl.textContent = "Toca las estrellas o selecciona una opción abajo:";
 
       const multiBadge = document.getElementById("multiSelectCounter");
       if (multiBadge) multiBadge.textContent = "0 seleccionadas";

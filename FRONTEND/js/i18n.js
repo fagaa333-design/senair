@@ -88,6 +88,81 @@
     ["Centro de ayuda", "Help Center"],
     ["Estamos aquí para ayudarte", "We are here to help you"],
 
+
+    // ── Planificación & Experiencia (destinos.html) ────────────
+    ["Planifica sin complicarte", "Hassle-free planning"],
+    ["PLANIFICA SIN COMPLICARTE", "HASSLE-FREE PLANNING"],
+    ["Tu viaje empieza mucho antes de despegar.", "Your journey starts long before takeoff."],
+    ["Encuentra el vuelo que se ajusta a tu ritmo, revisa tus opciones y prepárate para disfrutar el camino.", "Find the flight that fits your pace, review your options, and get ready to enjoy the journey."],
+    ["Buscar un vuelo", "Search for a flight"],
+    ["Elige una ruta", "Choose a route"],
+    ["Compara horarios y encuentra la conexión ideal.", "Compare schedules and find the ideal connection."],
+    ["Prepara tu experiencia", "Prepare your experience"],
+    ["Agrega equipaje y servicios a tu medida.", "Add baggage and tailored services."],
+    ["Disfruta el destino", "Enjoy the destination"],
+    ["Nosotros nos encargamos del camino.", "We take care of the journey."],
+
+    // ── Precios y Filtros (vuelos.html) ────────────────────────
+    ["por pasajero", "per passenger"],
+    ["Por pasajero", "Per passenger"],
+    ["POR PASAJERO", "PER PASSENGER"],
+    ["Todas las opciones", "All options"],
+    ["Precio más bajo", "Lowest price"],
+    ["Mostrando la opción más barata. Los valores incluyen impuestos.", "Showing the cheapest option. Prices include taxes."],
+
+    // ── Asientos, Cabina y Clases (checkout.html) ──────────────
+    ["Todas las clases", "All classes"],
+    ["Primera Clase", "First Class"],
+    ["Filas 1 - 2", "Rows 1 - 2"],
+    ["Clase Empresarial", "Business Class"],
+    ["Filas 3 - 4", "Rows 3 - 4"],
+    ["Clase Normal", "Economy Class"],
+    ["Filas 5 - 8", "Rows 5 - 8"],
+    ["Primera", "First"],
+    ["Empresarial", "Business"],
+    ["Normal", "Economy"],
+    ["Ocupado", "Occupied"],
+    ["Ventana", "Window"],
+    ["VENTANA", "WINDOW"],
+    ["Pasillo", "Aisle"],
+    ["PASILLO", "AISLE"],
+    ["Medio", "Middle"],
+    ["MEDIO", "MIDDLE"],
+    ["FILA", "ROW"],
+    ["Fila", "Row"],
+    ["Col. A y F", "Col. A & F"],
+    ["Col. C y D", "Col. C & D"],
+    ["Cabina del avión · SENAIR A320", "Aircraft Cabin · SENAIR A320"],
+    ["CABINA DEL AVIÓN - SENAIR A320", "AIRCRAFT CABIN - SENAIR A320"],
+    ["CABINA DEL AVIÓN · SENAIR A320", "AIRCRAFT CABIN · SENAIR A320"],
+    ["Cabina del avión", "Aircraft Cabin"],
+    ["Primera Clase · Suites Confort (Filas 1-2)", "First Class · Comfort Suites (Rows 1-2)"],
+    ["Clase Empresarial · Premium (Filas 3-4)", "Business Class · Premium (Rows 3-4)"],
+    ["Clase Normal · Confort Estándar (Filas 5-8)", "Economy Class · Standard Comfort (Rows 5-8)"],
+    ["Referencia de asientos y clases", "Seat and class reference"],
+    ["Mapa de asientos del avión", "Aircraft seat map"],
+
+    // ── Paso 2 y Factura (checkout.html) ───────────────────────
+    ["Datos de Pasajeros por Boleto", "Passenger Details per Ticket"],
+    ["Ingresa la información de la persona a quien pertenecerá cada boleto antes de realizar el pago.", "Enter the information of the person each ticket belongs to before payment."],
+    ["Completar datos para proceder al pago", "Complete details to proceed to payment"],
+    ["Información encriptada para emisión reglamentaria de boletos según la Aeronáutica Civil.", "Encrypted information for regulatory ticket issuance per Civil Aviation authority."],
+    ["Boletos Emitidos por Pasajero:", "Tickets Issued per Passenger:"],
+    ["BOLETOS EMITIDOS POR PASAJERO:", "TICKETS ISSUED PER PASSENGER:"],
+    ["Boletos Emitidos por Pasajero", "Tickets Issued per Passenger"],
+    ["BOLETOS EMITIDOS POR PASAJERO", "TICKETS ISSUED PER PASSENGER"],
+    ["Titular del Boleto", "Ticket Holder"],
+    ["Documento de Identificación", "Identification Document"],
+    ["Número de Documento", "Document Number"],
+    ["Teléfono de Contacto", "Contact Phone"],
+    ["Nombres y Apellidos", "Full Name"],
+    ["Clase cabina", "Cabin class"],
+    ["Titulares:", "Holders:"],
+    ["Total a pagar", "Total to pay"],
+    ["Doc:", "ID:"],
+    ["Quitar destino", "Remove destination"],
+    ["Quitar", "Remove"],
+
     // ── Secciones de Inicio (Destinos & Ofertas destacadas) ─────
     ["Descubre Colombia", "Discover Colombia"],
     ["¿A dónde quieres ir?", "Where do you want to go?"],
@@ -519,6 +594,12 @@
 
     // 2. Patrones con números y dinámicos
     if (targetLang === "en") {
+      // "CC: 12345678 · Clase Normal" -> "CC: 12345678 · Economy Class"
+      if (/^([A-Z]+:\s*[\w\d.-]+\s*·\s*)(.+)$/i.test(clean)) {
+        return clean.replace(/^([A-Z]+:\s*[\w\d.-]+\s*·\s*)(.+)$/i, (match, prefix, className) => {
+          return prefix + (translateString(className.trim(), "en") || className);
+        });
+      }
       // "6 destinos disponibles" -> "6 destinations available"
       if (/^(\d+)\s+destinos?\s+disponibles?$/i.test(clean)) {
         return clean.replace(/^(\d+)\s+destinos?\s+disponibles?$/i, "$1 destinations available");

@@ -214,7 +214,7 @@
                 </div>
 
                 <div class="form-field-wrapper">
-                  <label for="selectCity" class="form-label">¿Desde qué ciudad viajas o nos acompañas?</label>
+                  <label for="selectCity" class="form-label">¿Desde que ciudad nos acompañas?</label>
                   <div class="input-with-icon">
                     <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
@@ -453,57 +453,94 @@
                 </div>
               </div>
 
-              <!-- ── PREGUNTA 3: PUNTUALIDAD Y CUMPLIMIENTO ── -->
+              <!-- ── PREGUNTA 3: EXPERIENCIA Y RETROALIMENTACIÓN DE LA PÁGINA WEB ── -->
               <div class="question-pane" id="paneQ3" data-qid="q3_punctuality">
-                <span class="pane-eyebrow">03 // PUNTUALIDAD Y CUMPLIMIENTO</span>
-                <h3 class="pane-title">¿Qué opinas sobre la puntualidad y el cumplimiento de los vuelos?</h3>
+                <span class="pane-eyebrow">03 // EXPERIENCIA Y RETROALIMENTACIÓN WEB</span>
+                <h3 class="pane-title">¿Cómo calificarías tu experiencia navegando en el sitio web de SENAIR?</h3>
                 <p class="pane-description">
-                  Para nosotros en SENAIR, tu tiempo y la tranquilidad en tus horarios son lo primero:
+                  Tu valoración sobre el diseño, rapidez y facilidad para consultar vuelos y reservar tu asiento:
                 </p>
 
-                <div class="status-options-list" role="radiogroup" aria-label="Percepción de puntualidad">
+                <!-- Calificación Rápida por Estrellas para el Sitio Web -->
+                <div class="web-rating-bar-container">
+                  <div class="web-rating-stars-bar" role="radiogroup" aria-label="Calificación de la página web de 1 a 5 estrellas">
+                    <button type="button" class="q3-star-btn" data-value="1" data-rating-text="1 Estrella - Difícil de usar o confusa" aria-label="1 estrella - Por mejorar">
+                      <svg class="q3-star-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                      </svg>
+                      <span class="q3-star-num">1</span>
+                    </button>
+                    <button type="button" class="q3-star-btn" data-value="2" data-rating-text="2 Estrellas - Regular, requiere mejoras" aria-label="2 estrellas - Regular">
+                      <svg class="q3-star-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                      </svg>
+                      <span class="q3-star-num">2</span>
+                    </button>
+                    <button type="button" class="q3-star-btn" data-value="3" data-rating-text="3 Estrellas - Aceptable, cumple su función" aria-label="3 estrellas - Aceptable">
+                      <svg class="q3-star-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                      </svg>
+                      <span class="q3-star-num">3</span>
+                    </button>
+                    <button type="button" class="q3-star-btn" data-value="4" data-rating-text="4 Estrellas - Muy buena, moderna y rápida" aria-label="4 estrellas - Muy buena">
+                      <svg class="q3-star-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                      </svg>
+                      <span class="q3-star-num">4</span>
+                    </button>
+                    <button type="button" class="q3-star-btn" data-value="5" data-rating-text="5 Estrellas - ¡Excelente! Visualmente atractiva e intuitiva" aria-label="5 estrellas - ¡Excelente!">
+                      <svg class="q3-star-svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                      </svg>
+                      <span class="q3-star-num">5</span>
+                    </button>
+                  </div>
+                  <div class="q3-rating-feedback" id="q3FeedbackLabel">Toca las estrellas o selecciona una opción abajo:</div>
+                </div>
+
+                <div class="status-options-list" role="radiogroup" aria-label="Nivel de satisfacción con la web">
                   
-                  <button type="button" class="status-choice-row" data-value="Excelente, siempre a tiempo" role="radio" aria-checked="false">
+                  <button type="button" class="status-choice-row" data-stars="5" data-value="Excelente · 5 Estrellas (Rápida, moderna e intuitiva)" role="radio" aria-checked="false">
                     <span class="status-marker green"></span>
                     <div class="status-content">
                       <div class="status-title-row">
-                        <strong class="status-name">Excelente, siempre a tiempo</strong>
-                        <span class="badge-tag green">A TIEMPO</span>
+                        <strong class="status-name">Excelente · 5 Estrellas</strong>
+                        <span class="badge-tag green">DESTACADA</span>
                       </div>
-                      <small class="status-desc">Vuelos puntuales y con información clara y en vivo en todo momento.</small>
+                      <small class="status-desc">Plataforma fluida, diseño visual impecable y proceso de reserva claro y rápido.</small>
                     </div>
                   </button>
 
-                  <button type="button" class="status-choice-row" data-value="Aceptable, demoras mínimas" role="radio" aria-checked="false">
-                    <span class="status-marker yellow"></span>
-                    <div class="status-content">
-                      <div class="status-title-row">
-                        <strong class="status-name">Aceptable, demoras mínimas</strong>
-                        <span class="badge-tag yellow">TOLERABLE</span>
-                      </div>
-                      <small class="status-desc">Pequeños retrasos de menos de 15 minutos que se pueden entender en el viaje.</small>
-                    </div>
-                  </button>
-
-                  <button type="button" class="status-choice-row" data-value="Tienen que mejorar" role="radio" aria-checked="false">
-                    <span class="status-marker red"></span>
-                    <div class="status-content">
-                      <div class="status-title-row">
-                        <strong class="status-name">Tienen que mejorar</strong>
-                        <span class="badge-tag red">POR MEJORAR</span>
-                      </div>
-                      <small class="status-desc">Se presentan retrasos y hace falta avisar con mayor anticipación al pasajero.</small>
-                    </div>
-                  </button>
-
-                  <button type="button" class="status-choice-row" data-value="Primera vez que conozco SENAIR" role="radio" aria-checked="false">
+                  <button type="button" class="status-choice-row" data-stars="4" data-value="Muy buena · 4 Estrellas (Fácil e interactiva)" role="radio" aria-checked="false">
                     <span class="status-marker blue"></span>
                     <div class="status-content">
                       <div class="status-title-row">
-                        <strong class="status-name">Primera vez que conozco la aerolínea</strong>
-                        <span class="badge-tag blue">NUEVO VIAJERO</span>
+                        <strong class="status-name">Muy buena · 4 Estrellas</strong>
+                        <span class="badge-tag blue">SATISFACTORIA</span>
                       </div>
-                      <small class="status-desc">Vengo a conocer y evaluar la propuesta como jurado o visitante de la feria de software.</small>
+                      <small class="status-desc">Navegación agradable, mapas de asientos claros y buena presentación de vuelos.</small>
+                    </div>
+                  </button>
+
+                  <button type="button" class="status-choice-row" data-stars="3" data-value="Aceptable · 3 Estrellas (Cumple su propósito)" role="radio" aria-checked="false">
+                    <span class="status-marker yellow"></span>
+                    <div class="status-content">
+                      <div class="status-title-row">
+                        <strong class="status-name">Aceptable · 3 Estrellas</strong>
+                        <span class="badge-tag yellow">ACEPTABLE</span>
+                      </div>
+                      <small class="status-desc">Funcional y directa, aunque puede incorporar más animaciones o detalles.</small>
+                    </div>
+                  </button>
+
+                  <button type="button" class="status-choice-row" data-stars="2" data-value="Por mejorar · 2 Estrellas o menos (Requiere ajustes)" role="radio" aria-checked="false">
+                    <span class="status-marker red"></span>
+                    <div class="status-content">
+                      <div class="status-title-row">
+                        <strong class="status-name">Por mejorar · 2 Estrellas o menos</strong>
+                        <span class="badge-tag red">POR MEJORAR</span>
+                      </div>
+                      <small class="status-desc">Requiere simplificar pasos, optimizar tiempos de carga o mejorar el contraste.</small>
                     </div>
                   </button>
 
@@ -740,12 +777,12 @@
                     <strong class="cell-data" id="bpPassengerName">Viajero Invitado</strong>
                   </div>
                   <div class="pass-meta-cell">
-                    <span class="cell-label">RUTA DE VUELO</span>
-                    <strong class="cell-data">BOG / MDE (FERIA 2026)</strong>
+                    <span class="cell-label">DESTINO</span>
+                    <strong class="cell-data">Feria Unisalamanca</strong>
                   </div>
                   <div class="pass-meta-cell">
                     <span class="cell-label">ASIENTO ASIGNADO</span>
-                    <strong class="cell-data highlight">14A • CLASE PREFERENTE</strong>
+                    <strong class="cell-data highlight">Premium Class</strong>
                   </div>
                   <div class="pass-meta-cell">
                     <span class="cell-label">CORREO DE CONTACTO</span>
@@ -767,7 +804,7 @@
                       <strong class="sb-val" id="bpValQ2">Pendiente</strong>
                     </div>
                     <div class="summary-box">
-                      <span class="sb-label">03 // PUNTUALIDAD</span>
+                      <span class="sb-label">03 // EXPERIENCIA WEB</span>
                       <strong class="sb-val" id="bpValQ3">Pendiente</strong>
                     </div>
                     <div class="summary-box">

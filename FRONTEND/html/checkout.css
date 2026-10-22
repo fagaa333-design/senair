@@ -621,24 +621,42 @@ select.input_field.installments_select:focus {
 }
 
 @media print {
-  body * {
-    visibility: hidden;
+  header, footer, .topbar, .site-header, .login-home-button, .confirmation, .btn-print-invoice, .invoice-actions, .ai-widget, .ai-nav-btn, .modal, .modal-backdrop, .passenger-overlay, .checkout-layout, .checkout-intro {
+    display: none !important;
   }
-  .invoice-card,
-  .invoice-card * {
-    visibility: visible;
+  body, html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .checkout-page-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+  .post-checkout-container {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
   }
   .invoice-card {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 20px;
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 24px !important;
     box-shadow: none !important;
-    border: none !important;
+    border: 1px solid #cbd5e1 !important;
     background: #ffffff !important;
-    color: #17324d !important;
+    color: #0f172a !important;
+    page-break-inside: avoid;
+  }
+  .invoice-card * {
+    visibility: visible !important;
   }
   .invoice-company,
   .party-name,
@@ -660,9 +678,6 @@ select.input_field.installments_select:focus {
     background: #ffffff !important;
     color: #17324d !important;
     border-color: #e7edf3 !important;
-  }
-  .invoice-actions {
-    display: none !important;
   }
 }
 
