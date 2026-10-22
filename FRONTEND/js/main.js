@@ -436,19 +436,51 @@ if (airportChoices && airportChoices[0]) {
     } catch (_) {}
 }
 
-document.getElementById("flightForm").addEventListener("submit", (event) => {
-    event.preventDefault();
+const flightFormEl = document.getElementById("flightForm");
+if (flightFormEl) {
+    flightFormEl.addEventListener("submit", (event) => {
+        event.preventDefault();
 
-    const origin = document.getElementById("origin").value.trim();
-    const destination = document.getElementById("destination").value.trim();
-    const departure = document.getElementById("departure").value;
-    const returnDate = document.getElementById("return").value;
-    const passengers = String(document.getElementById("passengers").value.match(/\d+/)?.[0] || "1");
-    const tripType = document.querySelector(".search-tab.active")?.dataset.trip || "roundtrip";
-    const query = new URLSearchParams({ origin, destination, departure, passengers, trip: tripType });
-    if (returnDate) query.set("return", returnDate);
-    window.location.href = `vuelos.html?${query.toString()}`;
-});
+        const origin = document.getElementById("origin")?.value?.trim() || "Bogotá (BOG)";
+        const destination = document.getElementById("destination")?.value?.trim() || "";
+        let departure = document.getElementById("departure")?.value || "";
+        let returnDate = document.getElementById("return")?.value || "";
+        const passengers = String(document.getElementById("passengers")?.value?.match(/\d+/)?.[0] || "1");
+        const tripType = document.querySelector(".search-tab.active")?.dataset.trip || "roundtrip";
+
+        if (!destination) {
+            alert("Por favor selecciona una ciudad de destino para tu vuelo.");
+            const destChoice = document.querySelector(".route-field .choices") || document.getElementById("destination");
+            if (destChoice) {
+                destChoice.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+            return;
+        }
+
+        if (!departure) {
+            const depTrigger = document.getElementById("departureTrigger");
+            if (depTrigger) depTrigger.click();
+            return;
+        }
+
+        const query = new URLSearchParams({ origin, destination, departure, passengers, trip: tripType });
+        if (tripType === "roundtrip" && returnDate) {
+            query.set("return", returnDate);
+        }
+        window.location.href = `vuelos.html?${query.toString()}`;
+    });
+
+    const btnBuscar = document.getElementById("bbbbb");
+    if (btnBuscar) {
+        btnBuscar.addEventListener("click", () => {
+            if (typeof flightFormEl.requestSubmit === "function") {
+                flightFormEl.requestSubmit();
+            } else {
+                flightFormEl.dispatchEvent(new Event("submit", { cancelable: true }));
+            }
+        });
+    }
+}
 
 const passengerField = document.querySelector(".passengers-field");
 const passengerTrigger = document.getElementById("passengersTrigger");

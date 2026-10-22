@@ -153,7 +153,7 @@
               </div>
             </div>
 
-            <form class="search-grid" id="flightForm">
+            <form class="search-grid" id="flightForm" novalidate>
               <div class="route-group">
                 <div class="field route-field">
                   <label for="origin"><svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4Z"/></svg>Origen</label>
@@ -180,7 +180,7 @@
                   <button class="date-trigger" id="departureTrigger" type="button" aria-expanded="false" aria-controls="calendarOverlay">
                     <span>Selecciona una fecha</span>
                   </button>
-                  <input class="date-input" id="departure" name="departure" required type="date" tabindex="-1" aria-hidden="true" />
+                  <input class="date-input" id="departure" name="departure" type="date" tabindex="-1" aria-hidden="true" />
                 </div>
 
                 <div class="field date-field" id="returnField">
@@ -188,7 +188,7 @@
                   <button class="date-trigger" id="returnTrigger" type="button" aria-expanded="false" aria-controls="calendarOverlay">
                     <span>Selecciona una fecha</span>
                   </button>
-                  <input class="date-input" id="return" name="return" required type="date" tabindex="-1" aria-hidden="true" />
+                  <input class="date-input" id="return" name="return" type="date" tabindex="-1" aria-hidden="true" />
                 </div>
               </div>
 
