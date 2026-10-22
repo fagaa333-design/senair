@@ -2,569 +2,539 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Experiencia de Vuelo & Encuesta — SENAIR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Cabina 3D & Encuesta de Vuelo — SENAIR</title>
     <link rel="icon" type="image/png" href="logo.png" />
     <link rel="stylesheet" href="encuesta.css" />
   </head>
-  <body class="theme-campaign">
+  <body class="cockpit-theme">
 
-    <!-- Indicador de Navegación Rápida HUD (Esquinas técnicas) -->
-    <nav class="hud-top-bar" aria-label="Control de vuelo">
-      <a href="index.html" class="hud-brand" title="Volver al inicio de SENAIR">
-        <img src="logo.png" alt="SENAIR" class="hud-logo-img" onerror="this.onerror=null;this.src='../assets/images/senair.png'" />
-        <span>SENAIR / CAMPAIGN 2026</span>
-      </a>
-      <div class="hud-indicator">
-        <span class="hud-scene-name" id="hudSceneName">01. CHECK-IN</span>
-        <span class="hud-slash">/</span>
-        <span class="hud-progress-num" id="hudProgressNum">0%</span>
-      </div>
-    </nav>
-
-    <!-- Barra de progreso fija superior ultradelgada -->
-    <div class="top-flight-progress-track">
-      <div class="top-flight-progress-bar" id="topProgressBar"></div>
+    <!-- ── FONDO DINÁMICO DE VUELO: VIDEO + ATMÓSFERA 3D ── -->
+    <div class="sky-viewport-container" aria-hidden="true">
+      <video class="sky-flight-video" id="skyFlightVideo" autoplay muted loop playsinline preload="auto">
+        <source src="../assets/video/carga%20air%20white.mp4" type="video/mp4" />
+        <source src="../assets/video/blackair.mp4" type="video/mp4" />
+      </video>
+      <div class="cockpit-glass-vignette"></div>
+      <div class="cockpit-grid-overlay"></div>
     </div>
 
-    <!-- Contenedor Maestro de Escenas (Scrollytelling) -->
-    <main class="scrolly-master" id="scrollyMaster">
+    <!-- ── BARRA SUPERIOR HUD DE TELEMETRÍA ── -->
+    <header class="hud-cockpit-bar" role="banner">
+      <div class="hud-left-flight">
+        <a href="index.html" class="hud-logo-link" title="Volver al inicio de SENAIR">
+          <img src="logo.png" alt="SENAIR" class="hud-logo-icon" />
+          <span class="hud-brand-txt">SENAIR <span class="tag-hud">FLIGHT 2026</span></span>
+        </a>
+        <div class="hud-flight-pill" id="hudFlightPhasePill">
+          <span class="pulse-beacon"></span>
+          <span id="hudPhaseName">WAYPOINT 00: CHECK-IN</span>
+        </div>
+      </div>
 
-      <!-- ══════════════════════════════════════════════════════════
-           ESCENA 1: HERO CLARO (CHECK-IN)
-           Fondo crema, título grande, ventanilla de avión con cortinilla scrub
-           ══════════════════════════════════════════════════════════ -->
-      <section class="scene scene-1-hero" id="scene-1">
-        <div class="hero-content-wrap">
-          <span class="tag-meta-kicker">EMBARQUE • CABINA DIGITAL SENAIR</span>
-          <h1 class="hero-display-title">
-            <span class="split-line">TU VIAJE</span>
-            <span class="split-line">COMIENZA AQUÍ.</span>
-          </h1>
-          <p class="hero-lead-text">
-            Abre la ventanilla. Desliza para despegar y evaluar cómo volamos juntos hacia el futuro.
-          </p>
+      <!-- Stepper central de waypoints -->
+      <nav class="hud-waypoints-nav" id="hudWaypointsNav" aria-label="Progreso del vuelo">
+        <button type="button" class="waypoint-dot active" data-step="0" title="Check-in"><span>0</span></button>
+        <button type="button" class="waypoint-dot" data-step="1" title="Satisfacción"><span>1</span></button>
+        <button type="button" class="waypoint-dot" data-step="2" title="Facilidad"><span>2</span></button>
+        <button type="button" class="waypoint-dot" data-step="3" title="Puntualidad"><span>3</span></button>
+        <button type="button" class="waypoint-dot" data-step="4" title="Upgrades"><span>4</span></button>
+        <button type="button" class="waypoint-dot" data-step="5" title="Potencia NPS"><span>5</span></button>
+        <button type="button" class="waypoint-dot" data-step="6" title="Boarding Pass"><span>6</span></button>
+      </nav>
 
-          <!-- Ventanilla realista de avión -->
-          <div class="airplane-window-frame" id="airplaneWindow">
-            <div class="window-inner-glass">
-              <!-- Cielo azul y nubes visibles detrás de la cortina -->
-              <div class="window-sky-view">
-                <div class="window-clouds-bg"></div>
-                <div class="window-small-airplane">
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="#ffffff">
-                    <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
-                  </svg>
+      <div class="hud-right-telemetry">
+        <div class="telemetry-block">
+          <span class="telemetry-label">ALTITUD</span>
+          <span class="telemetry-val" id="hudAltitudeVal">FL 000</span>
+        </div>
+        <div class="telemetry-block">
+          <span class="telemetry-label">PROGRESO</span>
+          <span class="telemetry-val highlight" id="hudProgressVal">0%</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── LÍNEA DE PROGRESO HUD ULTRA-DELGADA ── -->
+    <div class="hud-progress-track">
+      <div class="hud-progress-line" id="hudProgressLine"></div>
+    </div>
+
+    <!-- ── DECK 3D INTERACTIVO: WAYPOINTS DE VUELO ── -->
+    <main class="cockpit-stage-wrapper" id="cockpitStageWrapper">
+      <div class="flight-deck-3d" id="flightDeck3D">
+
+        <!-- ══════════════════════════════════════════════════════════
+             WAYPOINT 0: CHECK-IN Y DESPEGUE (WELCOME)
+             ══════════════════════════════════════════════════════════ -->
+        <article class="waypoint-card active" id="waypoint-0" data-index="0" data-altitude="FL 020" data-phase="WAYPOINT 00: CHECK-IN">
+          <div class="card-glass-shell">
+            <span class="card-corner tl"></span>
+            <span class="card-corner tr"></span>
+            <span class="card-corner bl"></span>
+            <span class="card-corner br"></span>
+
+            <div class="aero-badge-row">
+              <span class="aero-badge">VUELO SA-2026 // FERIA DE SOFTWARE</span>
+              <span class="status-badge-live">SISTEMAS LISTOS</span>
+            </div>
+
+            <h1 class="card-display-title">Tu experiencia redefine cómo volamos</h1>
+            <p class="card-display-subtitle">
+              Sube a bordo de la cabina virtual de SENAIR. Cada respuesta calibra nuestros instrumentos de vuelo para ofrecer el servicio aéreo más innovador y humano de Colombia.
+            </p>
+
+            <div class="flight-manifest-mini">
+              <div class="manifest-item">
+                <span class="m-title">ORIGEN</span>
+                <strong class="m-val">Feria de Software</strong>
+              </div>
+              <div class="manifest-arrow">✈</div>
+              <div class="manifest-item">
+                <span class="m-title">DESTINO</span>
+                <strong class="m-val">Innovación Aérea</strong>
+              </div>
+              <div class="manifest-item">
+                <span class="m-title">DURACIÓN</span>
+                <strong class="m-val">~ 2 Minutos</strong>
+              </div>
+            </div>
+
+            <div class="card-actions-row">
+              <button type="button" class="btn-aero-primary" id="btnStartFlight">
+                <span class="btn-text">Iniciar Despegue & Encuesta</span>
+                <span class="btn-arrow">→</span>
+              </button>
+            </div>
+            <div class="touch-hint-label">Desliza en tu pantalla o usa las flechas para navegar</div>
+          </div>
+        </article>
+
+        <!-- ══════════════════════════════════════════════════════════
+             WAYPOINT 1: PREGUNTA 1 — SATISFACCIÓN GENERAL (5 ESTRELLAS 3D)
+             ══════════════════════════════════════════════════════════ -->
+        <article class="waypoint-card" id="waypoint-1" data-index="1" data-altitude="FL 120" data-phase="FASE 01 // CONFORT & SERVICIO">
+          <div class="card-glass-shell">
+            <span class="card-corner tl"></span>
+            <span class="card-corner tr"></span>
+            <span class="card-corner bl"></span>
+            <span class="card-corner br"></span>
+
+            <div class="question-header-strip">
+              <span class="stage-num-tag">FASE 01 DE 05</span>
+              <span class="req-tag">OBLIGATORIA</span>
+            </div>
+
+            <h2 class="question-core-title">¿Cuál es tu nivel de satisfacción general con el servicio de SENAIR?</h2>
+            <p class="question-core-desc">Toca las balizas luminosas para calificar de 1 a 5 tu percepción del viaje.</p>
+
+            <div class="interactive-star-deck" id="deckStarsQ1">
+              <button type="button" class="star-beacon-btn" data-val="1" aria-label="1 estrella">
+                <span class="star-icon">★</span>
+                <span class="beacon-label">1</span>
+              </button>
+              <button type="button" class="star-beacon-btn" data-val="2" aria-label="2 estrellas">
+                <span class="star-icon">★</span>
+                <span class="beacon-label">2</span>
+              </button>
+              <button type="button" class="star-beacon-btn" data-val="3" aria-label="3 estrellas">
+                <span class="star-icon">★</span>
+                <span class="beacon-label">3</span>
+              </button>
+              <button type="button" class="star-beacon-btn" data-val="4" aria-label="4 estrellas">
+                <span class="star-icon">★</span>
+                <span class="beacon-label">4</span>
+              </button>
+              <button type="button" class="star-beacon-btn" data-val="5" aria-label="5 estrellas">
+                <span class="star-icon">★</span>
+                <span class="beacon-label">5</span>
+              </button>
+            </div>
+
+            <div class="live-selection-callout" id="feedbackQ1">Toca una estrella para registrar tu calificación</div>
+
+            <div class="card-nav-cluster">
+              <button type="button" class="btn-aero-ghost" data-action="prev">← Anterior</button>
+              <button type="button" class="btn-aero-primary" data-action="next">Siguiente Waypoint →</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- ══════════════════════════════════════════════════════════
+             WAYPOINT 2: PREGUNTA 2 — FACILIDAD Y RESERVA DIGITAL
+             ══════════════════════════════════════════════════════════ -->
+        <article class="waypoint-card" id="waypoint-2" data-index="2" data-altitude="FL 220" data-phase="FASE 02 // PLATAFORMA DIGITAL">
+          <div class="card-glass-shell">
+            <span class="card-corner tl"></span>
+            <span class="card-corner tr"></span>
+            <span class="card-corner bl"></span>
+            <span class="card-corner br"></span>
+
+            <div class="question-header-strip">
+              <span class="stage-num-tag">FASE 02 DE 05</span>
+              <span class="req-tag">OBLIGATORIA</span>
+            </div>
+
+            <h2 class="question-core-title">¿Qué tan ágil e intuitiva te pareció la compra y gestión de reservas?</h2>
+            <p class="question-core-desc">Evalúa la claridad de precios, selección de asientos y velocidad en la web.</p>
+
+            <div class="interactive-star-deck" id="deckStarsQ2">
+              <button type="button" class="star-beacon-btn" data-val="1" aria-label="1 estrella">
+                <span class="star-icon">★</span>
+                <span class="beacon-label">1</span>
+              </button>
+              <button type="button" class="star-beacon-btn" data-val="2" aria-label="2 estrellas">
+                <span class="star-icon">★</span>
+                <span class="beacon-label">2</span>
+              </button>
+              <button type="button" class="star-beacon-btn" data-val="3" aria-label="3 estrellas">
+                <span class="star-icon">★</span>
+                <span class="beacon-label">3</span>
+              </button>
+              <button type="button" class="star-beacon-btn" data-val="4" aria-label="4 estrellas">
+                <span class="star-icon">★</span>
+                <span class="beacon-label">4</span>
+              </button>
+              <button type="button" class="star-beacon-btn" data-val="5" aria-label="5 estrellas">
+                <span class="star-icon">★</span>
+                <span class="beacon-label">5</span>
+              </button>
+            </div>
+
+            <div class="live-selection-callout" id="feedbackQ2">Toca una estrella para registrar tu calificación</div>
+
+            <div class="card-nav-cluster">
+              <button type="button" class="btn-aero-ghost" data-action="prev">← Anterior</button>
+              <button type="button" class="btn-aero-primary" data-action="next">Siguiente Waypoint →</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- ══════════════════════════════════════════════════════════
+             WAYPOINT 3: PREGUNTA 3 — RADAR DE PUNTUALIDAD AÉREA
+             ══════════════════════════════════════════════════════════ -->
+        <article class="waypoint-card" id="waypoint-3" data-index="3" data-altitude="FL 300" data-phase="FASE 03 // RADAR DE PUNTUALIDAD">
+          <div class="card-glass-shell">
+            <span class="card-corner tl"></span>
+            <span class="card-corner tr"></span>
+            <span class="card-corner bl"></span>
+            <span class="card-corner br"></span>
+
+            <div class="question-header-strip">
+              <span class="stage-num-tag">FASE 03 DE 05</span>
+              <span class="req-tag">OBLIGATORIA</span>
+            </div>
+
+            <h2 class="question-core-title">¿Cómo calificas la puntualidad e itinerarios de los vuelos de SENAIR?</h2>
+            <p class="question-core-desc">Selecciona la opción que mejor refleje el cumplimiento de horarios.</p>
+
+            <div class="radar-options-grid" id="gridOptionsQ3">
+              <div class="radar-card" data-val="Excelente" role="radio" tabindex="0">
+                <div class="radar-indicator-ring"></div>
+                <div class="radar-content">
+                  <div class="radar-status-pill green">A TIEMPO // 100%</div>
+                  <strong class="radar-title">Excelente</strong>
+                  <p class="radar-desc">Despegue y arribo exactos según la programación de vuelo.</p>
                 </div>
               </div>
 
-              <!-- Cortinilla / Persiana de la ventanilla (Se abre con scrub) -->
-              <div class="window-blind-shutter" id="windowShutter">
-                <div class="shutter-handle"></div>
-                <div class="shutter-ridges">
-                  <span></span><span></span><span></span><span></span><span></span>
+              <div class="radar-card" data-val="Buena" role="radio" tabindex="0">
+                <div class="radar-indicator-ring"></div>
+                <div class="radar-content">
+                  <div class="radar-status-pill blue">CONFORME // 95%</div>
+                  <strong class="radar-title">Buena</strong>
+                  <p class="radar-desc">Cumplimiento satisfactorio dentro de los márgenes estándar.</p>
+                </div>
+              </div>
+
+              <div class="radar-card" data-val="Regular" role="radio" tabindex="0">
+                <div class="radar-indicator-ring"></div>
+                <div class="radar-content">
+                  <div class="radar-status-pill amber">ESPERA // 75%</div>
+                  <strong class="radar-title">Regular</strong>
+                  <p class="radar-desc">Ligeros minutos de retraso en puerta de abordaje.</p>
+                </div>
+              </div>
+
+              <div class="radar-card" data-val="Mala" role="radio" tabindex="0">
+                <div class="radar-indicator-ring"></div>
+                <div class="radar-content">
+                  <div class="radar-status-pill red">DEMORADO // 50%</div>
+                  <strong class="radar-title">Mala</strong>
+                  <p class="radar-desc">Retrasos notorios que afectaron mi itinerario de viaje.</p>
                 </div>
               </div>
             </div>
-            <div class="window-rim-highlight"></div>
-          </div>
 
-          <div class="scroll-instruction-cue">
-            <span class="cue-icon">↓</span>
-            <span>Desliza para abrir la persiana</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════════════════════════
-           ESCENA 2: ENCOGER IMAGEN + MARQUEE GIGANTE
-           La ventanilla se reduce a marco central sobre fondo oscuro
-           Líneas de texto gigante en direcciones opuestas
-           ══════════════════════════════════════════════════════════ -->
-      <section class="scene scene-2-marquee" id="scene-2">
-        <!-- Marquee detrás del marco central -->
-        <div class="marquee-wrapper">
-          <div class="marquee-track marquee-left" id="marqueeTrack1">
-            <span class="marquee-text">TU OPINIÓN NOS HACE VOLAR • SENAIR 2026 • TU OPINIÓN NOS HACE VOLAR • SENAIR 2026 • </span>
-          </div>
-          <div class="marquee-track marquee-right" id="marqueeTrack2">
-            <span class="marquee-text">CADA VUELO CUENTA • CONECTANDO HORIZONTES • CADA VUELO CUENTA • CONECTANDO HORIZONTES • </span>
-          </div>
-        </div>
-
-        <!-- Marco reducido centrado -->
-        <div class="scaled-window-anchor" id="scaledWindowAnchor">
-          <div class="mini-frame-card">
-            <div class="mini-frame-header">
-              <span class="dot red"></span>
-              <span class="dot yellow"></span>
-              <span class="dot green"></span>
-              <span class="mini-code">SENAIR // FLIGHT PERSPECTIVE</span>
+            <div class="card-nav-cluster">
+              <button type="button" class="btn-aero-ghost" data-action="prev">← Anterior</button>
+              <button type="button" class="btn-aero-primary" data-action="next">Siguiente Waypoint →</button>
             </div>
-            <div class="mini-frame-media">
-              <div class="mini-sky-backdrop"></div>
-              <div class="mini-plane-silhouette">
-                <svg viewBox="0 0 24 24" width="48" height="48" fill="#ffffff">
-                  <path d="M22 16v-2l-8.5-5V3.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5V9L2 14v2l8.5-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5l-2-1.5v-5.5L22 16z"/>
-                </svg>
+          </div>
+        </article>
+
+        <!-- ══════════════════════════════════════════════════════════
+             WAYPOINT 4: PREGUNTA 4 — UPGRADES Y MEJORAS DE CABINA
+             ══════════════════════════════════════════════════════════ -->
+        <article class="waypoint-card" id="waypoint-4" data-index="4" data-altitude="FL 340" data-phase="FASE 04 // UPGRADES DE CABINA">
+          <div class="card-glass-shell">
+            <span class="card-corner tl"></span>
+            <span class="card-corner tr"></span>
+            <span class="card-corner bl"></span>
+            <span class="card-corner br"></span>
+
+            <div class="question-header-strip">
+              <span class="stage-num-tag">FASE 04 DE 05</span>
+              <span class="req-tag">SELECCIÓN MÚLTIPLE</span>
+            </div>
+
+            <h2 class="question-core-title">¿Qué aspectos de la experiencia SENAIR consideras prioritario potenciar?</h2>
+            <p class="question-core-desc">Marca todas las alternativas que enriquecerían tus próximos viajes:</p>
+
+            <div class="amenities-toggle-grid" id="gridAmenitiesQ4">
+              <div class="amenity-chip-card" data-val="Servicio a bordo" role="checkbox" tabindex="0">
+                <span class="amenity-icon">☕</span>
+                <div class="amenity-meta">
+                  <strong>Servicio y Menú a Bordo</strong>
+                  <small>Snacks premium y bebidas</small>
+                </div>
+                <span class="amenity-check">✓</span>
+              </div>
+
+              <div class="amenity-chip-card" data-val="Comodidad del asiento" role="checkbox" tabindex="0">
+                <span class="amenity-icon">💺</span>
+                <div class="amenity-meta">
+                  <strong>Confort y Espacio</strong>
+                  <small>Mayor reclinación y legroom</small>
+                </div>
+                <span class="amenity-check">✓</span>
+              </div>
+
+              <div class="amenity-chip-card" data-val="Equipaje y bodega" role="checkbox" tabindex="0">
+                <span class="amenity-icon">🧳</span>
+                <div class="amenity-meta">
+                  <strong>Gestión de Equipaje</strong>
+                  <small>Rastreo de maletas en tiempo real</small>
+                </div>
+                <span class="amenity-check">✓</span>
+              </div>
+
+              <div class="amenity-chip-card" data-val="Atención al cliente" role="checkbox" tabindex="0">
+                <span class="amenity-icon">💬</span>
+                <div class="amenity-meta">
+                  <strong>Atención & AeroBot 24/7</strong>
+                  <small>Resolución inmediata por chat</small>
+                </div>
+                <span class="amenity-check">✓</span>
+              </div>
+
+              <div class="amenity-chip-card" data-val="Precios y ofertas" role="checkbox" tabindex="0">
+                <span class="amenity-icon">🏷️</span>
+                <div class="amenity-meta">
+                  <strong>Tarifas & Promociones</strong>
+                  <small>Precios claros y programas de millas</small>
+                </div>
+                <span class="amenity-check">✓</span>
+              </div>
+
+              <div class="amenity-chip-card" data-val="Check-in y web" role="checkbox" tabindex="0">
+                <span class="amenity-icon">📱</span>
+                <div class="amenity-meta">
+                  <strong>Check-in & Mapa 3D</strong>
+                  <small>Selección táctil de cabina</small>
+                </div>
+                <span class="amenity-check">✓</span>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <!-- ══════════════════════════════════════════════════════════
-           ESCENA 3: GARABATO + BARRAS
-           Ruta de vuelo SVG dibujada a mano sobre el marco + barrido de barras
-           ══════════════════════════════════════════════════════════ -->
-      <section class="scene scene-3-garabato" id="scene-3">
-        <div class="garabato-container">
-          <!-- Trazo SVG dibujado por stroke-dashoffset -->
-          <svg class="flight-doodle-svg" viewBox="0 0 800 500" fill="none">
-            <path id="flightDoodlePath" d="M 60,380 C 180,390 220,120 380,140 C 500,160 480,360 620,280 C 690,240 710,140 760,110" stroke="#0866c6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1400" stroke-dashoffset="1400"></path>
-            <!-- Avión que recorre el doodle -->
-            <g id="doodlePlaneMarker" transform="translate(60, 380)">
-              <circle cx="0" cy="0" r="14" fill="#0866c6"></circle>
-              <path d="M-4,-4 L4,0 L-4,4 Z" fill="#ffffff"></path>
-            </g>
-          </svg>
-          <div class="garabato-caption">
-            <span class="coord-label">LAT: 04°42′N • LON: 74°08′W</span>
-            <h3>TRAZANDO RUTAS HACIA LA EXCELENCIA</h3>
-          </div>
-        </div>
-
-        <!-- Barras de color que barren la pantalla de abajo hacia arriba -->
-        <div class="wipe-bars-curtain" id="wipeCurtain" aria-hidden="true">
-          <div class="wipe-bar bar-1"></div>
-          <div class="wipe-bar bar-2"></div>
-          <div class="wipe-bar bar-3"></div>
-          <div class="wipe-bar bar-4"></div>
-          <div class="wipe-bar bar-5"></div>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════════════════════════
-           ESCENA 4: MANIFIESTO
-           Texto enorme oscuro que se revela palabra por palabra con scroll
-           Mezcla sans-serif gruesa con serif itálica en color de acento
-           ══════════════════════════════════════════════════════════ -->
-      <section class="scene scene-4-manifesto" id="scene-4">
-        <div class="manifesto-inner-shell">
-          <span class="manifesto-kicker">DECLARACIÓN DE PRINCIPIOS</span>
-          <div class="manifesto-quote-text" id="manifestoWords">
-            <span class="word">Tu</span>
-            <span class="word accent-italic">experiencia</span>
-            <span class="word">a</span>
-            <span class="word">bordo</span>
-            <span class="word accent-italic">redefine</span>
-            <span class="word">cómo</span>
-            <span class="word">volamos.</span>
-            <span class="word">Cada</span>
-            <span class="word">minuto,</span>
-            <span class="word">cada</span>
-            <span class="word">asiento</span>
-            <span class="word">y</span>
-            <span class="word">cada</span>
-            <span class="word accent-italic">destino</span>
-            <span class="word">se</span>
-            <span class="word">transforman</span>
-            <span class="word">con</span>
-            <span class="word">tu</span>
-            <span class="word accent-italic">voz.</span>
-          </div>
-          <div class="manifesto-author-strip">
-            <span>SENAIR FLIGHT EXPERIENCE // FERIA DE SOFTWARE</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════════════════════════
-           ESCENA 5: COLLAGE FLOTANTE
-           Fotos/ilustraciones en capas parallax; de B&W a color
-           El fondo pasa de oscuro a crema suave
-           ══════════════════════════════════════════════════════════ -->
-      <section class="scene scene-5-collage" id="scene-5">
-        <div class="collage-stage-wrapper">
-          <div class="collage-item layer-1" data-parallax="0.2">
-            <div class="collage-card-inner">
-              <div class="collage-visual visual-caribe"></div>
-              <span class="collage-caption">CARTAGENA // DESTINOS DE ENSUEÑO</span>
+            <div class="card-nav-cluster">
+              <button type="button" class="btn-aero-ghost" data-action="prev">← Anterior</button>
+              <button type="button" class="btn-aero-primary" data-action="next">Siguiente Waypoint →</button>
             </div>
           </div>
+        </article>
 
-          <div class="collage-item layer-2" data-parallax="0.45">
-            <div class="collage-card-inner">
-              <div class="collage-visual visual-cabin"></div>
-              <span class="collage-caption">CABINA EJECUTIVA SENAIR</span>
+        <!-- ══════════════════════════════════════════════════════════
+             WAYPOINT 5: PREGUNTA 5 — TACÓMETRO DE EMPUJE NPS (0 A 10)
+             ══════════════════════════════════════════════════════════ -->
+        <article class="waypoint-card" id="waypoint-5" data-index="5" data-altitude="FL 380" data-phase="FASE 05 // EMPUJE NPS">
+          <div class="card-glass-shell">
+            <span class="card-corner tl"></span>
+            <span class="card-corner tr"></span>
+            <span class="card-corner bl"></span>
+            <span class="card-corner br"></span>
+
+            <div class="question-header-strip">
+              <span class="stage-num-tag">FASE 05 DE 05</span>
+              <span class="req-tag">OBLIGATORIA</span>
+            </div>
+
+            <h2 class="question-core-title">¿Qué tan probable es que recomiendes SENAIR a amigos, colegas o familiares?</h2>
+            <p class="question-core-desc">Ajusta el tacómetro de propulsión de 0 (Nada probable) a 10 (¡Definitivamente sí!).</p>
+
+            <div class="nps-tachometer-deck">
+              <!-- Tacómetro visual Mach -->
+              <div class="mach-speed-display">
+                <span class="mach-title">POTENCIA DE RECOMENDACIÓN</span>
+                <div class="mach-readout">
+                  <span class="mach-num" id="npsMachVal">--</span>
+                  <span class="mach-tag" id="npsCategoryTag">CALIBRA EL EMPUJE</span>
+                </div>
+              </div>
+
+              <!-- Array de botones táctiles 0-10 -->
+              <div class="thrust-buttons-row" id="thrustButtonsRow">
+                <button type="button" class="thrust-btn" data-nps="0">0</button>
+                <button type="button" class="thrust-btn" data-nps="1">1</button>
+                <button type="button" class="thrust-btn" data-nps="2">2</button>
+                <button type="button" class="thrust-btn" data-nps="3">3</button>
+                <button type="button" class="thrust-btn" data-nps="4">4</button>
+                <button type="button" class="thrust-btn" data-nps="5">5</button>
+                <button type="button" class="thrust-btn" data-nps="6">6</button>
+                <button type="button" class="thrust-btn" data-nps="7">7</button>
+                <button type="button" class="thrust-btn" data-nps="8">8</button>
+                <button type="button" class="thrust-btn" data-nps="9">9</button>
+                <button type="button" class="thrust-btn" data-nps="10">10</button>
+              </div>
+
+              <div class="thrust-scale-guide">
+                <span>0 • Detractor</span>
+                <span>7-8 • Pasivo</span>
+                <span>9-10 • Promotor Fan</span>
+              </div>
+            </div>
+
+            <div class="card-nav-cluster">
+              <button type="button" class="btn-aero-ghost" data-action="prev">← Anterior</button>
+              <button type="button" class="btn-aero-primary" data-action="next">Generar Boarding Pass →</button>
             </div>
           </div>
+        </article>
 
-          <div class="collage-item layer-3" data-parallax="0.3">
-            <div class="collage-card-inner">
-              <div class="collage-visual visual-wing"></div>
-              <span class="collage-caption">VISTA DE ALA • 10.000 METROS</span>
+        <!-- ══════════════════════════════════════════════════════════
+             WAYPOINT 6: RESUMEN DIGITAL // BOARDING PASS 3D
+             ══════════════════════════════════════════════════════════ -->
+        <article class="waypoint-card" id="waypoint-6" data-index="6" data-altitude="FL 180" data-phase="FASE 06 // BOARDING PASS">
+          <div class="card-glass-shell">
+            <span class="card-corner tl"></span>
+            <span class="card-corner tr"></span>
+            <span class="card-corner bl"></span>
+            <span class="card-corner br"></span>
+
+            <div class="question-header-strip">
+              <span class="stage-num-tag">FASE FINAL DE TELEMETRÍA</span>
+              <span class="status-badge-live">CALIBRACIÓN COMPLETA</span>
+            </div>
+
+            <h2 class="question-core-title">Bitácora Oficial de Vuelo & Boarding Pass</h2>
+            <p class="question-core-desc">Verifica tus respuestas antes de transmitir la telemetría a la torre de control.</p>
+
+            <!-- Boarding pass estilizado -->
+            <div class="boarding-pass-card">
+              <div class="bp-header">
+                <div class="bp-brand">
+                  <img src="logo.png" alt="SENAIR" class="bp-logo" />
+                  <strong>SENAIR BOARDING PASS</strong>
+                </div>
+                <div class="bp-flight-code">SA-2026 // GATE 03</div>
+              </div>
+
+              <div class="bp-grid-telemetry">
+                <div class="bp-item">
+                  <span class="bp-label">01 // SATISFACCIÓN</span>
+                  <strong class="bp-val" id="summaryValQ1">Pendiente</strong>
+                </div>
+                <div class="bp-item">
+                  <span class="bp-label">02 // WEB & RESERVA</span>
+                  <strong class="bp-val" id="summaryValQ2">Pendiente</strong>
+                </div>
+                <div class="bp-item">
+                  <span class="bp-label">03 // PUNTUALIDAD</span>
+                  <strong class="bp-val" id="summaryValQ3">Pendiente</strong>
+                </div>
+                <div class="bp-item highlight">
+                  <span class="bp-label">05 // ÍNDICE NPS</span>
+                  <strong class="bp-val" id="summaryValQ5">Pendiente</strong>
+                </div>
+                <div class="bp-item full">
+                  <span class="bp-label">04 // UPGRADES SELECCIONADOS</span>
+                  <strong class="bp-val" id="summaryValQ4">Ninguno marcado</strong>
+                </div>
+              </div>
+
+              <div class="bp-footer-strip">
+                <div class="bp-barcode-sim">
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <div class="bp-seat-tag">ASIENTO 01A // VIP CABIN</div>
+              </div>
+            </div>
+
+            <!-- Entrada de sugerencia libre y correo opcional -->
+            <div class="closure-inputs-block">
+              <div class="input-field-group">
+                <label for="feedbackTextarea" class="input-head-label">06 // OBSERVACIÓN O IDEA DE INNOVACIÓN (OPCIONAL)</label>
+                <textarea id="feedbackTextarea" class="cockpit-textarea" rows="2" placeholder="Escribe cualquier felicitación o propuesta para SENAIR en la feria..." maxlength="500"></textarea>
+              </div>
+
+              <div class="input-field-group">
+                <label for="contactEmailInput" class="input-head-label">CORREO ELECTRÓNICO PARA SEGUIMIENTO (OPCIONAL)</label>
+                <input type="email" id="contactEmailInput" class="cockpit-input" placeholder="tu@correo.com" maxlength="120" />
+                <span class="privacy-tiny">Tratamiento de datos confidencial para la feria de software • Ley 1581 de 2012.</span>
+              </div>
+            </div>
+
+            <div class="error-banner-telemetry" id="errorBanner" style="display: none;"></div>
+
+            <div class="card-nav-cluster">
+              <button type="button" class="btn-aero-ghost" data-action="prev">← Revisar</button>
+              <button type="button" class="btn-aero-primary glow-active" id="btnTransmitFlight">
+                <span class="btn-pulse-ring"></span>
+                <span class="btn-text">Transmitir Bitácora a Torre de Control</span>
+                <span class="btn-arrow">🛰️</span>
+              </button>
             </div>
           </div>
+        </article>
 
-          <div class="collage-item layer-4" data-parallax="0.6">
-            <div class="collage-card-inner">
-              <div class="collage-visual visual-crew"></div>
-              <span class="collage-caption">TRIPULACIÓN & ATENCIÓN 24/7</span>
+        <!-- ══════════════════════════════════════════════════════════
+             WAYPOINT 7: ATERRIZAJE EXITOSO & AGRADECIMIENTO
+             ══════════════════════════════════════════════════════════ -->
+        <article class="waypoint-card" id="waypoint-7" data-index="7" data-altitude="FL 000" data-phase="VUELO COMPLETADO">
+          <div class="card-glass-shell text-center">
+            <span class="card-corner tl"></span>
+            <span class="card-corner tr"></span>
+            <span class="card-corner bl"></span>
+            <span class="card-corner br"></span>
+
+            <div class="touchdown-visual">
+              <div class="landing-wings-badge">✈</div>
+              <div class="runway-lights-pulse">
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+
+            <span class="success-callout">ATERRIZAJE CONFIRMADO EN PISTA</span>
+            <h2 class="card-display-title">¡Misión Cumplida Pasajero!</h2>
+            <p class="card-display-subtitle">
+              Tus respuestas se han transmitido con éxito y quedaron almacenadas en el servidor central de SENAIR. Tu voz ayuda a que la aviación colombiana alcance nuevas alturas.
+            </p>
+
+            <div class="post-landing-actions">
+              <a href="index.html" class="btn-aero-primary">Volver al Sitio Principal</a>
+              <button type="button" class="btn-aero-ghost" id="btnRestartExperience">Nueva Encuesta (Otro visitante)</button>
             </div>
           </div>
+        </article>
 
-          <div class="collage-center-banner">
-            <span class="collage-pill">TU TURNO A BORDO</span>
-            <h2 class="collage-big-heading">Cuéntanos tu viaje</h2>
-            <p>La cabina está lista para recibir tu evaluación.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════════════════════════
-           ESCENA 6: TRANSICIÓN DE BLOQUES (PIXEL GRID)
-           Cuadrícula de bloques divs que se apagan y encienden con stagger
-           ══════════════════════════════════════════════════════════ -->
-      <section class="scene scene-6-pixel-grid" id="scene-6">
-        <div class="pixel-mosaic-grid" id="pixelMosaicGrid">
-          <!-- 24 bloques generados dinámicamente o estáticos -->
-          <div class="pixel-block"></div><div class="pixel-block"></div><div class="pixel-block"></div><div class="pixel-block"></div>
-          <div class="pixel-block"></div><div class="pixel-block"></div><div class="pixel-block"></div><div class="pixel-block"></div>
-          <div class="pixel-block"></div><div class="pixel-block"></div><div class="pixel-block"></div><div class="pixel-block"></div>
-          <div class="pixel-block"></div><div class="pixel-block"></div><div class="pixel-block"></div><div class="pixel-block"></div>
-          <div class="pixel-block"></div><div class="pixel-block"></div><div class="pixel-block"></div><div class="pixel-block"></div>
-          <div class="pixel-block"></div><div class="pixel-block"></div><div class="pixel-block"></div><div class="pixel-block"></div>
-        </div>
-        <div class="pixel-center-text">
-          <span>INICIANDO CUESTIONARIO</span>
-          <h2>FASE 1: EXPERIENCIA Y SERVICIO</h2>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════════════════════════
-           ESCENA 7: PREGUNTAS PARTE 1
-           Título partido "ANTES DEL VUELO" / "DURANTE EL VUELO"
-           Secciones pineadas (Preguntas 1, 2 y 3)
-           ══════════════════════════════════════════════════════════ -->
-      <div class="split-title-banner" id="splitTitlePart1">
-        <div class="split-side split-left" id="splitLeftWord">ANTES DEL VUELO</div>
-        <div class="split-side split-right" id="splitRightWord">DURANTE EL VUELO</div>
       </div>
-
-      <!-- PREGUNTA 1: PINEADA A PANTALLA COMPLETA -->
-      <section class="scene question-pinned-stage" id="stage-q1">
-        <div class="pinned-question-card">
-          <div class="question-watermark-number">01</div>
-          <div class="question-hud-header">
-            <span class="hud-phase-pill">FASE 01 // SATISFACCIÓN GENERAL</span>
-            <span class="hud-req-tag">OBLIGATORIA</span>
-          </div>
-          <h2 class="question-headline">¿Cuál es tu nivel de satisfacción general con SENAIR?</h2>
-          <p class="question-subheadline">Toca las estrellas para calificar del 1 al 5 tu percepción global del servicio.</p>
-
-          <div class="stars-touch-grid" id="starsRowQ1">
-            <button type="button" class="star-touch-btn" data-star="1" aria-label="1 estrella">★</button>
-            <button type="button" class="star-touch-btn" data-star="2" aria-label="2 estrellas">★</button>
-            <button type="button" class="star-touch-btn" data-star="3" aria-label="3 estrellas">★</button>
-            <button type="button" class="star-touch-btn" data-star="4" aria-label="4 estrellas">★</button>
-            <button type="button" class="star-touch-btn" data-star="5" aria-label="5 estrellas">★</button>
-          </div>
-          <div class="star-verbal-badge" id="starBadgeQ1">Toca una estrella para calificar</div>
-        </div>
-      </section>
-
-      <!-- PREGUNTA 2: PINEADA A PANTALLA COMPLETA -->
-      <section class="scene question-pinned-stage" id="stage-q2">
-        <div class="pinned-question-card">
-          <div class="question-watermark-number">02</div>
-          <div class="question-hud-header">
-            <span class="hud-phase-pill">FASE 02 // PLATAFORMA DIGITAL</span>
-            <span class="hud-req-tag">OBLIGATORIA</span>
-          </div>
-          <h2 class="question-headline">¿Qué tan fácil e intuitivo fue comprar y gestionar tu reserva?</h2>
-          <p class="question-subheadline">Evalúa la velocidad, transparencia y claridad del proceso en nuestro sitio web.</p>
-
-          <div class="stars-touch-grid" id="starsRowQ2">
-            <button type="button" class="star-touch-btn" data-star="1" aria-label="1 estrella">★</button>
-            <button type="button" class="star-touch-btn" data-star="2" aria-label="2 estrellas">★</button>
-            <button type="button" class="star-touch-btn" data-star="3" aria-label="3 estrellas">★</button>
-            <button type="button" class="star-touch-btn" data-star="4" aria-label="4 estrellas">★</button>
-            <button type="button" class="star-touch-btn" data-star="5" aria-label="5 estrellas">★</button>
-          </div>
-          <div class="star-verbal-badge" id="starBadgeQ2">Toca una estrella para calificar</div>
-        </div>
-      </section>
-
-      <!-- PREGUNTA 3: PINEADA A PANTALLA COMPLETA -->
-      <section class="scene question-pinned-stage" id="stage-q3">
-        <div class="pinned-question-card">
-          <div class="question-watermark-number">03</div>
-          <div class="question-hud-header">
-            <span class="hud-phase-pill">FASE 03 // PUNTUALIDAD AÉREA</span>
-            <span class="hud-req-tag">OBLIGATORIA</span>
-          </div>
-          <h2 class="question-headline">¿Cómo calificas la puntualidad e itinerarios de tu vuelo?</h2>
-          <p class="question-subheadline">El cumplimiento estricto de horarios es nuestro compromiso con cada pasajero.</p>
-
-          <div class="large-options-grid">
-            <div class="hud-choice-card" data-qid="q3_punctuality" data-val="Excelente" role="radio" tabindex="0">
-              <div class="card-radio-ring"></div>
-              <div class="card-text-body">
-                <strong class="card-title">Excelente</strong>
-                <span class="card-desc">Despegue y arribo con total puntualidad y sin demoras.</span>
-              </div>
-            </div>
-            <div class="hud-choice-card" data-qid="q3_punctuality" data-val="Buena" role="radio" tabindex="0">
-              <div class="card-radio-ring"></div>
-              <div class="card-text-body">
-                <strong class="card-title">Buena</strong>
-                <span class="card-desc">Cumplimiento satisfactorio de la programación habitual.</span>
-              </div>
-            </div>
-            <div class="hud-choice-card" data-qid="q3_punctuality" data-val="Regular" role="radio" tabindex="0">
-              <div class="card-radio-ring"></div>
-              <div class="card-text-body">
-                <strong class="card-title">Regular</strong>
-                <span class="card-desc">Pequeños minutos de espera durante el abordaje.</span>
-              </div>
-            </div>
-            <div class="hud-choice-card" data-qid="q3_punctuality" data-val="Mala" role="radio" tabindex="0">
-              <div class="card-radio-ring"></div>
-              <div class="card-text-body">
-                <strong class="card-title">Mala</strong>
-                <span class="card-desc">Retrasos notorios que impactaron mi itinerario.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════════════════════════
-           ESCENA 8: EXPANSIÓN A PANTALLA COMPLETA (CLIP-PATH)
-           Transición con clip-path que se expande revelando fondo oscuro
-           ══════════════════════════════════════════════════════════ -->
-      <section class="scene scene-8-expand" id="scene-8">
-        <div class="expand-clip-card" id="expandCard">
-          <div class="expand-card-media">
-            <div class="expand-content-centered">
-              <span class="hud-phase-pill">CAMBIO DE ALTITUD</span>
-              <h2>PASANDO A LA FASE DE RETORNO</h2>
-              <p>Desliza para continuar hacia el aterrizaje.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════════════════════════
-           ESCENA 9: PREGUNTAS PARTE 2
-           Título "DESPUÉS DEL VUELO" + Preguntas 4 y 5
-           ══════════════════════════════════════════════════════════ -->
-      <div class="banner-stage-header" id="bannerPart2">
-        <span class="banner-sub">FASE FINAL DE EVALUACIÓN</span>
-        <h2 class="banner-title">DESPUÉS DEL VUELO</h2>
-      </div>
-
-      <!-- PREGUNTA 4: PINEADA (MEJORAS - MULTI) -->
-      <section class="scene question-pinned-stage theme-dark-card" id="stage-q4">
-        <div class="pinned-question-card">
-          <div class="question-watermark-number">04</div>
-          <div class="question-hud-header">
-            <span class="hud-phase-pill">FASE 04 // OPORTUNIDADES</span>
-            <span class="hud-req-tag">SELECCIÓN MÚLTIPLE</span>
-          </div>
-          <h2 class="question-headline">¿Qué aspectos de SENAIR consideras que podríamos potenciar?</h2>
-          <p class="question-subheadline">Selecciona una o más alternativas que mejorarían tus futuros trayectos:</p>
-
-          <div class="multi-select-grid">
-            <div class="multi-pill-card" data-qid="q4_improvements" data-val="Servicio a bordo" role="checkbox" tabindex="0">
-              <span class="pill-icon">☕</span>
-              <span class="pill-title">Servicio a bordo y menú</span>
-            </div>
-            <div class="multi-pill-card" data-qid="q4_improvements" data-val="Comodidad del asiento" role="checkbox" tabindex="0">
-              <span class="pill-icon">💺</span>
-              <span class="pill-title">Comodidad y espacio en cabina</span>
-            </div>
-            <div class="multi-pill-card" data-qid="q4_improvements" data-val="Equipaje y bodega" role="checkbox" tabindex="0">
-              <span class="pill-icon">🧳</span>
-              <span class="pill-title">Gestión de equipaje</span>
-            </div>
-            <div class="multi-pill-card" data-qid="q4_improvements" data-val="Atención al cliente" role="checkbox" tabindex="0">
-              <span class="pill-icon">💬</span>
-              <span class="pill-title">Atención al cliente y soporte</span>
-            </div>
-            <div class="multi-pill-card" data-qid="q4_improvements" data-val="Precios y ofertas" role="checkbox" tabindex="0">
-              <span class="pill-icon">🏷️</span>
-              <span class="pill-title">Precios y promociones</span>
-            </div>
-            <div class="multi-pill-card" data-qid="q4_improvements" data-val="Check-in y web" role="checkbox" tabindex="0">
-              <span class="pill-icon">📱</span>
-              <span class="pill-title">Check-in digital y mapa 3D</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- PREGUNTA 5: PINEADA (NPS 0-10) -->
-      <section class="scene question-pinned-stage theme-dark-card" id="stage-q5">
-        <div class="pinned-question-card">
-          <div class="question-watermark-number">05</div>
-          <div class="question-hud-header">
-            <span class="hud-phase-pill">FASE 05 // RECOMENDACIÓN</span>
-            <span class="hud-req-tag">OBLIGATORIA</span>
-          </div>
-          <h2 class="question-headline">¿Qué tan probable es que recomiendes SENAIR a amigos o colegas?</h2>
-          <p class="question-subheadline">Escala NPS del 0 (Poco probable) al 10 (¡Definitivamente sí!).</p>
-
-          <div class="nps-hud-container">
-            <div class="nps-tiles-row">
-              <button type="button" class="nps-tile" data-nps="0">0</button>
-              <button type="button" class="nps-tile" data-nps="1">1</button>
-              <button type="button" class="nps-tile" data-nps="2">2</button>
-              <button type="button" class="nps-tile" data-nps="3">3</button>
-              <button type="button" class="nps-tile" data-nps="4">4</button>
-              <button type="button" class="nps-tile" data-nps="5">5</button>
-              <button type="button" class="nps-tile" data-nps="6">6</button>
-              <button type="button" class="nps-tile" data-nps="7">7</button>
-              <button type="button" class="nps-tile" data-nps="8">8</button>
-              <button type="button" class="nps-tile" data-nps="9">9</button>
-              <button type="button" class="nps-tile" data-nps="10">10</button>
-            </div>
-            <div class="nps-scale-labels">
-              <span>0 • Nada probable</span>
-              <span>10 • ¡Totalmente seguro!</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════════════════════════
-           ESCENA 10: RESUMEN "BOARDING PASS" (HUD)
-           Cuadrícula de tarjetas técnicas con resumen de respuestas
-           Pregunta 6 (Comentario libre) + Correo opcional + Botón Enviar
-           ══════════════════════════════════════════════════════════ -->
-      <section class="scene scene-10-summary" id="scene-10">
-        <div class="hud-summary-stage">
-          <div class="summary-top-header">
-            <span class="hud-phase-pill">FASE 06 // PLAN DE VUELO</span>
-            <h2>RESUMEN TÉCNICO • BOARDING PASS</h2>
-            <p>Verifica tus respuestas registradas antes de completar el despegue final.</p>
-          </div>
-
-          <!-- Cuadrícula HUD con tarjetas de respuestas -->
-          <div class="hud-grid-metrics">
-            <div class="hud-metric-card" id="cardSummaryQ1">
-              <span class="hud-card-corner tl"></span>
-              <span class="hud-card-corner tr"></span>
-              <span class="metric-label">01 // SATISFACCIÓN GENERAL</span>
-              <strong class="metric-val" id="summaryValQ1">Pendiente</strong>
-              <small class="metric-meta">Calificación de servicio</small>
-            </div>
-
-            <div class="hud-metric-card" id="cardSummaryQ2">
-              <span class="hud-card-corner tl"></span>
-              <span class="hud-card-corner tr"></span>
-              <span class="metric-label">02 // GESTIÓN & RESERVA</span>
-              <strong class="metric-val" id="summaryValQ2">Pendiente</strong>
-              <small class="metric-meta">Facilidad digital</small>
-            </div>
-
-            <div class="hud-metric-card" id="cardSummaryQ3">
-              <span class="hud-card-corner tl"></span>
-              <span class="hud-card-corner tr"></span>
-              <span class="metric-label">03 // PUNTUALIDAD AÉREA</span>
-              <strong class="metric-val" id="summaryValQ3">Pendiente</strong>
-              <small class="metric-meta">Cumplimiento de itinerario</small>
-            </div>
-
-            <!-- Tarjeta destacada con borde en color de acento -->
-            <div class="hud-metric-card highlight-accent" id="cardSummaryQ5">
-              <span class="hud-card-corner tl"></span>
-              <span class="hud-card-corner tr"></span>
-              <span class="metric-label">05 // ÍNDICE NPS DE RECOMENDACIÓN</span>
-              <strong class="metric-val" id="summaryValQ5">Pendiente</strong>
-              <small class="metric-meta">Probabilidad de recomendación</small>
-            </div>
-
-            <div class="hud-metric-card full-span" id="cardSummaryQ4">
-              <span class="hud-card-corner tl"></span>
-              <span class="hud-card-corner tr"></span>
-              <span class="metric-label">04 // ASPECTOS A POTENCIAR SELECCIONADOS</span>
-              <strong class="metric-val" id="summaryValQ4">Ninguno seleccionado aún</strong>
-            </div>
-          </div>
-
-          <!-- Formulario de cierre (Pregunta 6, Correo y Enviar) -->
-          <div class="closure-form-container">
-            <div class="form-group-block">
-              <label for="feedbackTextarea" class="block-label">06 // COMENTARIO LIBRE O SUGERENCIA ADICIONAL (OPCIONAL)</label>
-              <textarea id="feedbackTextarea" class="hud-textarea" rows="3" placeholder="Comparte cualquier observación sobre tu viaje, felicitaciones o ideas de innovación para SENAIR..." maxlength="500"></textarea>
-            </div>
-
-            <div class="contact-optional-row">
-              <div class="form-group-block" style="flex: 1;">
-                <label for="contactEmailInput" class="block-label">CORREO ELECTRÓNICO PARA SEGUIMIENTO (OPCIONAL)</label>
-                <input type="email" id="contactEmailInput" class="hud-input" placeholder="tu@correo.com" maxlength="120" />
-              </div>
-              <p class="privacy-note">
-                Conforme a la <strong>Ley 1581 de 2012</strong> de Colombia, tus datos serán tratados con estricta confidencialidad para la feria de software.
-              </p>
-            </div>
-
-            <div class="error-banner-animated" id="errorBanner" style="display: none;"></div>
-
-            <button type="button" class="btn-transmit-submit" id="submitSurveyBtn">
-              <span class="btn-pulse-glow"></span>
-              <span class="btn-text">Transmitir y Enviar Encuesta</span>
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════════════════════════
-           ESCENA 11: FINAL (AGRADECIMIENTO & ATERRIZAJE)
-           Animación de despegue/aterrizaje del avión, mensaje de agradecimiento
-           ══════════════════════════════════════════════════════════ -->
-      <section class="scene scene-11-final" id="scene-11">
-        <div class="final-board-wrapper">
-          <div class="plane-landing-canvas">
-            <svg class="landing-plane-svg" viewBox="0 0 100 100">
-              <path d="M50 15 L53 35 L75 48 L75 54 L53 48 L53 70 L60 76 L60 81 L50 78 L40 81 L40 76 L47 70 L47 48 L25 54 L25 48 L47 35 Z" fill="#0866c6"></path>
-            </svg>
-            <div class="runway-lights-strip">
-              <span></span><span></span><span></span><span></span><span></span>
-            </div>
-          </div>
-
-          <span class="landing-badge">VUELO COMPLETADO CON ÉXITO</span>
-          <h2 class="landing-title">¡Gracias por volar con SENAIR!</h2>
-          <p class="landing-p">
-            Tus respuestas han sido recibidas y registradas en el sistema central de la aerolínea. Tu retroalimentación nos ayuda a construir la mejor experiencia de aviación.
-          </p>
-
-          <div class="final-links-row">
-            <a href="index.html" class="btn-action-primary">Volver al Sitio Web</a>
-            <button type="button" class="btn-action-secondary" id="btnRestartExperience">Nueva Encuesta (Otro visitante)</button>
-          </div>
-        </div>
-      </section>
-
     </main>
 
-    <!-- ── BIBLIOTECAS CDN (LENIS + GSAP + SCROLLTRIGGER + SPLIT-TYPE + CONFETTI) ── -->
-    <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://unpkg.com/split-type"></script>
+    <!-- ── BIBLIOTECAS LIGERAS (CONFETTI CDN) ── -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
-    <!-- ── ARCHIVOS MODULARES DE LA ENCUESTA ─────────────────────── -->
+    <!-- ── CONTROLADORES DE LA CABINA 3D ── -->
     <script src="encuesta-data.js"></script>
-    <script src="encuesta-anim.js"></script>
     <script src="encuesta.js"></script>
   </body>
 </html>

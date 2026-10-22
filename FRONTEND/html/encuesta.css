@@ -1,1383 +1,1131 @@
 /* ═════════════════════════════════════════════════════════════════════════
-   SENAIR — Estilos Scrollytelling de Alta Gama
-   11 Escenas • Contraste Crema / Oscuro • Detalles Técnicos HUD • 60 FPS
+   SENAIR — Cabina 3D & Sistema de Waypoints de Vuelo
+   Aceleración por GPU (60 FPS) • Diseño Táctil Móvil • Instrumentación HUD
    ═════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  --senair-navy: #051429;
-  --senair-dark: #030a16;
-  --senair-cream: #faf7f2;
-  --senair-cream-alt: #f3efe6;
-  --senair-blue: #0866c6;
-  --senair-blue-hover: #064b91;
-  --senair-sky: #38bdf8;
-  --senair-gold: #f59e0b;
-  --senair-text-dark: #0f1f33;
-  --senair-text-light: #f1f5f9;
-  --senair-muted: #64748b;
-  --senair-line: rgba(8, 102, 198, 0.2);
-  --hud-border: 1px solid rgba(8, 102, 198, 0.25);
-  --hud-bg-dark: rgba(5, 20, 41, 0.85);
-  --hud-bg-light: rgba(255, 255, 255, 0.88);
+  --cockpit-bg: #020813;
+  --cockpit-panel: rgba(5, 18, 38, 0.85);
+  --cockpit-panel-solid: #051429;
+  --aero-blue: #0866c6;
+  --aero-sky: #38bdf8;
+  --aero-sky-glow: rgba(56, 189, 248, 0.35);
+  --aero-amber: #f59e0b;
+  --aero-green: #10b981;
+  --aero-red: #ef4444;
+  --txt-bright: #ffffff;
+  --txt-muted: #94a3b8;
+  --txt-dim: #64748b;
+  --aero-border: 1px solid rgba(56, 189, 248, 0.22);
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
-html {
+html, body {
+  width: 100%;
+  min-height: 100%;
+  background-color: var(--cockpit-bg);
+  color: var(--txt-bright);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--senair-cream);
-  color: var(--senair-text-dark);
   overflow-x: hidden;
 }
 
-/* ── HUD SUPERIOR ULTRA-COMPACTO ──────────────────────────────────── */
-.hud-top-bar {
+/* ── 1. FONDO DE VUELO: VIDEO & ATMÓSFERA ── */
+.sky-viewport-container {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sky-flight-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.42) saturate(1.2) contrast(1.1);
+  transform: scale(1.05);
+}
+
+.cockpit-glass-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(2, 8, 19, 0.35) 0%, rgba(2, 8, 19, 0.88) 100%);
+}
+
+.cockpit-grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.6;
+}
+
+/* ── 2. BARRA SUPERIOR HUD ── */
+.hud-cockpit-bar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 52px;
-  z-index: 1000;
-  background: rgba(3, 10, 22, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  height: 60px;
+  z-index: 100;
+  background: rgba(2, 8, 19, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.18);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 max(20px, calc((100% - 1200px) / 2));
-  color: #ffffff;
+  padding: 0 24px;
 }
 
-.hud-brand {
+.hud-left-flight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hud-logo-link {
   display: flex;
   align-items: center;
   gap: 10px;
   color: #ffffff;
   text-decoration: none;
-  font-size: 13px;
   font-weight: 800;
+  font-size: 14px;
   letter-spacing: 0.8px;
 }
 
-.hud-logo-img {
-  width: 26px;
-  height: 26px;
+.hud-logo-icon {
+  width: 28px;
+  height: 28px;
   object-fit: contain;
 }
 
-.hud-indicator {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-.hud-scene-name {
-  color: #38bdf8;
-}
-
-.hud-slash {
-  opacity: 0.4;
-}
-
-.hud-progress-num {
-  color: #fbbf24;
-}
-
-/* Barra de progreso de scroll fija */
-.top-flight-progress-track {
-  position: fixed;
-  top: 52px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.1);
-  z-index: 999;
-}
-
-.top-flight-progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #0866c6, #38bdf8, #fbbf24);
-  transition: width 0.1s linear;
-}
-
-/* ── CONTENEDOR MAESTRO ───────────────────────────────────────────── */
-.scrolly-master {
-  position: relative;
-  width: 100%;
-}
-
-.scene {
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   ESCENA 1: HERO CLARO & VENTANILLA DE AVIÓN
-   ══════════════════════════════════════════════════════════════════ */
-.scene-1-hero {
-  background-color: var(--senair-cream);
-  padding: 100px 24px 80px;
-  text-align: center;
-}
-
-.hero-content-wrap {
-  width: 100%;
-  max-width: 720px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.tag-meta-kicker {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  color: var(--senair-blue);
-  text-transform: uppercase;
-  margin-bottom: 14px;
-}
-
-.hero-display-title {
-  font-size: clamp(40px, 7vw, 76px);
-  font-weight: 900;
-  line-height: 0.98;
-  letter-spacing: -1.5px;
-  color: var(--senair-navy);
-  margin-bottom: 18px;
-}
-
-.split-line {
-  display: block;
-}
-
-.hero-lead-text {
-  font-size: 17px;
-  line-height: 1.55;
-  color: var(--senair-muted);
-  max-width: 520px;
-  margin-bottom: 34px;
-}
-
-/* Ventanilla realista de avión */
-.airplane-window-frame {
-  position: relative;
-  width: 220px;
-  height: 310px;
-  background: #ffffff;
-  border-radius: 95px;
-  box-shadow: 
-    0 0 0 10px #e4ded3,
-    0 0 0 18px #d6cebf,
-    0 25px 60px rgba(6, 43, 85, 0.16);
-  padding: 16px;
-  overflow: hidden;
-  margin-bottom: 32px;
-}
-
-.window-inner-glass {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 80px;
-  overflow: hidden;
-  background: #1e3a5f;
-}
-
-/* Cielo visible dentro de la ventanilla */
-.window-sky-view {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, #094b91 0%, #1e88e5 60%, #90caf9 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.window-clouds-bg {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 120%, rgba(255,255,255,0.7) 0%, transparent 60%);
-}
-
-.window-small-airplane {
-  position: relative;
-  z-index: 2;
-  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.25));
-  animation: planeWiggle 3s ease-in-out infinite alternate;
-}
-
-@keyframes planeWiggle {
-  from { transform: translateY(-4px) rotate(-2deg); }
-  to { transform: translateY(4px) rotate(3deg); }
-}
-
-/* Cortinilla de la ventana (se desliza hacia arriba con scrub) */
-.window-blind-shutter {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, #f5f2eb 0%, #ded7c8 100%);
-  border-radius: 80px;
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  padding-bottom: 18px;
-  box-shadow: inset 0 -4px 10px rgba(0, 0, 0, 0.12);
-  will-change: transform;
-}
-
-.shutter-handle {
-  width: 52px;
-  height: 10px;
-  background: #b5ac9b;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.shutter-ridges {
-  position: absolute;
-  top: 20%;
-  left: 20px;
-  right: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.shutter-ridges span {
-  display: block;
-  height: 2px;
-  background: rgba(0, 0, 0, 0.06);
-}
-
-.scroll-instruction-cue {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--senair-muted);
-}
-
-.cue-icon {
-  font-size: 16px;
-  animation: bounceDown 1.5s infinite;
-}
-
-@keyframes bounceDown {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(6px); }
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   ESCENA 2: ENCOGER IMAGEN + MARQUEE GIGANTE
-   ══════════════════════════════════════════════════════════════════ */
-.scene-2-marquee {
-  background-color: var(--senair-dark);
-  color: #ffffff;
-  min-height: 120vh;
-  position: relative;
-}
-
-.marquee-wrapper {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 20px;
-  overflow: hidden;
-  pointer-events: none;
-  opacity: 0.22;
-}
-
-.marquee-track {
-  white-space: nowrap;
-  display: flex;
-  will-change: transform;
-}
-
-.marquee-text {
-  font-size: clamp(48px, 9vw, 110px);
-  font-weight: 900;
-  letter-spacing: -2px;
-  color: #ffffff;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
-/* Marco reducido centrado */
-.scaled-window-anchor {
-  position: relative;
-  z-index: 10;
-  will-change: transform;
-}
-
-.mini-frame-card {
-  width: 320px;
-  background: #0f1e33;
-  border: 1px solid rgba(8, 102, 198, 0.35);
-  border-radius: 16px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
-  overflow: hidden;
-}
-
-.mini-frame-header {
-  padding: 10px 14px;
-  background: #081322;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.mini-frame-header .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.mini-frame-header .dot.red { background: #ef4444; }
-.mini-frame-header .dot.yellow { background: #f59e0b; }
-.mini-frame-header .dot.green { background: #10b981; }
-
-.mini-code {
-  font-family: monospace;
+.tag-hud {
   font-size: 10px;
-  color: #7dd3fc;
-  margin-left: 8px;
-  letter-spacing: 1px;
+  color: var(--aero-sky);
+  background: rgba(56, 189, 248, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+  font-family: monospace;
 }
 
-.mini-frame-media {
-  height: 200px;
-  position: relative;
-  background: linear-gradient(135deg, #0284c7, #0369a1);
-  display: grid;
-  place-items: center;
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   ESCENA 3: GARABATO + BARRAS
-   ══════════════════════════════════════════════════════════════════ */
-.scene-3-garabato {
-  background-color: var(--senair-dark);
-  min-height: 100vh;
-  position: relative;
-  display: grid;
-  place-items: center;
-  padding: 40px 20px;
-}
-
-.garabato-container {
-  width: 100%;
-  max-width: 800px;
-  text-align: center;
-  position: relative;
-  z-index: 5;
-}
-
-.flight-doodle-svg {
-  width: 100%;
-  height: auto;
-  max-height: 420px;
-  filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.45));
-}
-
-.garabato-caption {
-  margin-top: 20px;
-  color: #ffffff;
-}
-
-.coord-label {
+.hud-flight-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: monospace;
   font-size: 11px;
-  letter-spacing: 2px;
-  color: #38bdf8;
-  display: block;
-  margin-bottom: 6px;
-}
-
-.garabato-caption h3 {
-  font-size: clamp(20px, 3.5vw, 32px);
-  font-weight: 800;
-  letter-spacing: -0.5px;
-}
-
-/* Cortina de barras que barren la pantalla */
-.wipe-bars-curtain {
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  display: flex;
-  pointer-events: none;
-}
-
-.wipe-bar {
-  flex: 1;
-  height: 100%;
-  transform: translateY(100%);
-  will-change: transform;
-}
-
-.bar-1 { background: #062b55; }
-.bar-2 { background: #0866c6; }
-.bar-3 { background: #0284c7; }
-.bar-4 { background: #0866c6; }
-.bar-5 { background: #062b55; }
-
-/* ══════════════════════════════════════════════════════════════════
-   ESCENA 4: MANIFIESTO (TIPOGRAFÍA GRANDE + REVELACIÓN CON SCROLL)
-   ══════════════════════════════════════════════════════════════════ */
-.scene-4-manifesto {
-  background-color: #030811;
-  color: #ffffff;
-  min-height: 110vh;
-  padding: 100px 30px;
-}
-
-.manifesto-inner-shell {
-  width: 100%;
-  max-width: 980px;
-  margin: 0 auto;
-}
-
-.manifesto-kicker {
-  display: inline-block;
-  font-family: monospace;
-  font-size: 12px;
-  letter-spacing: 2px;
-  color: #38bdf8;
-  margin-bottom: 24px;
-}
-
-.manifesto-quote-text {
-  font-size: clamp(34px, 5.5vw, 68px);
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -1px;
-  color: #ffffff;
-}
-
-.manifesto-quote-text .word {
-  display: inline-block;
-  opacity: 0.18;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  margin-right: 0.22em;
-}
-
-.manifesto-quote-text .word.accent-italic {
-  font-family: "Georgia", "Playfair Display", serif;
-  font-style: italic;
-  font-weight: 400;
-  color: #38bdf8;
-}
-
-.manifesto-author-strip {
-  margin-top: 40px;
-  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 1.5px;
-  color: var(--senair-muted);
+  color: #bae6fd;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   ESCENA 5: COLLAGE FLOTANTE
-   ══════════════════════════════════════════════════════════════════ */
-.scene-5-collage {
-  background-color: var(--senair-cream);
-  min-height: 130vh;
-  position: relative;
-  transition: background-color 0.8s ease;
+.pulse-beacon {
+  width: 6px;
+  height: 6px;
+  background: var(--aero-sky);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--aero-sky);
+  animation: pulseBeacon 1.8s infinite;
 }
 
-.collage-stage-wrapper {
-  position: relative;
-  width: 100%;
-  max-width: 1100px;
-  height: 680px;
-  margin: 0 auto;
+@keyframes pulseBeacon {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.6; }
 }
 
-.collage-item {
-  position: absolute;
-  will-change: transform, filter;
-}
-
-.collage-card-inner {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 10px;
-  box-shadow: 0 20px 45px rgba(6, 43, 85, 0.15);
-  border: 1px solid rgba(8, 102, 198, 0.12);
-  transition: filter 0.4s ease, transform 0.3s ease;
-  filter: grayscale(1);
-}
-
-.collage-item.is-colored .collage-card-inner {
-  filter: grayscale(0);
-}
-
-.collage-visual {
-  width: 220px;
-  height: 150px;
-  border-radius: 8px;
-  background-size: cover;
-  background-position: center;
-}
-
-.visual-caribe {
-  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
-}
-
-.visual-cabin {
-  background: linear-gradient(135deg, #062b55, #1e3a5f);
-}
-
-.visual-wing {
-  background: linear-gradient(135deg, #0284c7, #60a5fa);
-}
-
-.visual-crew {
-  background: linear-gradient(135deg, #0369a1, #0866c6);
-}
-
-.collage-caption {
-  display: block;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  color: var(--senair-navy);
-  margin-top: 8px;
-}
-
-.layer-1 { top: 8%; left: 4%; }
-.layer-2 { top: 12%; right: 5%; }
-.layer-3 { bottom: 10%; left: 8%; }
-.layer-4 { bottom: 14%; right: 8%; }
-
-.collage-center-banner {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  z-index: 10;
-  width: min(520px, calc(100% - 40px));
-}
-
-.collage-pill {
-  display: inline-block;
-  background: var(--senair-blue);
-  color: #ffffff;
-  font-size: 11.5px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  margin-bottom: 12px;
-}
-
-.collage-big-heading {
-  font-size: clamp(34px, 5vw, 54px);
-  font-weight: 900;
-  color: var(--senair-navy);
-  margin-bottom: 8px;
-}
-
-.collage-center-banner p {
-  color: var(--senair-muted);
-  font-size: 15.5px;
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   ESCENA 6: TRANSICIÓN DE BLOQUES (PIXEL MOSAIC)
-   ══════════════════════════════════════════════════════════════════ */
-.scene-6-pixel-grid {
-  background: var(--senair-navy);
-  color: #ffffff;
-  min-height: 100vh;
-  position: relative;
-}
-
-.pixel-mosaic-grid {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: 2px;
-  z-index: 1;
-}
-
-.pixel-block {
-  background: #020914;
-  opacity: 0.95;
-  transition: opacity 0.4s ease;
-}
-
-.pixel-center-text {
-  position: relative;
-  z-index: 5;
-  text-align: center;
-  padding: 20px;
-}
-
-.pixel-center-text span {
-  font-family: monospace;
-  font-size: 12px;
-  letter-spacing: 2px;
-  color: #38bdf8;
-  display: block;
-  margin-bottom: 8px;
-}
-
-.pixel-center-text h2 {
-  font-size: clamp(26px, 4.5vw, 46px);
-  font-weight: 900;
-  letter-spacing: -0.5px;
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   ESCENA 7 Y 9: PREGUNTAS PINEADAS A PANTALLA COMPLETA
-   ══════════════════════════════════════════════════════════════════ */
-.split-title-banner {
-  height: 120px;
-  background: var(--senair-cream-alt);
+/* Stepper de waypoints en el HUD */
+.hud-waypoints-nav {
   display: flex;
-  overflow: hidden;
   align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid var(--senair-line);
-  border-bottom: 1px solid var(--senair-line);
+  gap: 8px;
 }
 
-.split-side {
-  font-size: clamp(24px, 4vw, 42px);
-  font-weight: 900;
-  color: var(--senair-navy);
-  padding: 0 40px;
-  white-space: nowrap;
-  will-change: transform;
-}
-
-.question-pinned-stage {
-  min-height: 100vh;
-  width: 100%;
+.waypoint-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--txt-muted);
+  font-size: 11px;
+  font-family: monospace;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
-  background-color: var(--senair-cream);
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
-.question-pinned-stage.theme-dark-card {
-  background-color: #030a16;
+.waypoint-dot:hover {
+  border-color: var(--aero-sky);
+  color: #ffffff;
 }
 
-.pinned-question-card {
+.waypoint-dot.active {
+  background: var(--aero-blue);
+  border-color: var(--aero-sky);
+  color: #ffffff;
+  box-shadow: 0 0 12px var(--aero-sky-glow);
+  transform: scale(1.1);
+}
+
+.waypoint-dot.completed {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: var(--aero-green);
+  color: var(--aero-green);
+}
+
+/* Telemetría a la derecha */
+.hud-right-telemetry {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.telemetry-block {
+  text-align: right;
+  font-family: monospace;
+}
+
+.telemetry-label {
+  display: block;
+  font-size: 9px;
+  color: var(--txt-dim);
+  letter-spacing: 1px;
+}
+
+.telemetry-val {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--txt-muted);
+}
+
+.telemetry-val.highlight {
+  color: var(--aero-sky);
+}
+
+/* Línea de progreso de cabina */
+.hud-progress-track {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  z-index: 99;
+}
+
+.hud-progress-line {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--aero-blue), var(--aero-sky));
+  box-shadow: 0 0 8px var(--aero-sky);
+  transition: width 0.35s ease;
+}
+
+/* ── 3. CONTENEDOR 3D DE WAYPOINTS ── */
+.cockpit-stage-wrapper {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  min-height: calc(100vh - 62px);
+  margin-top: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1200px;
+  perspective-origin: center center;
+  padding: 30px 16px;
+  overflow: hidden;
+}
+
+.flight-deck-3d {
   position: relative;
   width: 100%;
   max-width: 680px;
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 44px 38px;
-  box-shadow: 0 25px 70px rgba(6, 43, 85, 0.12);
-  border: 1.5px solid rgba(8, 102, 198, 0.16);
-  z-index: 5;
+  min-height: 540px;
+  transform-style: preserve-3d;
+}
+
+/* Tarjetas individuales de Waypoint */
+.waypoint-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate3d(80px, 0, -220px) rotateY(16deg) scale(0.92);
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease, visibility 0.45s;
+  will-change: transform, opacity;
+}
+
+.waypoint-card.active {
+  position: relative;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0) rotateY(0deg) scale(1);
+  z-index: 20;
+}
+
+.waypoint-card.past {
+  transform: translate3d(-80px, 0, -220px) rotateY(-16deg) scale(0.92);
+}
+
+/* Shell de vidrio aeroespacial */
+.card-glass-shell {
+  position: relative;
+  background: var(--cockpit-panel);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: var(--aero-border);
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 
+    0 30px 70px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
   box-sizing: border-box;
 }
 
-.theme-dark-card .pinned-question-card {
-  background: #08172c;
-  border-color: rgba(56, 189, 248, 0.25);
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6);
-  color: #ffffff;
-}
-
-.question-watermark-number {
+/* Esquinas tácticas de instrumentación */
+.card-corner {
   position: absolute;
-  top: 14px;
-  right: 28px;
-  font-size: 80px;
-  font-weight: 900;
-  line-height: 1;
-  color: rgba(8, 102, 198, 0.08);
-  pointer-events: none;
-  font-family: monospace;
-}
-
-.theme-dark-card .question-watermark-number {
-  color: rgba(255, 255, 255, 0.05);
-}
-
-.question-hud-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.hud-phase-pill {
-  font-family: monospace;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--senair-blue);
-  background: rgba(8, 102, 198, 0.1);
-  padding: 4px 10px;
-  border-radius: 6px;
-}
-
-.theme-dark-card .hud-phase-pill {
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.15);
-}
-
-.hud-req-tag {
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--senair-muted);
-}
-
-.question-headline {
-  font-size: clamp(22px, 3.5vw, 29px);
-  font-weight: 800;
-  line-height: 1.25;
-  margin-bottom: 8px;
-  color: var(--senair-navy);
-}
-
-.theme-dark-card .question-headline {
-  color: #ffffff;
-}
-
-.question-subheadline {
-  font-size: 14.5px;
-  line-height: 1.5;
-  color: var(--senair-muted);
-  margin-bottom: 26px;
-}
-
-/* Opciones de Estrellas */
-.stars-touch-grid {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin: 10px 0 14px;
-}
-
-.star-touch-btn {
-  background: none;
-  border: none;
-  font-size: 44px;
-  color: #cbd5e1;
-  cursor: pointer;
-  padding: 4px;
-  line-height: 1;
-  transition: transform 0.15s ease, color 0.15s ease;
-}
-
-.star-touch-btn.active,
-.star-touch-btn.hover {
-  color: var(--senair-gold);
-  transform: scale(1.22);
-}
-
-.star-verbal-badge {
-  text-align: center;
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--senair-blue);
-  min-height: 24px;
-}
-
-.theme-dark-card .star-verbal-badge {
-  color: #38bdf8;
-}
-
-/* Opciones de Tarjetas Grandes (Q3) */
-.large-options-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.hud-choice-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: #ffffff;
-  border: 2px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 16px 20px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.hud-choice-card:hover {
-  border-color: #93c5fd;
-  transform: translateX(6px);
-  background: #f8fbff;
-}
-
-.hud-choice-card.selected {
-  border-color: var(--senair-blue);
-  background: #f0f7ff;
-  box-shadow: 0 4px 14px rgba(8, 102, 198, 0.15);
-}
-
-.card-radio-ring {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 2px solid #cbd5e1;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-}
-
-.hud-choice-card.selected .card-radio-ring {
-  border-color: var(--senair-blue);
-  background: var(--senair-blue);
-}
-
-.card-radio-ring::after {
-  content: "";
   width: 8px;
   height: 8px;
-  border-radius: 50%;
-  background: #ffffff;
-  opacity: 0;
+  border-color: var(--aero-sky);
+  border-style: solid;
+  pointer-events: none;
 }
 
-.hud-choice-card.selected .card-radio-ring::after {
-  opacity: 1;
+.card-corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; border-top-left-radius: 4px; }
+.card-corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; border-top-right-radius: 4px; }
+.card-corner.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; border-bottom-left-radius: 4px; }
+.card-corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; border-bottom-right-radius: 4px; }
+
+/* ── 4. ESTILOS DE WAYPOINT 0 (WELCOME) ── */
+.aero-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
-.card-text-body {
+.aero-badge {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--aero-sky);
+  background: rgba(56, 189, 248, 0.12);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.status-badge-live {
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--aero-green);
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.card-display-title {
+  font-size: clamp(26px, 4.5vw, 38px);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.8px;
+  color: #ffffff;
+  margin-bottom: 14px;
+}
+
+.card-display-subtitle {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--txt-muted);
+  margin-bottom: 28px;
+}
+
+/* Manifiesto de vuelo */
+.flight-manifest-mini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(2, 8, 19, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 30px;
+}
+
+.manifest-item {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.card-title {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--senair-navy);
+.manifest-arrow {
+  color: var(--aero-sky);
+  font-size: 18px;
 }
 
-.card-desc {
+.m-title {
+  font-size: 10px;
+  font-family: monospace;
+  letter-spacing: 1px;
+  color: var(--txt-dim);
+}
+
+.m-val {
   font-size: 13px;
-  color: var(--senair-muted);
+  font-weight: 800;
+  color: #ffffff;
 }
 
-/* Opciones Múltiples Píldoras (Q4) */
-.multi-select-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.multi-pill-card {
+.card-actions-row {
   display: flex;
+  justify-content: flex-end;
+}
+
+.touch-hint-label {
+  text-align: center;
+  font-size: 11px;
+  color: var(--txt-dim);
+  font-family: monospace;
+  margin-top: 18px;
+}
+
+/* ── 5. BOTONES DE ACCIÓN AEROESPACIAL ── */
+.btn-aero-primary {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  background: #0f2442;
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  padding: 14px 16px;
+  gap: 10px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, var(--aero-blue), #0284c7);
+  color: #ffffff;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 24px var(--aero-sky-glow);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.btn-aero-primary:hover {
+  background: linear-gradient(135deg, #0975e0, #0396e3);
+  box-shadow: 0 10px 30px rgba(56, 189, 248, 0.55);
+  transform: translateY(-2px);
+}
+
+.btn-aero-primary:active {
+  transform: translateY(0);
+}
+
+.btn-aero-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 22px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--txt-muted);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.multi-pill-card:hover {
-  background: #153158;
-  border-color: #38bdf8;
-}
-
-.multi-pill-card.selected {
-  background: #0866c6;
-  border-color: #38bdf8;
-  box-shadow: 0 4px 14px rgba(8, 102, 198, 0.4);
-}
-
-.pill-icon {
-  font-size: 20px;
-}
-
-.pill-title {
-  font-size: 14px;
-  font-weight: 700;
+.btn-aero-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Escala NPS 0–10 (Q5) */
-.nps-hud-container {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.nps-tiles-row {
-  display: grid;
-  grid-template-columns: repeat(11, 1fr);
-  gap: 6px;
-}
-
-.nps-tile {
-  background: #0f2442;
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
-  height: 52px;
-  font-size: 16px;
-  font-weight: 800;
-  color: #ffffff;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.nps-tile:hover {
-  border-color: #38bdf8;
-  transform: translateY(-4px);
-}
-
-.nps-tile.selected {
-  background: var(--senair-blue);
-  border-color: #38bdf8;
-  transform: translateY(-4px) scale(1.08);
-  box-shadow: 0 8px 18px rgba(8, 102, 198, 0.5);
-}
-
-.nps-scale-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--senair-muted);
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   ESCENA 8: EXPANSIÓN A PANTALLA COMPLETA (CLIP-PATH)
-   ══════════════════════════════════════════════════════════════════ */
-.scene-8-expand {
-  min-height: 120vh;
-  position: relative;
-  background-color: var(--senair-cream);
-}
-
-.expand-clip-card {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  clip-path: inset(20% 18% round 24px);
-  will-change: clip-path;
-}
-
-.expand-card-media {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #051933, #020b18);
+.card-nav-cluster {
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  text-align: center;
-  padding: 30px;
+  justify-content: space-between;
+  margin-top: 32px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.expand-content-centered {
-  max-width: 600px;
+/* ── 6. HEADER DE PREGUNTAS ── */
+.question-header-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
 }
 
-.expand-content-centered h2 {
-  font-size: clamp(28px, 4.5vw, 50px);
-  font-weight: 900;
-  margin: 14px 0 8px;
-}
-
-.expand-content-centered p {
-  color: var(--senair-muted);
-  font-size: 16px;
-}
-
-.banner-stage-header {
-  padding: 60px 20px 20px;
-  background-color: #030a16;
-  text-align: center;
-  color: #ffffff;
-}
-
-.banner-sub {
+.stage-num-tag {
   font-family: monospace;
-  font-size: 12px;
-  letter-spacing: 2px;
-  color: #38bdf8;
-}
-
-.banner-title {
-  font-size: clamp(26px, 4.5vw, 44px);
-  font-weight: 900;
-  margin-top: 4px;
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   ESCENA 10: RESUMEN "BOARDING PASS" (HUD TÉCNICO)
-   ══════════════════════════════════════════════════════════════════ */
-.scene-10-summary {
-  background-color: #030811;
-  color: #ffffff;
-  min-height: 100vh;
-  padding: 90px 20px 60px;
-}
-
-.hud-summary-stage {
-  width: 100%;
-  max-width: 820px;
-  margin: 0 auto;
-}
-
-.summary-top-header {
-  text-align: center;
-  margin-bottom: 34px;
-}
-
-.summary-top-header h2 {
-  font-size: clamp(26px, 4vw, 40px);
-  font-weight: 900;
-  letter-spacing: -0.5px;
-  margin: 10px 0 6px;
-}
-
-.summary-top-header p {
-  color: var(--senair-muted);
-  font-size: 15px;
-}
-
-/* Cuadrícula de tarjetas métricas HUD */
-.hud-grid-metrics {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-  margin-bottom: 32px;
-}
-
-.hud-metric-card {
-  position: relative;
-  background: rgba(15, 30, 51, 0.75);
-  border: 1px solid rgba(8, 102, 198, 0.25);
-  padding: 18px 20px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--aero-sky);
+  background: rgba(56, 189, 248, 0.12);
+  padding: 4px 10px;
   border-radius: 4px;
 }
 
-.hud-metric-card.full-span {
-  grid-column: 1 / -1;
-}
-
-.hud-metric-card.highlight-accent {
-  border-color: #38bdf8;
-  box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
-}
-
-/* Esquinas técnicas */
-.hud-card-corner {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-color: #38bdf8;
-  border-style: solid;
-}
-
-.hud-card-corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
-.hud-card-corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
-
-.metric-label {
-  display: block;
-  font-family: monospace;
-  font-size: 10.5px;
+.req-tag {
+  font-size: 10px;
+  font-weight: 800;
   letter-spacing: 1px;
-  color: #7dd3fc;
+  color: var(--txt-dim);
+}
+
+.question-core-title {
+  font-size: clamp(20px, 3.8vw, 27px);
+  font-weight: 900;
+  line-height: 1.25;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.question-core-desc {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--txt-muted);
+  margin-bottom: 26px;
+}
+
+/* ── 7. BALIZAS TÁCTICAS DE ESTRELLAS (Q1 & Q2) ── */
+.interactive-star-deck {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.star-beacon-btn {
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 8px;
+}
+
+.star-beacon-btn .star-icon {
+  font-size: 32px;
+  color: rgba(255, 255, 255, 0.2);
+  transition: all 0.25s ease;
+  line-height: 1;
+}
+
+.star-beacon-btn .beacon-label {
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--txt-dim);
+}
+
+.star-beacon-btn:hover {
+  border-color: var(--aero-sky);
+  background: rgba(56, 189, 248, 0.08);
+  transform: translateY(-3px);
+}
+
+.star-beacon-btn:hover .star-icon {
+  color: #fbbf24;
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+}
+
+.star-beacon-btn.active {
+  border-color: #fbbf24;
+  background: rgba(251, 191, 36, 0.12);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.25);
+  transform: translateY(-2px);
+}
+
+.star-beacon-btn.active .star-icon {
+  color: #fbbf24;
+  text-shadow: 0 0 16px rgba(251, 191, 36, 0.8);
+}
+
+.star-beacon-btn.active .beacon-label {
+  color: #fbbf24;
+}
+
+.live-selection-callout {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--aero-sky);
+  font-family: monospace;
+  background: rgba(56, 189, 248, 0.06);
+  border: 1px dashed rgba(56, 189, 248, 0.25);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+/* ── 8. TARJETAS DE RADAR DE PUNTUALIDAD (Q3) ── */
+.radar-options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.radar-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.radar-indicator-ring {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+  margin-top: 3px;
+  transition: all 0.2s ease;
+}
+
+.radar-content {
+  flex: 1;
+}
+
+.radar-status-pill {
+  display: inline-block;
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 4px;
   margin-bottom: 6px;
 }
 
-.metric-val {
+.radar-status-pill.green { background: rgba(16, 185, 129, 0.15); color: var(--aero-green); }
+.radar-status-pill.blue { background: rgba(56, 189, 248, 0.15); color: var(--aero-sky); }
+.radar-status-pill.amber { background: rgba(245, 158, 11, 0.15); color: var(--aero-amber); }
+.radar-status-pill.red { background: rgba(239, 68, 68, 0.15); color: var(--aero-red); }
+
+.radar-title {
   display: block;
-  font-size: 17px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.radar-desc {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--txt-muted);
+}
+
+.radar-card:hover {
+  border-color: var(--aero-sky);
+  background: rgba(56, 189, 248, 0.06);
+  transform: translateY(-2px);
+}
+
+.radar-card.selected {
+  border-color: var(--aero-sky);
+  background: rgba(56, 189, 248, 0.12);
+  box-shadow: 0 0 20px var(--aero-sky-glow);
+}
+
+.radar-card.selected .radar-indicator-ring {
+  border-color: var(--aero-sky);
+  background: var(--aero-sky);
+  box-shadow: 0 0 10px var(--aero-sky);
+}
+
+/* ── 9. PASTILLAS INTERACTIVAS DE UPGRADE (Q4) ── */
+.amenities-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.amenity-chip-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.amenity-icon {
+  font-size: 22px;
+}
+
+.amenity-meta {
+  flex: 1;
+}
+
+.amenity-meta strong {
+  display: block;
+  font-size: 14px;
   font-weight: 800;
   color: #ffffff;
   margin-bottom: 2px;
 }
 
-.metric-meta {
+.amenity-meta small {
+  display: block;
   font-size: 11px;
-  color: var(--senair-muted);
+  color: var(--txt-muted);
 }
 
-/* Formulario de Cierre */
-.closure-form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-group-block {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.block-label {
-  font-family: monospace;
-  font-size: 11px;
-  letter-spacing: 1.5px;
-  color: #38bdf8;
-}
-
-.hud-textarea,
-.hud-input {
-  width: 100%;
-  background: #091729;
-  border: 1.5px solid rgba(8, 102, 198, 0.3);
+.amenity-check {
+  width: 20px;
+  height: 20px;
   border-radius: 6px;
-  padding: 14px 16px;
-  color: #ffffff;
-  font-family: inherit;
-  font-size: 14.5px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.hud-textarea:focus,
-.hud-input:focus {
-  outline: none;
-  border-color: #38bdf8;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
-}
-
-.contact-optional-row {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.privacy-note {
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--senair-muted);
-}
-
-/* Botón de Transmisión con Glow */
-.btn-transmit-submit {
-  position: relative;
-  width: 100%;
-  background: linear-gradient(135deg, #0866c6, #0369a1);
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 18px 28px;
-  font-size: 16.5px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(8, 102, 198, 0.4);
-  transition: all 0.25s ease;
-}
-
-.btn-transmit-submit:hover {
-  background: linear-gradient(135deg, #07529f, #025280);
-  transform: translateY(-2px);
-  box-shadow: 0 14px 35px rgba(8, 102, 198, 0.55);
-}
-
-.btn-transmit-submit:disabled {
-  opacity: 0.6;
-  cursor: wait;
-}
-
-.error-banner-animated {
-  background: rgba(220, 38, 38, 0.2);
-  border: 1px solid #ef4444;
-  color: #fca5a5;
-  padding: 12px 16px;
-  border-radius: 6px;
-  font-size: 13.5px;
-  font-weight: 700;
-  animation: shake 0.3s ease;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  75% { transform: translateX(6px); }
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   ESCENA 11: FINAL (ATERRIZAJE & AGRADECIMIENTO)
-   ══════════════════════════════════════════════════════════════════ */
-.scene-11-final {
-  background: #02070f;
-  color: #ffffff;
-  min-height: 100vh;
-  padding: 80px 20px;
-  text-align: center;
-}
-
-.final-board-wrapper {
-  width: 100%;
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.plane-landing-canvas {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   display: grid;
   place-items: center;
-}
-
-.landing-plane-svg {
-  width: 68px;
-  height: 68px;
-  filter: drop-shadow(0 10px 20px rgba(8, 102, 198, 0.6));
-  animation: landingDrop 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes landingDrop {
-  from { transform: translateY(-50px) scale(0.6); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
-}
-
-.landing-badge {
-  display: inline-block;
-  font-family: monospace;
-  font-size: 11px;
-  letter-spacing: 2px;
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.12);
-  padding: 4px 12px;
-  border-radius: 4px;
-  margin-bottom: 12px;
-}
-
-.landing-title {
-  font-size: clamp(30px, 5vw, 46px);
+  font-size: 12px;
   font-weight: 900;
-  margin-bottom: 12px;
-}
-
-.landing-p {
-  color: var(--senair-muted);
-  font-size: 16px;
-  line-height: 1.6;
-  margin-bottom: 34px;
-}
-
-.final-links-row {
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.btn-action-primary {
-  padding: 14px 28px;
-  background: var(--senair-blue);
-  color: #ffffff;
-  border-radius: 6px;
-  font-weight: 800;
-  text-decoration: none;
-  font-size: 15px;
-  transition: background 0.2s;
-}
-
-.btn-action-primary:hover {
-  background: var(--senair-blue-hover);
-}
-
-.btn-action-secondary {
-  padding: 14px 24px;
-  background: transparent;
-  color: #94a3b8;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 15px;
+  color: transparent;
   transition: all 0.2s ease;
 }
 
-.btn-action-secondary:hover {
-  color: #ffffff;
-  border-color: #ffffff;
+.amenity-chip-card:hover {
+  border-color: var(--aero-sky);
+  background: rgba(56, 189, 248, 0.05);
 }
 
-/* ── RESPONSIVE PARA DISPOSITIVOS MÓVILES ────────────────────────── */
+.amenity-chip-card.selected {
+  border-color: var(--aero-sky);
+  background: rgba(56, 189, 248, 0.12);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.2);
+}
+
+.amenity-chip-card.selected .amenity-check {
+  background: var(--aero-sky);
+  border-color: var(--aero-sky);
+  color: #020813;
+}
+
+/* ── 10. TACÓMETRO DE PROPULSIÓN NPS (Q5) ── */
+.nps-tachometer-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mach-speed-display {
+  background: rgba(2, 8, 19, 0.65);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mach-title {
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--txt-dim);
+}
+
+.mach-readout {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.mach-num {
+  font-size: 26px;
+  font-weight: 900;
+  font-family: monospace;
+  color: #ffffff;
+}
+
+.mach-tag {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--aero-sky);
+  letter-spacing: 1px;
+}
+
+.thrust-buttons-row {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 6px;
+}
+
+.thrust-btn {
+  height: 48px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #ffffff;
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thrust-btn:hover {
+  border-color: var(--aero-sky);
+  background: rgba(56, 189, 248, 0.1);
+  transform: translateY(-2px);
+}
+
+.thrust-btn.selected {
+  background: var(--aero-sky);
+  border-color: #ffffff;
+  color: #020813;
+  box-shadow: 0 0 20px var(--aero-sky);
+  font-size: 18px;
+  transform: translateY(-4px);
+}
+
+.thrust-scale-guide {
+  display: flex;
+  justify-content: space-between;
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--txt-dim);
+}
+
+/* ── 11. BITÁCORA // BOARDING PASS DIGITAL (Q6) ── */
+.boarding-pass-card {
+  background: #ffffff;
+  color: #051429;
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.bp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px dashed rgba(5, 20, 41, 0.18);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.bp-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.bp-logo {
+  width: 22px;
+  height: 22px;
+}
+
+.bp-flight-code {
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--aero-blue);
+}
+
+.bp-grid-telemetry {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 18px;
+}
+
+.bp-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.bp-item.full {
+  grid-column: 1 / -1;
+}
+
+.bp-item.highlight {
+  background: rgba(8, 102, 198, 0.08);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border-left: 3px solid var(--aero-blue);
+}
+
+.bp-label {
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--txt-dim);
+  letter-spacing: 0.5px;
+}
+
+.bp-val {
+  font-size: 13px;
+  font-weight: 800;
+  color: #051429;
+}
+
+.bp-footer-strip {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(5, 20, 41, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bp-barcode-sim {
+  display: flex;
+  gap: 3px;
+  height: 26px;
+  align-items: center;
+}
+
+.bp-barcode-sim span {
+  width: 2px;
+  height: 100%;
+  background: #051429;
+}
+
+.bp-barcode-sim span:nth-child(even) {
+  width: 4px;
+}
+
+.bp-barcode-sim span:nth-child(3n) {
+  width: 1px;
+}
+
+.bp-seat-tag {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--aero-blue);
+}
+
+/* Inputs de cierre */
+.closure-inputs-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.input-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-head-label {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--aero-sky);
+  letter-spacing: 1px;
+}
+
+.cockpit-textarea,
+.cockpit-input {
+  width: 100%;
+  background: rgba(2, 8, 19, 0.7);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 12px 14px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.cockpit-textarea:focus,
+.cockpit-input:focus {
+  border-color: var(--aero-sky);
+  box-shadow: 0 0 12px var(--aero-sky-glow);
+}
+
+.privacy-tiny {
+  font-size: 11px;
+  color: var(--txt-dim);
+}
+
+.error-banner-telemetry {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* ── 12. ATERRIZAJE EXITOSO & BOTÓN REINICIO ── */
+.touchdown-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.landing-wings-badge {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fbbf24, #d97706);
+  display: grid;
+  place-items: center;
+  font-size: 38px;
+  box-shadow: 0 0 30px rgba(251, 191, 36, 0.4);
+  animation: badgeBounce 2s infinite alternate;
+}
+
+@keyframes badgeBounce {
+  from { transform: translateY(-4px); }
+  to { transform: translateY(4px); }
+}
+
+.runway-lights-pulse {
+  display: flex;
+  gap: 8px;
+}
+
+.runway-lights-pulse span {
+  width: 12px;
+  height: 4px;
+  background: var(--aero-sky);
+  border-radius: 2px;
+  box-shadow: 0 0 8px var(--aero-sky);
+  animation: strobeLight 1.2s infinite;
+}
+
+.runway-lights-pulse span:nth-child(2) { animation-delay: 0.2s; }
+.runway-lights-pulse span:nth-child(3) { animation-delay: 0.4s; }
+.runway-lights-pulse span:nth-child(4) { animation-delay: 0.6s; }
+.runway-lights-pulse span:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes strobeLight {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.success-callout {
+  display: inline-block;
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--aero-green);
+  margin-bottom: 10px;
+}
+
+.post-landing-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* ── 13. RESPONSIVE ADAPTATION (MOBILE FIRST) ── */
 @media (max-width: 680px) {
-  .hud-grid-metrics {
-    grid-template-columns: 1fr;
+  .hud-cockpit-bar {
+    height: 52px;
+    padding: 0 12px;
   }
-  .multi-select-grid {
-    grid-template-columns: 1fr;
+  .hud-waypoints-nav {
+    display: none; /* Ocultar stepper en pantallas ultra angostas para dar espacio */
   }
-  .nps-tiles-row {
-    grid-template-columns: repeat(6, 1fr);
+  .cockpit-stage-wrapper {
+    margin-top: 52px;
+    min-height: calc(100vh - 52px);
+    padding: 16px 10px;
   }
-  .nps-tile {
-    height: 44px;
-    font-size: 14px;
-  }
-  .pinned-question-card {
-    padding: 30px 20px;
+  .card-glass-shell {
+    padding: 26px 18px;
     border-radius: 16px;
   }
-  .split-side {
-    font-size: 20px;
-    padding: 0 16px;
+  .card-display-title {
+    font-size: 24px;
   }
-}
-
-/* ── PREFERS REDUCED MOTION (ACCESIBILIDAD) ──────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  .scene {
-    min-height: auto !important;
-    padding: 40px 20px !important;
+  .question-core-title {
+    font-size: 19px;
   }
-  .marquee-track,
-  .wipe-bar,
-  .airplane-window-frame,
-  .window-blind-shutter,
-  .expand-clip-card {
-    transform: none !important;
-    clip-path: none !important;
-    animation: none !important;
+  .radar-options-grid,
+  .amenities-toggle-grid {
+    grid-template-columns: 1fr;
   }
-  .manifesto-quote-text .word {
-    opacity: 1 !important;
+  .thrust-buttons-row {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .thrust-btn {
+    height: 42px;
+    font-size: 14px;
+  }
+  .bp-grid-telemetry {
+    grid-template-columns: 1fr;
+  }
+  .flight-manifest-mini {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .manifest-arrow {
+    display: none;
+  }
+  .post-landing-actions {
+    flex-direction: column;
   }
 }
