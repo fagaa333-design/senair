@@ -299,9 +299,84 @@
   font-weight: 800;
 }
 
+.flight-price-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
 @media (max-width: 800px) {
   .flight-card {
     grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .filters-panel {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+  .filters-panel > strong {
+    width: 100% !important;
+    margin-bottom: 4px !important;
+  }
+  .sort-button {
+    flex: 1 1 140px !important;
+    text-align: center !important;
+    padding: 10px 12px !important;
+  }
+  .flight-price {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    border-top: 1px dashed var(--line);
+    padding-top: 14px;
+    margin-top: 2px;
+  }
+  .choose-flight {
+    margin-top: 0 !important;
+    min-width: 125px;
+    height: 42px;
+  }
+}
+
+@media (max-width: 640px) {
+  .airline-mark {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-shell {
+    width: calc(100% - 24px) !important;
+  }
+  .flight-card {
+    padding: 14px 12px !important;
+    gap: 14px !important;
+  }
+  .flight-times {
+    gap: 6px !important;
+  }
+  .flight-times strong {
+    font-size: 18px !important;
+  }
+  .flight-times span {
+    font-size: 11px !important;
+  }
+  .flight-line span {
+    font-size: 9.5px !important;
+    white-space: nowrap;
+  }
+  .flight-price strong {
+    font-size: 19px !important;
+  }
+  .choose-flight {
+    padding: 0 16px !important;
+    font-size: 13.5px !important;
+    min-width: 110px;
+    height: 40px;
   }
 }
 
@@ -333,7 +408,9 @@ body.dark-theme .airline-tag.tag-recommended {
 [data-theme="dark"] .flight-times strong,
 body.dark-theme .flight-times strong,
 [data-theme="dark"] .flight-price > strong,
-body.dark-theme .flight-price > strong {
+body.dark-theme .flight-price > strong,
+[data-theme="dark"] .flight-price-wrap strong,
+body.dark-theme .flight-price-wrap strong {
   color: #f8fafc !important;
 }
 

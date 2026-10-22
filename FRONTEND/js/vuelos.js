@@ -134,8 +134,10 @@ function renderFlights() {
 				</div>
 			</div>
 			<div class="flight-price">
-				<strong>${moneyFormatter.format(flight.price)}</strong>
-				<span>por pasajero</span>
+				<div class="flight-price-wrap">
+					<strong>${moneyFormatter.format(flight.price)}</strong>
+					<span>por pasajero</span>
+				</div>
 				<button type="button" class="choose-flight">Seleccionar</button>
 			</div>
 		`;

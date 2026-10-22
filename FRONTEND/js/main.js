@@ -116,6 +116,21 @@ const loginForm = document.querySelector('form[action="/login"]');
 const registerForm = document.querySelector('form[action="/register"]');
 
 async function submitAuthForm(form, isRegistration) {
+    if (isRegistration) {
+        const terms = form.querySelector('input[name="terms_accepted"]');
+        if (terms && !terms.checked) {
+            if (typeof window.senairAlert === "function") {
+                window.senairAlert({
+                    type: "info",
+                    title: "Términos y condiciones",
+                    message: "Debes aceptar los Términos y Condiciones de SENAIR para completar tu registro."
+                });
+            } else {
+                alert("Debes aceptar los Términos y Condiciones de SENAIR para completar tu registro.");
+            }
+            return;
+        }
+    }
     try {
         const endpoint = window.location.protocol === "file:"
             ? `http://localhost:3000/${isRegistration ? "register" : "login"}`

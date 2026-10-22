@@ -3916,3 +3916,51 @@ body.login-page {
     }
 }
 
+
+
+/* Checkbox Términos y Condiciones en Registro */
+.terms-agreement {
+    margin: -4px 0 2px;
+    text-align: left;
+    padding: 0 4px;
+}
+
+.terms-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--font-color, #17324d);
+    user-select: none;
+    line-height: 1.35;
+}
+
+.terms-checkbox-label input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: #0866c6;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.terms-checkbox-label a {
+    color: #0866c6;
+    text-decoration: underline;
+    font-weight: 700;
+    transition: color 0.15s;
+}
+
+.terms-checkbox-label a:hover {
+    color: #064b91;
+}
+
+[data-theme="dark"] .terms-checkbox-label {
+    color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .terms-checkbox-label a {
+    color: #60a5fa !important;
+}

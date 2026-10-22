@@ -199,6 +199,20 @@
       if (e.target === privacyModalBackdrop) hidePrivacy();
     });
 
+    const restartSurveyBtn = document.getElementById("restartSurveyBtn");
+    restartSurveyBtn?.addEventListener("click", () => {
+      sessionStorage.removeItem(STORAGE_TOKEN_KEY);
+      localStorage.removeItem(STORAGE_TOKEN_KEY);
+      sessionStorage.removeItem(STORAGE_NAME_KEY);
+      surveyState.token = null;
+      surveyState.participantName = "";
+      surveyState.currentIndex = 0;
+      surveyState.answers = {};
+      surveyState.isCompleted = false;
+      participantForm?.reset();
+      showScreen("welcome");
+    });
+
     // Soporte para teclas de navegación en escritorio
     document.addEventListener("keydown", (e) => {
       if (questionsScreen.style.display === "block") {
@@ -652,3 +666,4 @@
     init();
   }
 })();
+
