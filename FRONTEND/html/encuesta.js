@@ -32,11 +32,11 @@
   };
 
   const STAR_FEEDBACK = {
-    1: "1 ★ // Muy Insatisfecho — Necesita mejoras prioritarias",
-    2: "2 ★ // Insatisfecho — Varios aspectos a pulir",
-    3: "3 ★ // Aceptable — Cumple con el estándar",
-    4: "4 ★ // Muy Satisfecho — Gran experiencia de vuelo",
-    5: "5 ★ // ¡Totalmente Satisfecho! — Excelente plataforma"
+    1: "Nivel 1 // Inicial — Requiere optimización prioritaria",
+    2: "Nivel 2 // Regular — Varios aspectos técnicos a perfeccionar",
+    3: "Nivel 3 // Aceptable — Cumple con el estándar de servicio",
+    4: "Nivel 4 // Favorable — Gran agilidad y experiencia de vuelo",
+    5: "Nivel 5 // Sobresaliente — Excelente estándar de servicio"
   };
 
   const QUESTION_CATEGORIES = {
@@ -244,7 +244,7 @@
           state.participant.token = data.token;
           state.participant.id = data.participant_id;
 
-          showRegisterAlert("✓ Check-in verificado. Asiento 14A asignado. ¡Iniciando encuesta!", "success");
+          showRegisterAlert("Check-in verificado. Asiento 14A asignado. Iniciando evaluacion...", "success");
 
           setTimeout(() => {
             renderView(2); // Avanza a Pregunta 1
@@ -254,14 +254,14 @@
         }
       } catch (err) {
         console.warn("Fallo de red al registrar, avanzando en modo resiliente:", err);
-        showRegisterAlert("✓ Check-in registrado. Continuando a cabina...", "success");
+        showRegisterAlert("Check-in registrado. Continuando a cabina...", "success");
         setTimeout(() => {
           renderView(2);
         }, 450);
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = `<span>Confirmar Check-In y Continuar</span> <span aria-hidden="true">➔</span>`;
+          submitBtn.innerHTML = `<span>Confirmar Check-In y Continuar</span> <svg class="btn-arrow-svg" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 10h12m-5-5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
         }
       }
     });
@@ -490,7 +490,7 @@
     const valQ1 = document.getElementById("bpValQ1");
     if (valQ1) {
       valQ1.textContent = state.answers.q1_satisfaction
-        ? `${"★".repeat(state.answers.q1_satisfaction)} (${state.answers.q1_satisfaction}/5)`
+        ? `Nivel ${state.answers.q1_satisfaction} / 5 (${STAR_FEEDBACK[state.answers.q1_satisfaction] ? STAR_FEEDBACK[state.answers.q1_satisfaction].split(' // ')[1].split(' — ')[0] : 'Evaluado'})`
         : "Sin calificar";
     }
 
@@ -597,7 +597,7 @@
       } finally {
         state.isSubmitting = false;
         btnSubmit.disabled = false;
-        btnSubmit.innerHTML = `<span>Guardar Encuesta en Base de Datos</span> <span aria-hidden="true">✓</span>`;
+        btnSubmit.innerHTML = `<span>Guardar Encuesta en Base de Datos</span> <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16.7 5.3 7.5 14.5 3.3 10.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
       }
     });
   }
