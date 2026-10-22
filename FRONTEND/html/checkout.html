@@ -94,27 +94,13 @@
       </section>
 
       <!-- PASO 2: Datos del Pasajero por Boleto -->
-      <section class="checkout-step passenger-step" id="passengerStep" aria-labelledby="passengerTitle">
+      <section class="checkout-step passenger-step" id="passengerStep" aria-labelledby="passengerTitle" style="display: none;">
         <div class="step-heading">
           <span>2</span>
           <div>
             <h2 id="passengerTitle">Datos de Pasajeros por Boleto</h2>
             <p id="passengerInstruction">Ingresa la información de la persona a quien pertenecerá cada boleto antes de realizar el pago.</p>
           </div>
-        </div>
-
-        <!-- Estado vacío cuando no hay asientos -->
-        <div class="passengers-empty-hint" id="passengersEmptyHint">
-          <div class="empty-hint-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <line x1="19" y1="8" x2="19" y2="14"></line>
-              <line x1="22" y1="11" x2="16" y2="11"></line>
-            </svg>
-          </div>
-          <strong>Selecciona tus asientos primero</strong>
-          <p>Escoge tu(s) asiento(s) en el mapa de cabina superior (Paso 1) para habilitar el registro de los pasajeros.</p>
         </div>
 
         <!-- Contenedor dinámico de formularios de pasajeros -->

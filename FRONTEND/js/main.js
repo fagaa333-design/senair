@@ -136,6 +136,21 @@ async function submitAuthForm(form, isRegistration) {
             ? `http://localhost:3000/${isRegistration ? "register" : "login"}`
             : form.action;
         const formData = new FormData(form);
+        if (isRegistration) {
+            const formEmail = String(formData.get("email") || "").trim();
+            if (formEmail.length > 50) {
+                if (typeof window.senairAlert === "function") {
+                    window.senairAlert({
+                        type: "warning",
+                        title: "Correo demasiado largo",
+                        message: "El correo electrónico no puede superar los 50 caracteres."
+                    });
+                } else {
+                    window.alert("El correo electrónico no puede superar los 50 caracteres.");
+                }
+                return;
+            }
+        }
         const response = await fetch(endpoint, {
             method: "POST",
             body: JSON.stringify(Object.fromEntries(formData.entries())),

@@ -428,8 +428,8 @@ app.post("/register", async (request, response) => {
   const email = String(request.body.email || "").trim().toLowerCase();
   const password = String(request.body.password || "");
 
-  if (name.length < 2 || !/^\S+@\S+\.\S+$/.test(email) || email.length > 190) {
-    return response.status(400).json({ success: false, message: "Revisa tu nombre y correo." });
+  if (name.length < 2 || !/^\S+@\S+\.\S+$/.test(email) || email.length > 50) {
+    return response.status(400).json({ success: false, message: "Revisa tu nombre y correo (máximo 50 caracteres)." });
   }
   if (!PASSWORD_REGEX.test(password) || password.length > 128) {
     return response.status(400).json({ success: false, message: PASSWORD_MESSAGE });

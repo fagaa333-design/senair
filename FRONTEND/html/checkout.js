@@ -305,9 +305,11 @@ function validateAllPassengers() {
     const p = passengerDataStore[seat];
     if (!p) return false;
     const nameValid = (p.name || "").trim().length >= 3;
-    const docValid = (p.docNumber || "").trim().length >= 4;
-    const emailValid = emailRegex.test((p.email || "").trim());
-    const phoneValid = (p.phone || "").replace(/\D/g, "").length >= 7;
+    const docValid = (p.docNumber || "").trim().length >= 4 && (p.docNumber || "").trim().length <= 20;
+    const emailStr = (p.email || "").trim();
+    const emailValid = emailRegex.test(emailStr) && emailStr.length <= 50;
+    const phoneStr = (p.phone || "").trim();
+    const phoneValid = phoneStr.replace(/\D/g, "").length >= 7 && phoneStr.length <= 20;
     return nameValid && docValid && emailValid && phoneValid;
   });
 }
@@ -363,33 +365,41 @@ function syncPassengerValidationUI() {
 }
 
 function renderPassengerForms() {
-  if (!passengersCardsContainer || !passengersEmptyHint) return;
+  if (!passengersCardsContainer) return;
 
-  if (selectedSeats.length === 0) {
-    passengersEmptyHint.style.display = "flex";
+  // El formulario de datos del cliente aparece SOLO cuando se han seleccionado los asientos correspondientes
+  const seatsReady = selectedSeats.length === passengerCount && passengerCount > 0;
+
+  if (!seatsReady) {
+    if (passengerStep) {
+      passengerStep.style.display = "none";
+      passengerStep.classList.remove("is-active");
+    }
     passengersCardsContainer.style.display = "none";
     if (passengerActionRow) passengerActionRow.style.display = "none";
-    if (passengerStep) passengerStep.classList.remove("is-active");
     updateSummaryPassengers();
     return;
   }
 
-  passengersEmptyHint.style.display = "none";
+  // Hacer visible el apartado de pasajeros solo cuando los asientos están seleccionados
+  if (passengerStep) {
+    passengerStep.style.display = "block";
+    passengerStep.classList.add("is-active");
+  }
   passengersCardsContainer.style.display = "flex";
   if (passengerActionRow) passengerActionRow.style.display = "flex";
-  if (passengerStep) passengerStep.classList.add("is-active");
 
   const loggedUser = window.sessionStorage.getItem("senairUserName") || "";
   const loggedEmail = window.sessionStorage.getItem("senairUserEmail") || "";
 
-  // Crear tarjetas para cada asiento seleccionado
+  // Crear tarjetas para cada asiento seleccionado con los límites de 20 dígitos en doc/tel y 50 en email
   passengersCardsContainer.innerHTML = selectedSeats.map((seat, index) => {
     if (!passengerDataStore[seat]) {
       passengerDataStore[seat] = {
         name: index === 0 && loggedUser ? loggedUser : "",
         docType: "CC",
         docNumber: "",
-        email: index === 0 && loggedEmail ? loggedEmail : "",
+        email: index === 0 && loggedEmail ? loggedEmail.slice(0, 50) : "",
         phone: ""
       };
     }
@@ -423,6 +433,7 @@ function renderPassengerForms() {
               data-seat="${seat}" 
               placeholder="Ej. Juan Andrés Pérez Gómez" 
               value="${escapeHtml(store.name)}" 
+              maxlength="70"
               required 
               autocomplete="name"
             />
@@ -442,10 +453,10 @@ function renderPassengerForms() {
             </select>
           </div>
 
-          <!-- Número de Documento -->
+          <!-- Número de Documento (Límite: 20 dígitos) -->
           <div class="passenger-form-group">
             <label for="pass_doc_${seat}" class="pass-label">
-              Número de Documento <span class="req">*</span>
+              Número de Documento <span class="req">*</span> <small style="color:var(--muted); font-weight:normal;">(Máx. 20 dígitos)</small>
             </label>
             <input 
               type="text" 
@@ -454,15 +465,16 @@ function renderPassengerForms() {
               data-seat="${seat}" 
               placeholder="Ej. 1020304050" 
               value="${escapeHtml(store.docNumber)}" 
+              maxlength="20"
               required 
               inputmode="numeric"
             />
           </div>
 
-          <!-- Correo Electrónico -->
+          <!-- Correo Electrónico (Límite: 50 caracteres) -->
           <div class="passenger-form-group">
             <label for="pass_email_${seat}" class="pass-label">
-              Correo Electrónico <span class="req">*</span>
+              Correo Electrónico <span class="req">*</span> <small style="color:var(--muted); font-weight:normal;">(Máx. 50 caracteres)</small>
             </label>
             <input 
               type="email" 
@@ -471,15 +483,16 @@ function renderPassengerForms() {
               data-seat="${seat}" 
               placeholder="correo@ejemplo.com" 
               value="${escapeHtml(store.email)}" 
+              maxlength="50"
               required 
               autocomplete="email"
             />
           </div>
 
-          <!-- Teléfono / Celular -->
+          <!-- Teléfono / Celular (Límite: 20 dígitos) -->
           <div class="passenger-form-group">
             <label for="pass_phone_${seat}" class="pass-label">
-              Teléfono / Celular <span class="req">*</span>
+              Teléfono / Celular <span class="req">*</span> <small style="color:var(--muted); font-weight:normal;">(Máx. 20 dígitos)</small>
             </label>
             <input 
               type="tel" 
@@ -488,6 +501,7 @@ function renderPassengerForms() {
               data-seat="${seat}" 
               placeholder="Ej. 300 123 4567" 
               value="${escapeHtml(store.phone)}" 
+              maxlength="20"
               required 
               autocomplete="tel"
             />
@@ -497,33 +511,41 @@ function renderPassengerForms() {
     `;
   }).join("");
 
-  // Añadir listeners para cada campo
+  // Añadir listeners para cada campo con validación estricta de longitudes
   passengersCardsContainer.querySelectorAll(".pass-input, .pass-select").forEach((el) => {
     const seat = el.dataset.seat;
     el.addEventListener("input", () => {
       if (!passengerDataStore[seat]) passengerDataStore[seat] = {};
+
       if (el.classList.contains("pass-input-name")) {
-        passengerDataStore[seat].name = el.value;
+        passengerDataStore[seat].name = el.value.slice(0, 70);
         el.classList.toggle("is-valid", el.value.trim().length >= 3);
         el.classList.toggle("is-invalid", el.value.trim().length > 0 && el.value.trim().length < 3);
       } else if (el.classList.contains("pass-select-doctype")) {
         passengerDataStore[seat].docType = el.value;
       } else if (el.classList.contains("pass-input-doc")) {
-        const cleanDoc = el.value.replace(/[^0-9A-Za-z-]/g, "");
+        // Solo caracteres alfanuméricos y guiones, máximo 20 dígitos
+        const cleanDoc = el.value.replace(/[^0-9A-Za-z-]/g, "").slice(0, 20);
         el.value = cleanDoc;
         passengerDataStore[seat].docNumber = cleanDoc;
-        el.classList.toggle("is-valid", cleanDoc.length >= 4);
+        el.classList.toggle("is-valid", cleanDoc.length >= 4 && cleanDoc.length <= 20);
         el.classList.toggle("is-invalid", cleanDoc.length > 0 && cleanDoc.length < 4);
       } else if (el.classList.contains("pass-input-email")) {
-        passengerDataStore[seat].email = el.value.trim();
-        const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+        // Máximo 50 caracteres para correo electrónico
+        const cleanEmail = el.value.trim().slice(0, 50);
+        el.value = cleanEmail;
+        passengerDataStore[seat].email = cleanEmail;
+        const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail) && cleanEmail.length <= 50;
         el.classList.toggle("is-valid", valid);
-        el.classList.toggle("is-invalid", el.value.trim().length > 0 && !valid);
+        el.classList.toggle("is-invalid", cleanEmail.length > 0 && !valid);
       } else if (el.classList.contains("pass-input-phone")) {
-        passengerDataStore[seat].phone = el.value;
-        const validPhone = el.value.replace(/\D/g, "").length >= 7;
-        el.classList.toggle("is-valid", validPhone);
-        el.classList.toggle("is-invalid", el.value.trim().length > 0 && !validPhone);
+        // Teléfono: máximo 20 dígitos/caracteres
+        const cleanPhone = el.value.replace(/[^0-9+ ()-]/g, "").slice(0, 20);
+        el.value = cleanPhone;
+        passengerDataStore[seat].phone = cleanPhone;
+        const digitsCount = cleanPhone.replace(/\D/g, "").length;
+        el.classList.toggle("is-valid", digitsCount >= 7 && cleanPhone.length <= 20);
+        el.classList.toggle("is-invalid", cleanPhone.length > 0 && digitsCount < 7);
       }
 
       syncPassengerValidationUI();
