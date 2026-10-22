@@ -1,17 +1,24 @@
 /**
  * ═════════════════════════════════════════════════════════════════════════
- * SENAIR — Controlador de Cabina 3D & Sistema de Waypoints de Vuelo
- * Transiciones 3D a 60 FPS • Soporte Gestual Táctil • Envío Persistente
+ * SENAIR — Controlador de Encuesta Interactiva (Feria de Software)
+ * Flujo Conversacional por Pasos, Registro Persistente y Validación Backend
  * ═════════════════════════════════════════════════════════════════════════
  */
 
 (() => {
   "use strict";
 
-  // Estado reactivo central de la encuesta
-  const surveyState = {
-    currentStep: 0,
-    maxStep: 7,
+  // Estado reactivo central
+  const state = {
+    currentStageIndex: 0,
+    participant: {
+      name: "",
+      email: "",
+      ageRange: "21-30",
+      city: "",
+      token: null,
+      id: null
+    },
     answers: {
       q1_satisfaction: null,
       q2_ease: null,
@@ -20,487 +27,571 @@
       q5_nps: null,
       q6_feedback: ""
     },
-    email: "",
     isSubmitting: false,
     completed: false
   };
 
+  // Secuencia lineal de etapas
+  const STAGES = [
+    "stageWelcome",   // 0
+    "stageRegister",  // 1
+    "stageQ1",        // 2
+    "stageQ2",        // 3
+    "stageQ3",        // 4
+    "stageQ4",        // 5
+    "stageQ5",        // 6
+    "stageQ6",        // 7 (Resumen Boarding Pass & Comentarios)
+    "stageCompletion" // 8 (Agradecimiento final)
+  ];
+
   const STAR_LABELS = {
     q1: {
-      1: "1 ★ // Muy Deficiente",
-      2: "2 ★ // Servicio Regular",
-      3: "3 ★ // Conforme / Aceptable",
-      4: "4 ★ // Muy Buen Servicio",
-      5: "5 ★ // ¡Servicio Excepcional!"
+      1: "1 ★ // Muy Insatisfecho",
+      2: "2 ★ // Insatisfecho / Regular",
+      3: "3 ★ // Aceptable / Conforme",
+      4: "4 ★ // Muy Satisfecho",
+      5: "5 ★ // ¡Totalmente Satisfecho!"
     },
     q2: {
-      1: "1 ★ // Plataforma Compleja",
-      2: "2 ★ // Proceso Difícil",
+      1: "1 ★ // Muy Compleja",
+      2: "2 ★ // Difícil de Usar",
       3: "3 ★ // Aceptable",
       4: "4 ★ // Rápida e Intuitiva",
       5: "5 ★ // ¡Impecable y Fluida!"
     }
   };
 
-  // ── 1. Controlador del Deck 3D y Navegación de Waypoints ──────────
-  const FlightDeck = {
-    cards: [],
-    dots: [],
-    hudPhaseName: null,
-    hudAltitudeVal: null,
-    hudProgressVal: null,
-    hudProgressLine: null,
+  // ── 1. Inicialización ──────────────────────────────────────────────
+  function init() {
+    bindStageNavigation();
+    bindRegistrationForm();
+    bindStarRatings();
+    bindPunctualityCards();
+    bindAmenitiesGrid();
+    bindNpsTiles();
+    bindTextInputs();
+    bindFinalSubmission();
+    bindRestart();
 
-    init() {
-      this.cards = Array.from(document.querySelectorAll(".waypoint-card"));
-      this.dots = Array.from(document.querySelectorAll(".waypoint-dot"));
-      this.hudPhaseName = document.getElementById("hudPhaseName");
-      this.hudAltitudeVal = document.getElementById("hudAltitudeVal");
-      this.hudProgressVal = document.getElementById("hudProgressVal");
-      this.hudProgressLine = document.getElementById("hudProgressLine");
-
-      this.bindWaypointNav();
-      this.bindButtons();
-      this.bindTouchGestures();
-      this.bindParallaxGyro();
-      this.updateHUD(0);
-    },
-
-    goToStep(targetStep) {
-      if (targetStep < 0 || targetStep >= this.cards.length) return;
-
-      const prevStep = surveyState.currentStep;
-      surveyState.currentStep = targetStep;
-
-      // Actualizar clases de tarjetas 3D
-      this.cards.forEach((card, idx) => {
-        card.classList.remove("active", "past");
-        if (idx === targetStep) {
-          card.classList.add("active");
-        } else if (idx < targetStep) {
-          card.classList.add("past");
-        }
-      });
-
-      // Actualizar dots en el HUD
-      this.dots.forEach((dot, idx) => {
-        dot.classList.remove("active");
-        if (idx === targetStep) {
-          dot.classList.add("active");
-        }
-        if (idx < targetStep) {
-          dot.classList.add("completed");
-        } else {
-          dot.classList.remove("completed");
-        }
-      });
-
-      this.updateHUD(targetStep);
-
-      // Desplazamiento al tope si la pantalla tiene scroll
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    },
-
-    next() {
-      if (surveyState.currentStep < this.cards.length - 1) {
-        this.goToStep(surveyState.currentStep + 1);
-      }
-    },
-
-    prev() {
-      if (surveyState.currentStep > 0) {
-        this.goToStep(surveyState.currentStep - 1);
-      }
-    },
-
-    updateHUD(step) {
-      const activeCard = this.cards[step];
-      if (!activeCard) return;
-
-      const phase = activeCard.getAttribute("data-phase") || `WAYPOINT 0${step}`;
-      const altitude = activeCard.getAttribute("data-altitude") || "FL 240";
-      const pct = Math.round((step / (this.cards.length - 1)) * 100);
-
-      if (this.hudPhaseName) this.hudPhaseName.textContent = phase;
-      if (this.hudAltitudeVal) this.hudAltitudeVal.textContent = altitude;
-      if (this.hudProgressVal) this.hudProgressVal.textContent = `${pct}%`;
-      if (this.hudProgressLine) this.hudProgressLine.style.width = `${pct}%`;
-
-      updateBoardingPass();
-    },
-
-    bindWaypointNav() {
-      this.dots.forEach((dot) => {
-        dot.addEventListener("click", () => {
-          const step = parseInt(dot.getAttribute("data-step"), 10);
-          this.goToStep(step);
-        });
-      });
-    },
-
-    bindButtons() {
-      // Botón de despegue inicial
-      document.getElementById("btnStartFlight")?.addEventListener("click", () => {
-        this.goToStep(1);
-      });
-
-      // Botones generales "next" y "prev"
-      document.querySelectorAll("[data-action='next']").forEach((btn) => {
-        btn.addEventListener("click", () => this.next());
-      });
-
-      document.querySelectorAll("[data-action='prev']").forEach((btn) => {
-        btn.addEventListener("click", () => this.prev());
-      });
-    },
-
-    // ── Gestos táctiles Swipe en móviles ──
-    bindTouchGestures() {
-      let touchStartX = 0;
-      let touchStartY = 0;
-      const stage = document.getElementById("cockpitStageWrapper");
-      if (!stage) return;
-
-      stage.addEventListener("touchstart", (e) => {
-        if (e.touches.length === 1) {
-          touchStartX = e.touches[0].clientX;
-          touchStartY = e.touches[0].clientY;
-        }
-      }, { passive: true });
-
-      stage.addEventListener("touchend", (e) => {
-        if (e.changedTouches.length === 1) {
-          const deltaX = e.changedTouches[0].clientX - touchStartX;
-          const deltaY = e.changedTouches[0].clientY - touchStartY;
-
-          // Si el movimiento horizontal es predominante y mayor a 60px
-          if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
-            if (deltaX < 0) {
-              // Deslizar izquierda -> siguiente
-              this.next();
-            } else {
-              // Deslizar derecha -> anterior
-              this.prev();
-            }
-          }
-        }
-      }, { passive: true });
-    },
-
-    // ── Efecto Giroscópico 3D con el cursor (Desktop) ──
-    bindParallaxGyro() {
-      if (window.innerWidth < 992) return;
-      const deck = document.getElementById("flightDeck3D");
-      if (!deck) return;
-
-      window.addEventListener("mousemove", (e) => {
-        const x = (e.clientX / window.innerWidth) - 0.5;
-        const y = (e.clientY / window.innerHeight) - 0.5;
-        deck.style.transform = `rotateY(${x * 6}deg) rotateX(${-y * 6}deg)`;
-      });
-    }
-  };
-
-  // ── 2. Interacciones de Preguntas ─────────────────────────────────
-  function bindQuestions() {
-    // P1: Satisfacción
-    setupStarRating("deckStarsQ1", "feedbackQ1", "q1_satisfaction", "q1", 2);
-
-    // P2: Facilidad Web
-    setupStarRating("deckStarsQ2", "feedbackQ2", "q2_ease", "q2", 3);
-
-    // P3: Radar de Puntualidad
-    setupPunctualityRadar();
-
-    // P4: Upgrades de Cabina
-    setupAmenitiesGrid();
-
-    // P5: Tacómetro NPS
-    setupNpsThrust();
-
-    // Textarea y Correo
-    setupTextInputs();
-
-    // Envío y Reinicio
-    setupSubmission();
-    setupRestart();
+    // Iniciar en Welcome
+    goToStage(0);
   }
 
-  function setupStarRating(deckId, feedbackId, stateKey, labelKey, nextStep) {
-    const deck = document.getElementById(deckId);
-    const feedback = document.getElementById(feedbackId);
-    if (!deck) return;
+  // ── 2. Gestor de Navegación entre Etapas ───────────────────────────
+  function goToStage(index) {
+    if (index < 0 || index >= STAGES.length) return;
 
-    const btns = deck.querySelectorAll(".star-beacon-btn");
+    state.currentStageIndex = index;
+    const stageId = STAGES[index];
+
+    // Alternar visibilidad de secciones
+    document.querySelectorAll(".stage-section").forEach((sec) => {
+      sec.classList.remove("active");
+    });
+
+    const activeSec = document.getElementById(stageId);
+    if (activeSec) {
+      activeSec.classList.add("active");
+    }
+
+    // Desplazarse al tope con suavidad
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // Actualizar Stepper del Header (Solo visible en preguntas Q1..Q6)
+    const stepper = document.getElementById("stepperIndicator");
+    const counterLabel = document.getElementById("stepCounterLabel");
+    const progressFill = document.getElementById("miniProgressFill");
+
+    if (index >= 2 && index <= 7) {
+      if (stepper) stepper.style.display = "flex";
+      const qNum = index - 1; // 1 a 6
+      if (counterLabel) counterLabel.textContent = `PASO ${qNum} DE 6`;
+      if (progressFill) progressFill.style.width = `${Math.round((qNum / 6) * 100)}%`;
+    } else {
+      if (stepper) stepper.style.display = "none";
+    }
+
+    // Si llegamos al resumen (Stage 7), actualizar el pasabordo
+    if (index === 7) {
+      updateBoardingPassSummary();
+    }
+  }
+
+  function bindStageNavigation() {
+    // Botón de inicio en Welcome
+    document.getElementById("btnStartExperience")?.addEventListener("click", () => {
+      goToStage(1); // Ir a Registro
+    });
+
+    // Botón volver de Registro a Welcome
+    document.getElementById("btnBackToWelcome")?.addEventListener("click", () => {
+      goToStage(0);
+    });
+
+    // Botones con data-action="prev"
+    document.querySelectorAll("[data-action='prev']").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (state.currentStageIndex > 2) {
+          goToStage(state.currentStageIndex - 1);
+        } else if (state.currentStageIndex === 2) {
+          goToStage(1); // Volver al registro
+        }
+      });
+    });
+
+    // Botones Siguiente de preguntas
+    document.getElementById("btnNextQ1")?.addEventListener("click", () => {
+      if (!validateCurrentQuestion("q1_satisfaction", "Por favor selecciona una calificación de 1 a 5 estrellas.")) return;
+      goToStage(3);
+    });
+
+    document.getElementById("btnNextQ2")?.addEventListener("click", () => {
+      if (!validateCurrentQuestion("q2_ease", "Por favor califica la agilidad de la web.")) return;
+      goToStage(4);
+    });
+
+    document.getElementById("btnNextQ3")?.addEventListener("click", () => {
+      if (!validateCurrentQuestion("q3_punctuality", "Por favor selecciona una opción de puntualidad.")) return;
+      goToStage(5);
+    });
+
+    document.getElementById("btnNextQ4")?.addEventListener("click", () => {
+      // Q4 es opcional o selección múltiple
+      goToStage(6);
+    });
+
+    document.getElementById("btnNextQ5")?.addEventListener("click", () => {
+      if (state.answers.q5_nps === null || state.answers.q5_nps === undefined) {
+        alert("Por favor selecciona tu probabilidad de recomendación en la escala NPS.");
+        return;
+      }
+      goToStage(7);
+    });
+  }
+
+  function validateCurrentQuestion(key, errorMsg) {
+    if (!state.answers[key]) {
+      alert(errorMsg);
+      return false;
+    }
+    return true;
+  }
+
+  // ── 3. Registro de Participantes (Etapa 2 con Persistencia Real) ───
+  function bindRegistrationForm() {
+    const form = document.getElementById("participantRegisterForm");
+    if (!form) return;
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const nameInput = document.getElementById("regFullName");
+      const emailInput = document.getElementById("regEmail");
+      const ageSelect = document.getElementById("regAgeRange");
+      const cityInput = document.getElementById("regCity");
+      const privacyCheck = document.getElementById("regPrivacyConsent");
+
+      const errName = document.getElementById("errFullName");
+      const errEmail = document.getElementById("errEmail");
+      const errPrivacy = document.getElementById("errPrivacy");
+
+      if (errName) errName.textContent = "";
+      if (errEmail) errEmail.textContent = "";
+      if (errPrivacy) errPrivacy.textContent = "";
+
+      const fullName = (nameInput?.value || "").trim();
+      const email = (emailInput?.value || "").trim().toLowerCase();
+      const ageRange = ageSelect?.value || "21-30";
+      const city = (cityInput?.value || "").trim();
+      const privacyAccepted = Boolean(privacyCheck?.checked);
+
+      let hasError = false;
+
+      if (!fullName || fullName.length < 3) {
+        if (errName) errName.textContent = "Por favor ingresa tu nombre completo.";
+        hasError = true;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
+        if (errEmail) errEmail.textContent = "Ingresa un correo electrónico válido.";
+        hasError = true;
+      }
+
+      if (!privacyAccepted) {
+        if (errPrivacy) errPrivacy.textContent = "Debes autorizar el tratamiento de datos para continuar.";
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      const submitBtn = document.getElementById("btnSubmitRegister");
+      const btnText = submitBtn?.querySelector(".btn-text");
+      if (submitBtn) submitBtn.disabled = true;
+      if (btnText) btnText.textContent = "Registrando en base de datos...";
+
+      try {
+        const res = await fetch("/api/survey/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: fullName,
+            email,
+            age_range: ageRange,
+            city,
+            privacy_accepted: true
+          })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          state.participant.name = fullName;
+          state.participant.email = email;
+          state.participant.ageRange = ageRange;
+          state.participant.city = city;
+          state.participant.token = data.token;
+          state.participant.id = data.participantId;
+
+          // Guardar token en sessionStorage
+          sessionStorage.setItem("senair_survey_token", data.token);
+
+          // Avanzar a la primera pregunta (Q1)
+          goToStage(2);
+        } else {
+          throw new Error(data.message || "Error al registrar participante.");
+        }
+      } catch (err) {
+        console.warn("[SENAIR] Error conectando con backend. Guardando en modo local seguro:", err);
+        // Fallback local seguro para que la feria no se detenga
+        state.participant.name = fullName;
+        state.participant.email = email;
+        state.participant.token = "offline_" + Date.now();
+        goToStage(2);
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        if (btnText) btnText.textContent = "Confirmar Registro y Despegar";
+      }
+    });
+  }
+
+  // ── 4. Controladores de Preguntas (Estrellas, Opciones, NPS) ────────
+  function bindStarRatings() {
+    setupStarRow("starsRowQ1", "badgeQ1", "q1_satisfaction", "q1", 3);
+    setupStarRow("starsRowQ2", "badgeQ2", "q2_ease", "q2", 4);
+  }
+
+  function setupStarRow(rowId, badgeId, stateKey, labelKey, nextStageIdx) {
+    const row = document.getElementById(rowId);
+    const badge = document.getElementById(badgeId);
+    if (!row) return;
+
+    const btns = row.querySelectorAll(".star-interactive-btn");
 
     btns.forEach((btn) => {
       const val = parseInt(btn.getAttribute("data-val"), 10);
 
       btn.addEventListener("mouseenter", () => {
         highlightStars(btns, val);
-        if (feedback) feedback.textContent = STAR_LABELS[labelKey][val];
+        if (badge) badge.textContent = STAR_LABELS[labelKey][val];
       });
 
       btn.addEventListener("mouseleave", () => {
-        const current = surveyState.answers[stateKey];
-        highlightStars(btns, current || 0);
-        if (feedback) {
-          feedback.textContent = current
-            ? STAR_LABELS[labelKey][current]
-            : "Toca una estrella para registrar tu calificación";
+        const cur = state.answers[stateKey];
+        highlightStars(btns, cur || 0);
+        if (badge) {
+          badge.textContent = cur
+            ? STAR_LABELS[labelKey][cur]
+            : "Selecciona una calificación para continuar";
         }
       });
 
       btn.addEventListener("click", () => {
-        surveyState.answers[stateKey] = val;
+        state.answers[stateKey] = val;
         highlightStars(btns, val);
-        if (feedback) feedback.textContent = STAR_LABELS[labelKey][val];
-        updateBoardingPass();
+        if (badge) badge.textContent = STAR_LABELS[labelKey][val];
 
-        // Auto-avance suave tras 380ms
+        // Guardar respuesta en backend
+        saveAnswer(stateKey, "Satisfacción", val);
+
+        // Auto avance suave tras 380ms
         setTimeout(() => {
-          FlightDeck.goToStep(nextStep);
+          goToStage(nextStageIdx);
         }, 380);
       });
     });
   }
 
-  function highlightStars(btnsList, count) {
-    btnsList.forEach((btn) => {
-      const v = parseInt(btn.getAttribute("data-val"), 10);
-      btn.classList.toggle("active", v <= count);
+  function highlightStars(btns, count) {
+    btns.forEach((b) => {
+      const v = parseInt(b.getAttribute("data-val"), 10);
+      b.classList.toggle("active", v <= count);
     });
   }
 
-  function setupPunctualityRadar() {
-    const cards = document.querySelectorAll(".radar-card");
+  function bindPunctualityCards() {
+    const cards = document.querySelectorAll(".tech-choice-card");
     cards.forEach((card) => {
       card.addEventListener("click", () => {
         const val = card.getAttribute("data-val");
         cards.forEach((c) => c.classList.remove("selected"));
         card.classList.add("selected");
-        surveyState.answers.q3_punctuality = val;
-        updateBoardingPass();
+        state.answers.q3_punctuality = val;
+
+        saveAnswer("q3_punctuality", "Puntualidad del vuelo", val);
 
         setTimeout(() => {
-          FlightDeck.goToStep(4);
+          goToStage(5);
         }, 380);
       });
     });
   }
 
-  function setupAmenitiesGrid() {
-    const chips = document.querySelectorAll(".amenity-chip-card");
+  function bindAmenitiesGrid() {
+    const chips = document.querySelectorAll(".amenity-chip-item");
     chips.forEach((chip) => {
       chip.addEventListener("click", () => {
         const val = chip.getAttribute("data-val");
         chip.classList.toggle("selected");
         const isSelected = chip.classList.contains("selected");
 
-        const list = surveyState.answers.q4_improvements;
+        const list = state.answers.q4_improvements;
         const idx = list.indexOf(val);
         if (isSelected && idx === -1) {
           list.push(val);
         } else if (!isSelected && idx !== -1) {
           list.splice(idx, 1);
         }
-        updateBoardingPass();
+
+        saveAnswer("q4_improvements", "Aspectos por potenciar", list.join(", "));
       });
     });
   }
 
-  function setupNpsThrust() {
-    const btns = document.querySelectorAll(".thrust-btn");
-    const machVal = document.getElementById("npsMachVal");
-    const categoryTag = document.getElementById("npsCategoryTag");
+  function bindNpsTiles() {
+    const btns = document.querySelectorAll(".nps-tile-button");
+    const displayScore = document.getElementById("npsDisplayScore");
+    const displayCategory = document.getElementById("npsDisplayCategory");
 
     btns.forEach((btn) => {
       btn.addEventListener("click", () => {
-        const val = parseInt(btn.getAttribute("data-nps"), 10);
+        const val = parseInt(btn.getAttribute("data-val"), 10);
         btns.forEach((b) => b.classList.remove("selected"));
         btn.classList.add("selected");
-        surveyState.answers.q5_nps = val;
+        state.answers.q5_nps = val;
 
-        let machStr = (val / 10).toFixed(1);
-        let catStr = "PASIVO";
-        if (val >= 9) catStr = "¡PROMOTOR TOTAL!";
-        else if (val <= 6) catStr = "DETRACTOR";
+        let cat = "PASIVO";
+        if (val >= 9) cat = "¡PROMOTOR TOTAL!";
+        else if (val <= 6) cat = "DETRACTOR";
 
-        if (machVal) machVal.textContent = `MACH ${machStr}`;
-        if (categoryTag) categoryTag.textContent = catStr;
+        if (displayScore) displayScore.textContent = `${val} / 10`;
+        if (displayCategory) displayCategory.textContent = cat;
 
-        updateBoardingPass();
+        saveAnswer("q5_nps", "Recomendación NPS", val);
 
-        // Auto-avance hacia el Boarding Pass (Paso 6)
         setTimeout(() => {
-          FlightDeck.goToStep(6);
+          goToStage(7); // Ir a Resumen
         }, 400);
       });
     });
   }
 
-  function setupTextInputs() {
-    const feedback = document.getElementById("feedbackTextarea");
-    const email = document.getElementById("contactEmailInput");
-
+  function bindTextInputs() {
+    const feedback = document.getElementById("feedbackTextInput");
     feedback?.addEventListener("input", (e) => {
-      surveyState.answers.q6_feedback = e.target.value.trim();
-    });
-
-    email?.addEventListener("input", (e) => {
-      surveyState.email = e.target.value.trim();
+      state.answers.q6_feedback = e.target.value.trim();
     });
   }
 
-  // ── 3. Actualización de Boarding Pass ─────────────────────────────
-  function updateBoardingPass() {
-    const q1El = document.getElementById("summaryValQ1");
-    const q2El = document.getElementById("summaryValQ2");
-    const q3El = document.getElementById("summaryValQ3");
-    const q4El = document.getElementById("summaryValQ4");
-    const q5El = document.getElementById("summaryValQ5");
+  // ── 5. Guardado de Respuestas en Servidor ──────────────────────────
+  async function saveAnswer(questionId, questionText, answerVal) {
+    const token = state.participant.token;
+    if (!token) return;
 
-    const { q1_satisfaction, q2_ease, q3_punctuality, q4_improvements, q5_nps } = surveyState.answers;
+    try {
+      await fetch("/api/survey/answer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-survey-token": token
+        },
+        body: JSON.stringify({
+          token,
+          question_id: questionId,
+          question_text: questionText,
+          answer: String(answerVal)
+        })
+      });
+    } catch (e) {
+      console.warn("[SENAIR] Guardado de paso diferido:", e);
+    }
+  }
 
-    if (q1El) {
-      q1El.textContent = q1_satisfaction ? `${q1_satisfaction} ★ (${STAR_LABELS.q1[q1_satisfaction].split("//")[1].trim()})` : "Pendiente";
+  // ── 6. Actualización del Boarding Pass en Tiempo Real ─────────────
+  function updateBoardingPassSummary() {
+    const pName = document.getElementById("bpPassengerName");
+    const pEmail = document.getElementById("bpPassengerEmail");
+    const valQ1 = document.getElementById("bpValQ1");
+    const valQ2 = document.getElementById("bpValQ2");
+    const valQ3 = document.getElementById("bpValQ3");
+    const valQ4 = document.getElementById("bpValQ4");
+    const valQ5 = document.getElementById("bpValQ5");
+
+    if (pName) pName.textContent = state.participant.name || "Viajero SENAIR";
+    if (pEmail) pEmail.textContent = state.participant.email || "Anonimizado";
+
+    const { q1_satisfaction, q2_ease, q3_punctuality, q4_improvements, q5_nps } = state.answers;
+
+    if (valQ1) {
+      valQ1.textContent = q1_satisfaction ? `${q1_satisfaction} ★ (${STAR_LABELS.q1[q1_satisfaction].split("//")[1].trim()})` : "Pendiente";
     }
-    if (q2El) {
-      q2El.textContent = q2_ease ? `${q2_ease} ★ (${STAR_LABELS.q2[q2_ease].split("//")[1].trim()})` : "Pendiente";
+    if (valQ2) {
+      valQ2.textContent = q2_ease ? `${q2_ease} ★ (${STAR_LABELS.q2[q2_ease].split("//")[1].trim()})` : "Pendiente";
     }
-    if (q3El) {
-      q3El.textContent = q3_punctuality ? `Vuelo ${q3_punctuality}` : "Pendiente";
+    if (valQ3) {
+      valQ3.textContent = q3_punctuality ? `Vuelo ${q3_punctuality}` : "Pendiente";
     }
-    if (q4El) {
-      q4El.textContent = q4_improvements.length > 0 ? q4_improvements.join(" • ") : "Ninguno marcado (Servicio óptimo)";
+    if (valQ4) {
+      valQ4.textContent = q4_improvements.length > 0 ? q4_improvements.join(" • ") : "Ninguno marcado (Servicio óptimo)";
     }
-    if (q5El) {
+    if (valQ5) {
       if (q5_nps !== null && q5_nps !== undefined) {
         let cat = q5_nps >= 9 ? "Promotor" : (q5_nps <= 6 ? "Detractor" : "Pasivo");
-        q5El.textContent = `${q5_nps} / 10 (${cat})`;
+        valQ5.textContent = `${q5_nps} / 10 (${cat})`;
       } else {
-        q5El.textContent = "Pendiente";
+        valQ5.textContent = "Pendiente";
       }
     }
   }
 
-  // ── 4. Validación y Envío de la Encuesta ──────────────────────────
-  function setupSubmission() {
-    const submitBtn = document.getElementById("btnTransmitFlight");
-    const errorBanner = document.getElementById("errorBanner");
+  // ── 7. Finalización & Envío Completo ──────────────────────────────
+  function bindFinalSubmission() {
+    const submitBtn = document.getElementById("btnFinalSubmit");
+    const errorBanner = document.getElementById("errorBannerSubmit");
     if (!submitBtn) return;
 
     submitBtn.addEventListener("click", async () => {
-      if (surveyState.isSubmitting) return;
+      if (state.isSubmitting) return;
 
       const missing = [];
-      let jumpStep = null;
-
-      if (!surveyState.answers.q1_satisfaction) {
-        missing.push("Fase 01 (Satisfacción general)");
-        if (jumpStep === null) jumpStep = 1;
-      }
-      if (!surveyState.answers.q2_ease) {
-        missing.push("Fase 02 (Facilidad web)");
-        if (jumpStep === null) jumpStep = 2;
-      }
-      if (!surveyState.answers.q3_punctuality) {
-        missing.push("Fase 03 (Puntualidad de vuelo)");
-        if (jumpStep === null) jumpStep = 3;
-      }
-      if (surveyState.answers.q5_nps === null || surveyState.answers.q5_nps === undefined) {
-        missing.push("Fase 05 (Tacómetro NPS)");
-        if (jumpStep === null) jumpStep = 5;
-      }
+      if (!state.answers.q1_satisfaction) missing.push("Pregunta 1");
+      if (!state.answers.q2_ease) missing.push("Pregunta 2");
+      if (!state.answers.q3_punctuality) missing.push("Pregunta 3");
+      if (state.answers.q5_nps === null || state.answers.q5_nps === undefined) missing.push("Pregunta 5");
 
       if (missing.length > 0) {
         if (errorBanner) {
-          errorBanner.innerHTML = `<strong>⚠️ Telemetría Incompleta:</strong> Por favor responde: ${missing.join(", ")}.`;
+          errorBanner.innerHTML = `<strong>⚠️ Faltan respuestas obligatorias:</strong> Por favor responde: ${missing.join(", ")}.`;
           errorBanner.style.display = "block";
-        }
-        if (jumpStep !== null) {
-          FlightDeck.goToStep(jumpStep);
         }
         return;
       }
 
       if (errorBanner) errorBanner.style.display = "none";
 
-      const payload = {
-        fullName: "Visitante de Feria de Software",
-        email: surveyState.email || "visitante@feria.senair.com",
-        phone: "",
-        answers: surveyState.answers
-      };
-
-      surveyState.isSubmitting = true;
-      submitBtn.classList.add("is-loading");
+      state.isSubmitting = true;
+      submitBtn.disabled = true;
       const btnText = submitBtn.querySelector(".btn-text");
-      if (btnText) btnText.textContent = "Transmitiendo datos a torre de control...";
+      if (btnText) btnText.textContent = "Guardando en base de datos...";
+
+      // Guardar comentario si existe
+      if (state.answers.q6_feedback) {
+        await saveAnswer("q6_feedback", "Comentarios libres", state.answers.q6_feedback);
+      }
+
+      const token = state.participant.token;
 
       try {
-        const endpoint = (typeof SURVEY_DATA !== "undefined" && SURVEY_DATA.ENDPOINT)
-          ? SURVEY_DATA.ENDPOINT
-          : "/api/survey/submit";
-
-        const res = await fetch(endpoint, {
+        // Enviar finalización oficial
+        const res = await fetch("/api/survey/complete", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          headers: {
+            "Content-Type": "application/json",
+            "x-survey-token": token || ""
+          },
+          body: JSON.stringify({ token })
         });
 
         const data = await res.json();
-        if (res.ok && data.success) {
-          handleSuccess();
-        } else {
-          throw new Error(data.message || "Error al registrar");
-        }
+        handleCompletionSuccess(data);
       } catch (err) {
-        console.warn("[SENAIR] Error en red remota. Guardando respaldo offline:", err);
-        saveOfflineBackup(payload);
-        handleSuccess();
+        console.warn("[SENAIR] Completado offline:", err);
+        // Fallback vía /api/survey/submit por lote
+        try {
+          await fetch("/api/survey/submit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: state.participant.name,
+              email: state.participant.email,
+              answers: state.answers
+            })
+          });
+        } catch (e2) {
+          saveLocalBackup();
+        }
+        handleCompletionSuccess({});
       } finally {
-        surveyState.isSubmitting = false;
-        submitBtn.classList.remove("is-loading");
-        if (btnText) btnText.textContent = "Transmitir Bitácora a Torre de Control";
+        state.isSubmitting = false;
+        submitBtn.disabled = false;
+        if (btnText) btnText.textContent = "Finalizar y Guardar Encuesta";
       }
     });
   }
 
-  function handleSuccess() {
-    surveyState.completed = true;
+  function handleCompletionSuccess(data) {
+    state.completed = true;
 
-    // Confetti de celebración
+    // Generar código de confirmación
+    const confCode = document.getElementById("completionConfirmationCode");
+    const randomCode = "SA-" + Math.floor(1000 + Math.random() * 9000);
+    if (confCode) confCode.textContent = randomCode;
+
+    // Disparar confeti sutil de celebración
     if (typeof confetti === "function") {
       try {
         confetti({
-          particleCount: 120,
-          spread: 80,
+          particleCount: 100,
+          spread: 70,
           origin: { y: 0.6 },
-          colors: ["#38bdf8", "#0866c6", "#ffffff", "#fbbf24"]
+          colors: ["#0866c6", "#38bdf8", "#fbbf24", "#ffffff"]
         });
       } catch (e) {
         console.log("Confetti trigger:", e);
       }
     }
 
-    // Navegar al Waypoint 7 (Aterrizaje)
-    FlightDeck.goToStep(7);
+    // Pasar a la etapa final de agradecimiento
+    goToStage(8);
   }
 
-  function saveOfflineBackup(payload) {
+  function saveLocalBackup() {
     try {
-      const stored = JSON.parse(localStorage.getItem("senair_offline_surveys") || "[]");
-      stored.push({ ...payload, savedAt: new Date().toISOString() });
-      localStorage.setItem("senair_offline_surveys", JSON.stringify(stored));
+      const stored = JSON.parse(localStorage.getItem("senair_surveys_backup") || "[]");
+      stored.push({
+        participant: state.participant,
+        answers: state.answers,
+        savedAt: new Date().toISOString()
+      });
+      localStorage.setItem("senair_surveys_backup", JSON.stringify(stored));
     } catch (e) {
-      console.error("[SENAIR] Fallo al guardar en localStorage:", e);
+      console.error("[SENAIR] No se pudo guardar respaldo offline:", e);
     }
   }
 
-  function setupRestart() {
-    document.getElementById("btnRestartExperience")?.addEventListener("click", () => {
-      surveyState.answers = {
+  // ── 8. Reiniciar Encuesta para Otro Visitante ──────────────────────
+  function bindRestart() {
+    document.getElementById("btnRestartForNewVisitor")?.addEventListener("click", () => {
+      state.currentStageIndex = 0;
+      state.participant = {
+        name: "",
+        email: "",
+        ageRange: "21-30",
+        city: "",
+        token: null,
+        id: null
+      };
+      state.answers = {
         q1_satisfaction: null,
         q2_ease: null,
         q3_punctuality: null,
@@ -508,33 +599,39 @@
         q5_nps: null,
         q6_feedback: ""
       };
-      surveyState.email = "";
-      surveyState.completed = false;
+      state.completed = false;
 
-      // Limpiar UI
-      document.querySelectorAll(".star-beacon-btn").forEach((s) => s.classList.remove("active"));
-      document.querySelectorAll(".radar-card").forEach((r) => r.classList.remove("selected"));
-      document.querySelectorAll(".amenity-chip-card").forEach((a) => a.classList.remove("selected"));
-      document.querySelectorAll(".thrust-btn").forEach((t) => t.classList.remove("selected"));
+      // Limpiar formulario de registro
+      const form = document.getElementById("participantRegisterForm");
+      if (form) form.reset();
 
-      const feedback = document.getElementById("feedbackTextarea");
-      const email = document.getElementById("contactEmailInput");
-      const machVal = document.getElementById("npsMachVal");
-      const categoryTag = document.getElementById("npsCategoryTag");
+      // Limpiar clases interactivas
+      document.querySelectorAll(".star-interactive-btn").forEach((s) => s.classList.remove("active"));
+      document.querySelectorAll(".tech-choice-card").forEach((c) => c.classList.remove("selected"));
+      document.querySelectorAll(".amenity-chip-item").forEach((a) => a.classList.remove("selected"));
+      document.querySelectorAll(".nps-tile-button").forEach((n) => n.classList.remove("selected"));
 
+      const badgeQ1 = document.getElementById("badgeQ1");
+      const badgeQ2 = document.getElementById("badgeQ2");
+      const npsScore = document.getElementById("npsDisplayScore");
+      const npsCat = document.getElementById("npsDisplayCategory");
+      const feedback = document.getElementById("feedbackTextInput");
+
+      if (badgeQ1) badgeQ1.textContent = "Selecciona una calificación para continuar";
+      if (badgeQ2) badgeQ2.textContent = "Selecciona una calificación para continuar";
+      if (npsScore) npsScore.textContent = "--";
+      if (npsCat) npsCat.textContent = "SELECCIONA UN VALOR";
       if (feedback) feedback.value = "";
-      if (email) email.value = "";
-      if (machVal) machVal.textContent = "--";
-      if (categoryTag) categoryTag.textContent = "CALIBRA EL EMPUJE";
 
-      updateBoardingPass();
-      FlightDeck.goToStep(0);
+      // Regresar a la pantalla de bienvenida
+      goToStage(0);
     });
   }
 
-  // ── Inicialización ───────────────────────────────────────────────
-  document.addEventListener("DOMContentLoaded", () => {
-    FlightDeck.init();
-    bindQuestions();
-  });
+  // Inicializar al cargar el DOM
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();

@@ -1,22 +1,28 @@
 /* ═════════════════════════════════════════════════════════════════════════
-   SENAIR — Cabina 3D & Sistema de Waypoints de Vuelo
-   Aceleración por GPU (60 FPS) • Diseño Táctil Móvil • Instrumentación HUD
+   SENAIR — Encuesta Interactiva de Vuelo
+   Inspirada en el Lenguaje Visual Editorial & Dinámico del Video de Referencia
+   Contraste Crema / Azul Marino • Tipografía Editorial • 60 FPS • Mobile First
    ═════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  --cockpit-bg: #020813;
-  --cockpit-panel: rgba(5, 18, 38, 0.85);
-  --cockpit-panel-solid: #051429;
-  --aero-blue: #0866c6;
-  --aero-sky: #38bdf8;
-  --aero-sky-glow: rgba(56, 189, 248, 0.35);
-  --aero-amber: #f59e0b;
-  --aero-green: #10b981;
-  --aero-red: #ef4444;
-  --txt-bright: #ffffff;
-  --txt-muted: #94a3b8;
-  --txt-dim: #64748b;
-  --aero-border: 1px solid rgba(56, 189, 248, 0.22);
+  --senair-cream: #faf7f2;
+  --senair-cream-alt: #f3eee3;
+  --senair-navy: #041226;
+  --senair-navy-card: #081a36;
+  --senair-blue: #0866c6;
+  --senair-blue-hover: #064f9b;
+  --senair-sky: #38bdf8;
+  --senair-yellow: #fbbf24;
+  --senair-green: #10b981;
+  --senair-red: #ef4444;
+  --text-dark: #091a30;
+  --text-light: #ffffff;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+  --border-light: rgba(4, 18, 38, 0.1);
+  --border-dark: rgba(56, 189, 248, 0.22);
+  --shadow-card: 0 20px 50px rgba(4, 18, 38, 0.08);
+  --shadow-dark: 0 25px 60px rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -29,663 +35,674 @@
 html, body {
   width: 100%;
   min-height: 100%;
-  background-color: var(--cockpit-bg);
-  color: var(--txt-bright);
+  background-color: var(--senair-cream);
+  color: var(--text-dark);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   overflow-x: hidden;
 }
 
-/* ── 1. FONDO DE VUELO: VIDEO & ATMÓSFERA ── */
-.sky-viewport-container {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.sky-flight-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: brightness(0.42) saturate(1.2) contrast(1.1);
-  transform: scale(1.05);
-}
-
-.cockpit-glass-vignette {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(2, 8, 19, 0.35) 0%, rgba(2, 8, 19, 0.88) 100%);
-}
-
-.cockpit-grid-overlay {
-  position: absolute;
-  inset: 0;
-  background-image: 
-    linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
-  background-size: 40px 40px;
-  opacity: 0.6;
-}
-
-/* ── 2. BARRA SUPERIOR HUD ── */
-.hud-cockpit-bar {
+/* ── 1. BARRA SUPERIOR DE NAVEGACIÓN ── */
+.survey-top-bar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 64px;
+  background: rgba(250, 247, 242, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-light);
   z-index: 100;
-  background: rgba(2, 8, 19, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(56, 189, 248, 0.18);
+  display: flex;
+  align-items: center;
+}
+
+.top-bar-inner {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
 }
 
-.hud-left-flight {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.hud-logo-link {
+.brand-link {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #ffffff;
   text-decoration: none;
-  font-weight: 800;
-  font-size: 14px;
+  color: var(--senair-navy);
+  font-weight: 900;
+  font-size: 15px;
   letter-spacing: 0.8px;
 }
 
-.hud-logo-icon {
+.brand-logo-img {
   width: 28px;
   height: 28px;
   object-fit: contain;
 }
 
-.tag-hud {
+.badge-campaign {
+  font-family: monospace;
   font-size: 10px;
-  color: var(--aero-sky);
-  background: rgba(56, 189, 248, 0.15);
-  padding: 2px 6px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--senair-blue);
+  background: rgba(8, 102, 198, 0.1);
+  padding: 2px 7px;
   border-radius: 4px;
   margin-left: 4px;
-  font-family: monospace;
 }
 
-.hud-flight-pill {
+/* Stepper central */
+.stepper-indicator {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+}
+
+.step-label {
   font-family: monospace;
   font-size: 11px;
-  font-weight: 700;
-  color: #bae6fd;
-  background: rgba(56, 189, 248, 0.08);
-  border: 1px solid rgba(56, 189, 248, 0.2);
-  padding: 4px 10px;
-  border-radius: 20px;
-}
-
-.pulse-beacon {
-  width: 6px;
-  height: 6px;
-  background: var(--aero-sky);
-  border-radius: 50%;
-  box-shadow: 0 0 8px var(--aero-sky);
-  animation: pulseBeacon 1.8s infinite;
-}
-
-@keyframes pulseBeacon {
-  0% { transform: scale(0.9); opacity: 0.6; }
-  50% { transform: scale(1.3); opacity: 1; }
-  100% { transform: scale(0.9); opacity: 0.6; }
-}
-
-/* Stepper de waypoints en el HUD */
-.hud-waypoints-nav {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.waypoint-dot {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--txt-muted);
-  font-size: 11px;
-  font-family: monospace;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.waypoint-dot:hover {
-  border-color: var(--aero-sky);
-  color: #ffffff;
-}
-
-.waypoint-dot.active {
-  background: var(--aero-blue);
-  border-color: var(--aero-sky);
-  color: #ffffff;
-  box-shadow: 0 0 12px var(--aero-sky-glow);
-  transform: scale(1.1);
-}
-
-.waypoint-dot.completed {
-  background: rgba(16, 185, 129, 0.18);
-  border-color: var(--aero-green);
-  color: var(--aero-green);
-}
-
-/* Telemetría a la derecha */
-.hud-right-telemetry {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
-
-.telemetry-block {
-  text-align: right;
-  font-family: monospace;
-}
-
-.telemetry-label {
-  display: block;
-  font-size: 9px;
-  color: var(--txt-dim);
-  letter-spacing: 1px;
-}
-
-.telemetry-val {
-  font-size: 13px;
   font-weight: 800;
-  color: var(--txt-muted);
+  color: var(--senair-blue);
+  letter-spacing: 1.5px;
 }
 
-.telemetry-val.highlight {
-  color: var(--aero-sky);
-}
-
-/* Línea de progreso de cabina */
-.hud-progress-track {
-  position: fixed;
-  top: 60px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.08);
-  z-index: 99;
-}
-
-.hud-progress-line {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, var(--aero-blue), var(--aero-sky));
-  box-shadow: 0 0 8px var(--aero-sky);
-  transition: width 0.35s ease;
-}
-
-/* ── 3. CONTENEDOR 3D DE WAYPOINTS ── */
-.cockpit-stage-wrapper {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  min-height: calc(100vh - 62px);
-  margin-top: 62px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  perspective: 1200px;
-  perspective-origin: center center;
-  padding: 30px 16px;
+.mini-progress-track {
+  width: 140px;
+  height: 4px;
+  background: rgba(4, 18, 38, 0.1);
+  border-radius: 2px;
   overflow: hidden;
 }
 
-.flight-deck-3d {
-  position: relative;
-  width: 100%;
-  max-width: 680px;
-  min-height: 540px;
-  transform-style: preserve-3d;
+.mini-progress-fill {
+  width: 16%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--senair-blue), var(--senair-sky));
+  border-radius: 2px;
+  transition: width 0.35s ease;
 }
 
-/* Tarjetas individuales de Waypoint */
-.waypoint-card {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translate3d(80px, 0, -220px) rotateY(16deg) scale(0.92);
-  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease, visibility 0.45s;
-  will-change: transform, opacity;
-}
-
-.waypoint-card.active {
-  position: relative;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translate3d(0, 0, 0) rotateY(0deg) scale(1);
-  z-index: 20;
-}
-
-.waypoint-card.past {
-  transform: translate3d(-80px, 0, -220px) rotateY(-16deg) scale(0.92);
-}
-
-/* Shell de vidrio aeroespacial */
-.card-glass-shell {
-  position: relative;
-  background: var(--cockpit-panel);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: var(--aero-border);
-  border-radius: 20px;
-  padding: 40px 36px;
-  box-shadow: 
-    0 30px 70px rgba(0, 0, 0, 0.65),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  box-sizing: border-box;
-}
-
-/* Esquinas tácticas de instrumentación */
-.card-corner {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-color: var(--aero-sky);
-  border-style: solid;
-  pointer-events: none;
-}
-
-.card-corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; border-top-left-radius: 4px; }
-.card-corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; border-top-right-radius: 4px; }
-.card-corner.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; border-bottom-left-radius: 4px; }
-.card-corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; border-bottom-right-radius: 4px; }
-
-/* ── 4. ESTILOS DE WAYPOINT 0 (WELCOME) ── */
-.aero-badge-row {
+.top-right-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
+  gap: 8px;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
 }
 
-.aero-badge {
+.live-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--senair-green);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--senair-green);
+}
+
+/* ── 2. VIEWPORT DE EXPERIENCIA ── */
+.experience-viewport {
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - 64px);
+  margin-top: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 16px;
+}
+
+.stage-section {
+  display: none;
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stage-section.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── 3. HERO CLARO EDITORIAL (INSPIRADO EN EL VIDEO) ── */
+.hero-editorial-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Marquees en sentidos opuestos */
+.hero-marquee-strip {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--senair-navy);
+  color: var(--senair-cream);
+  padding: 10px 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-family: monospace;
+}
+
+.marquee-content {
+  display: inline-block;
+  animation: marqueeRoll 28s linear infinite;
+}
+
+.hero-marquee-strip.reverse .marquee-content {
+  animation: marqueeRollReverse 32s linear infinite;
+  background: var(--senair-cream-alt);
+  color: var(--senair-navy);
+}
+
+@keyframes marqueeRoll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes marqueeRollReverse {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+.hero-main-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 36px;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.hero-copy-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kicker-tag {
   font-family: monospace;
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 1.5px;
-  color: var(--aero-sky);
-  background: rgba(56, 189, 248, 0.12);
-  padding: 4px 10px;
-  border-radius: 4px;
+  letter-spacing: 2px;
+  color: var(--senair-blue);
+  text-transform: uppercase;
 }
 
-.status-badge-live {
-  font-family: monospace;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--aero-green);
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  padding: 3px 8px;
-  border-radius: 4px;
-}
-
-.card-display-title {
-  font-size: clamp(26px, 4.5vw, 38px);
+.hero-headline {
+  font-size: clamp(34px, 5.5vw, 54px);
   font-weight: 900;
-  line-height: 1.15;
-  letter-spacing: -0.8px;
-  color: #ffffff;
-  margin-bottom: 14px;
+  line-height: 1.05;
+  letter-spacing: -1.2px;
+  color: var(--senair-navy);
 }
 
-.card-display-subtitle {
-  font-size: 15px;
+.accent-serif {
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--senair-blue);
+}
+
+.hero-description {
+  font-size: 16px;
   line-height: 1.6;
-  color: var(--txt-muted);
-  margin-bottom: 28px;
+  color: var(--text-muted);
+  max-width: 500px;
 }
 
-/* Manifiesto de vuelo */
-.flight-manifest-mini {
+.hero-meta-pills {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(2, 8, 19, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 6px 0;
 }
 
-.manifest-item {
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--text-dark);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.hero-cta-box {
+  margin-top: 10px;
+}
+
+/* Columna visual con foto y doodle */
+.hero-visual-col {
+  display: flex;
+  justify-content: center;
+}
+
+.visual-card-frame {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 4 / 5;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(4, 18, 38, 0.08);
+}
+
+.visual-img-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.visual-card-frame:hover .visual-img-cover {
+  transform: scale(1.04);
+}
+
+.flight-doodle-svg {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 65%;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+.visual-overlay-badge {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  background: rgba(4, 18, 38, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 14px;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.manifest-arrow {
-  color: var(--aero-sky);
-  font-size: 18px;
-}
-
-.m-title {
-  font-size: 10px;
+.badge-code {
   font-family: monospace;
+  font-size: 11px;
+  font-weight: 800;
   letter-spacing: 1px;
-  color: var(--txt-dim);
+  color: var(--senair-sky);
 }
 
-.m-val {
-  font-size: 13px;
-  font-weight: 800;
+.badge-sub {
+  font-size: 12px;
+  font-weight: 700;
   color: #ffffff;
 }
 
-.card-actions-row {
-  display: flex;
-  justify-content: flex-end;
+/* ── 4. TARJETAS DE ETAPAS Y FORMULARIO ── */
+.stage-card-shell {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 24px;
+  padding: 44px 38px;
+  box-shadow: var(--shadow-card);
+  max-width: 680px;
+  margin: 0 auto;
 }
 
-.touch-hint-label {
-  text-align: center;
-  font-size: 11px;
-  color: var(--txt-dim);
+.stage-card-header {
+  margin-bottom: 26px;
+}
+
+.stage-pill {
+  display: inline-block;
   font-family: monospace;
-  margin-top: 18px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--senair-blue);
+  background: rgba(8, 102, 198, 0.08);
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
 }
 
-/* ── 5. BOTONES DE ACCIÓN AEROESPACIAL ── */
-.btn-aero-primary {
+.stage-title {
+  font-size: clamp(22px, 4vw, 30px);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -0.6px;
+  color: var(--senair-navy);
+  margin-bottom: 8px;
+}
+
+.stage-desc {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* Campos del formulario de registro */
+.register-form-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--senair-navy);
+}
+
+.req-star {
+  color: var(--senair-red);
+}
+
+.field-input,
+.field-select,
+.field-textarea {
+  width: 100%;
+  padding: 13px 16px;
+  background: var(--senair-cream);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  font-size: 15px;
+  color: var(--text-dark);
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.field-input:focus,
+.field-select:focus,
+.field-textarea:focus {
+  background: #ffffff;
+  border-color: var(--senair-blue);
+  box-shadow: 0 0 0 3px rgba(8, 102, 198, 0.15);
+}
+
+.form-row-dual {
+  display: flex;
+  gap: 14px;
+}
+
+.field-error-msg {
+  font-size: 12px;
+  color: var(--senair-red);
+  font-weight: 600;
+  min-height: 16px;
+}
+
+/* Consentimiento de datos Ley 1581 */
+.privacy-consent-box {
+  background: var(--senair-cream);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.consent-checkbox-label {
+  display: flex;
+  gap: 12px;
+  cursor: pointer;
+  align-items: flex-start;
+}
+
+.consent-checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.custom-checkbox-mark {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid var(--senair-navy);
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s ease;
+}
+
+.consent-checkbox-label input[type="checkbox"]:checked + .custom-checkbox-mark {
+  background: var(--senair-blue);
+  border-color: var(--senair-blue);
+}
+
+.consent-checkbox-label input[type="checkbox"]:checked + .custom-checkbox-mark::after {
+  content: "✓";
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.consent-text {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+/* ── 5. BOTONES DE ACCIÓN ── */
+.form-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-light);
+}
+
+.btn-primary-action {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   padding: 14px 28px;
-  background: linear-gradient(135deg, var(--aero-blue), #0284c7);
+  background: var(--senair-blue);
   color: #ffffff;
-  border: 1px solid rgba(56, 189, 248, 0.4);
-  border-radius: 10px;
+  border: none;
+  border-radius: 12px;
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 8px 24px var(--aero-sky-glow);
-  transition: all 0.25s ease;
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(8, 102, 198, 0.35);
+  transition: all 0.2s ease;
   text-decoration: none;
 }
 
-.btn-aero-primary:hover {
-  background: linear-gradient(135deg, #0975e0, #0396e3);
-  box-shadow: 0 10px 30px rgba(56, 189, 248, 0.55);
+.btn-primary-action:hover {
+  background: var(--senair-blue-hover);
   transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(8, 102, 198, 0.45);
 }
 
-.btn-aero-primary:active {
-  transform: translateY(0);
-}
-
-.btn-aero-ghost {
+.btn-ghost-back {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 13px 22px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--txt-muted);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
+  padding: 13px 20px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.btn-aero-ghost:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.3);
+.btn-ghost-back:hover {
+  background: var(--senair-cream);
+  color: var(--senair-navy);
 }
 
-.card-nav-cluster {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 32px;
-  padding-top: 22px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
+/* ── 6. COMPONENTES INTERACTIVOS DE PREGUNTAS ── */
 
-/* ── 6. HEADER DE PREGUNTAS ── */
-.question-header-strip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.stage-num-tag {
-  font-family: monospace;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  color: var(--aero-sky);
-  background: rgba(56, 189, 248, 0.12);
-  padding: 4px 10px;
-  border-radius: 4px;
-}
-
-.req-tag {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--txt-dim);
-}
-
-.question-core-title {
-  font-size: clamp(20px, 3.8vw, 27px);
-  font-weight: 900;
-  line-height: 1.25;
-  color: #ffffff;
-  margin-bottom: 10px;
-}
-
-.question-core-desc {
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--txt-muted);
-  margin-bottom: 26px;
-}
-
-/* ── 7. BALIZAS TÁCTICAS DE ESTRELLAS (Q1 & Q2) ── */
-.interactive-star-deck {
+/* Q1 & Q2: Estrellas de Calificación */
+.star-rating-showcase {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin: 18px 0;
 }
 
-.star-beacon-btn {
+.star-interactive-btn {
   aspect-ratio: 1;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
+  background: var(--senair-cream);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
   cursor: pointer;
-  transition: all 0.25s ease;
-  padding: 8px;
+  transition: all 0.2s ease;
+  padding: 10px;
 }
 
-.star-beacon-btn .star-icon {
-  font-size: 32px;
-  color: rgba(255, 255, 255, 0.2);
-  transition: all 0.25s ease;
+.star-glyph {
+  font-size: 34px;
+  color: #cbd5e1;
+  transition: all 0.2s ease;
   line-height: 1;
 }
 
-.star-beacon-btn .beacon-label {
+.star-num {
   font-family: monospace;
   font-size: 12px;
   font-weight: 800;
-  color: var(--txt-dim);
+  color: var(--text-muted);
 }
 
-.star-beacon-btn:hover {
-  border-color: var(--aero-sky);
-  background: rgba(56, 189, 248, 0.08);
+.star-interactive-btn:hover {
+  background: #ffffff;
+  border-color: var(--senair-yellow);
   transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(251, 191, 36, 0.2);
 }
 
-.star-beacon-btn:hover .star-icon {
-  color: #fbbf24;
-  text-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+.star-interactive-btn:hover .star-glyph,
+.star-interactive-btn.active .star-glyph {
+  color: var(--senair-yellow);
 }
 
-.star-beacon-btn.active {
-  border-color: #fbbf24;
-  background: rgba(251, 191, 36, 0.12);
-  box-shadow: 0 0 20px rgba(251, 191, 36, 0.25);
+.star-interactive-btn.active {
+  background: #ffffff;
+  border-color: var(--senair-yellow);
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.25);
   transform: translateY(-2px);
 }
 
-.star-beacon-btn.active .star-icon {
-  color: #fbbf24;
-  text-shadow: 0 0 16px rgba(251, 191, 36, 0.8);
+.star-interactive-btn.active .star-num {
+  color: var(--senair-navy);
 }
 
-.star-beacon-btn.active .beacon-label {
-  color: #fbbf24;
-}
-
-.live-selection-callout {
+.verbal-feedback-banner {
   text-align: center;
+  font-family: monospace;
   font-size: 13px;
   font-weight: 700;
-  color: var(--aero-sky);
-  font-family: monospace;
-  background: rgba(56, 189, 248, 0.06);
-  border: 1px dashed rgba(56, 189, 248, 0.25);
-  border-radius: 8px;
+  color: var(--senair-blue);
+  background: rgba(8, 102, 198, 0.06);
+  border: 1px dashed rgba(8, 102, 198, 0.2);
+  border-radius: 10px;
   padding: 10px 14px;
+  margin-top: 10px;
 }
 
-/* ── 8. TARJETAS DE RADAR DE PUNTUALIDAD (Q3) ── */
-.radar-options-grid {
+/* Q3: Tarjetas de Puntualidad (Estilo Terminal del Video) */
+.technical-choice-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 
-.radar-card {
-  position: relative;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 16px 18px;
+.tech-choice-card {
+  background: var(--senair-cream);
+  border: 1.5px solid var(--border-light);
+  border-radius: 14px;
+  padding: 18px 20px;
   cursor: pointer;
-  transition: all 0.25s ease;
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.radar-indicator-ring {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  flex-shrink: 0;
-  margin-top: 3px;
   transition: all 0.2s ease;
+  position: relative;
 }
 
-.radar-content {
-  flex: 1;
-}
-
-.radar-status-pill {
+.choice-status-tag {
   display: inline-block;
   font-family: monospace;
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 1px;
-  padding: 2px 6px;
+  padding: 3px 7px;
   border-radius: 4px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
-.radar-status-pill.green { background: rgba(16, 185, 129, 0.15); color: var(--aero-green); }
-.radar-status-pill.blue { background: rgba(56, 189, 248, 0.15); color: var(--aero-sky); }
-.radar-status-pill.amber { background: rgba(245, 158, 11, 0.15); color: var(--aero-amber); }
-.radar-status-pill.red { background: rgba(239, 68, 68, 0.15); color: var(--aero-red); }
+.choice-status-tag.green { background: rgba(16, 185, 129, 0.15); color: var(--senair-green); }
+.choice-status-tag.blue { background: rgba(8, 102, 198, 0.15); color: var(--senair-blue); }
+.choice-status-tag.amber { background: rgba(245, 158, 11, 0.15); color: #b45309; }
+.choice-status-tag.red { background: rgba(239, 68, 68, 0.15); color: var(--senair-red); }
 
-.radar-title {
+.choice-heading {
   display: block;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--senair-navy);
   margin-bottom: 4px;
 }
 
-.radar-desc {
-  font-size: 12px;
+.choice-subtext {
+  font-size: 13px;
   line-height: 1.4;
-  color: var(--txt-muted);
+  color: var(--text-muted);
 }
 
-.radar-card:hover {
-  border-color: var(--aero-sky);
-  background: rgba(56, 189, 248, 0.06);
+.tech-choice-card:hover {
+  background: #ffffff;
+  border-color: var(--senair-blue);
   transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(4, 18, 38, 0.06);
 }
 
-.radar-card.selected {
-  border-color: var(--aero-sky);
-  background: rgba(56, 189, 248, 0.12);
-  box-shadow: 0 0 20px var(--aero-sky-glow);
+.tech-choice-card.selected {
+  background: #ffffff;
+  border-color: var(--senair-blue);
+  box-shadow: 0 0 0 2px var(--senair-blue), 0 8px 20px rgba(8, 102, 198, 0.15);
 }
 
-.radar-card.selected .radar-indicator-ring {
-  border-color: var(--aero-sky);
-  background: var(--aero-sky);
-  box-shadow: 0 0 10px var(--aero-sky);
-}
-
-/* ── 9. PASTILLAS INTERACTIVAS DE UPGRADE (Q4) ── */
-.amenities-toggle-grid {
+/* Q4: Cuadrícula de Selección Múltiple (Upgrades de Cabina) */
+.amenities-selection-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 
-.amenity-chip-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+.amenity-chip-item {
+  background: var(--senair-cream);
+  border: 1.5px solid var(--border-light);
+  border-radius: 14px;
   padding: 14px 16px;
   cursor: pointer;
   display: flex;
@@ -695,32 +712,33 @@ html, body {
 }
 
 .amenity-icon {
-  font-size: 22px;
+  font-size: 24px;
+  flex-shrink: 0;
 }
 
-.amenity-meta {
+.amenity-info {
   flex: 1;
 }
 
-.amenity-meta strong {
+.amenity-info strong {
   display: block;
   font-size: 14px;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--senair-navy);
   margin-bottom: 2px;
 }
 
-.amenity-meta small {
+.amenity-info small {
   display: block;
   font-size: 11px;
-  color: var(--txt-muted);
+  color: var(--text-muted);
 }
 
-.amenity-check {
-  width: 20px;
-  height: 20px;
+.chip-check-icon {
+  width: 22px;
+  height: 22px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1.5px solid var(--text-muted);
   display: grid;
   place-items: center;
   font-size: 12px;
@@ -729,403 +747,349 @@ html, body {
   transition: all 0.2s ease;
 }
 
-.amenity-chip-card:hover {
-  border-color: var(--aero-sky);
-  background: rgba(56, 189, 248, 0.05);
+.amenity-chip-item:hover {
+  background: #ffffff;
+  border-color: var(--senair-blue);
 }
 
-.amenity-chip-card.selected {
-  border-color: var(--aero-sky);
-  background: rgba(56, 189, 248, 0.12);
-  box-shadow: 0 0 16px rgba(56, 189, 248, 0.2);
+.amenity-chip-item.selected {
+  background: #ffffff;
+  border-color: var(--senair-blue);
+  box-shadow: 0 0 0 2px var(--senair-blue), 0 6px 18px rgba(8, 102, 198, 0.12);
 }
 
-.amenity-chip-card.selected .amenity-check {
-  background: var(--aero-sky);
-  border-color: var(--aero-sky);
-  color: #020813;
+.amenity-chip-item.selected .chip-check-icon {
+  background: var(--senair-blue);
+  border-color: var(--senair-blue);
+  color: #ffffff;
 }
 
-/* ── 10. TACÓMETRO DE PROPULSIÓN NPS (Q5) ── */
-.nps-tachometer-deck {
+/* Q5: Tacómetro NPS 0-10 */
+.nps-interactive-deck {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.mach-speed-display {
-  background: rgba(2, 8, 19, 0.65);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  border-radius: 12px;
+.nps-gauge-header {
+  background: var(--senair-navy);
+  color: #ffffff;
+  border-radius: 14px;
   padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.mach-title {
+.gauge-title {
   font-family: monospace;
   font-size: 11px;
   letter-spacing: 1px;
-  color: var(--txt-dim);
+  color: var(--senair-sky);
 }
 
-.mach-readout {
+.gauge-display {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 10px;
 }
 
-.mach-num {
+.gauge-score {
   font-size: 26px;
   font-weight: 900;
   font-family: monospace;
   color: #ffffff;
 }
 
-.mach-tag {
+.gauge-category {
   font-family: monospace;
   font-size: 11px;
   font-weight: 800;
-  color: var(--aero-sky);
-  letter-spacing: 1px;
+  color: var(--senair-yellow);
 }
 
-.thrust-buttons-row {
+.nps-tiles-row {
   display: grid;
   grid-template-columns: repeat(11, 1fr);
   gap: 6px;
 }
 
-.thrust-btn {
+.nps-tile-button {
   height: 48px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--senair-cream);
+  border: 1.5px solid var(--border-light);
   border-radius: 8px;
-  color: #ffffff;
+  color: var(--senair-navy);
   font-family: monospace;
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.thrust-btn:hover {
-  border-color: var(--aero-sky);
-  background: rgba(56, 189, 248, 0.1);
+.nps-tile-button:hover {
+  background: #ffffff;
+  border-color: var(--senair-blue);
   transform: translateY(-2px);
 }
 
-.thrust-btn.selected {
-  background: var(--aero-sky);
-  border-color: #ffffff;
-  color: #020813;
-  box-shadow: 0 0 20px var(--aero-sky);
-  font-size: 18px;
-  transform: translateY(-4px);
+.nps-tile-button.selected {
+  background: var(--senair-blue);
+  border-color: var(--senair-blue);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(8, 102, 198, 0.4);
+  font-size: 17px;
+  transform: translateY(-3px);
 }
 
-.thrust-scale-guide {
+.nps-legend-strip {
   display: flex;
   justify-content: space-between;
   font-family: monospace;
   font-size: 11px;
-  color: var(--txt-dim);
+  color: var(--text-muted);
 }
 
-/* ── 11. BITÁCORA // BOARDING PASS DIGITAL (Q6) ── */
-.boarding-pass-card {
-  background: #ffffff;
-  color: #051429;
-  border-radius: 14px;
+/* ── 7. RESUMEN: BOARDING PASS DIGITAL (Q6) ── */
+.summary-boarding-card {
+  background: var(--senair-cream);
+  border: 1.5px dashed rgba(4, 18, 38, 0.2);
+  border-radius: 16px;
   padding: 22px 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-  position: relative;
-  overflow: hidden;
+  margin-bottom: 20px;
 }
 
-.bp-header {
+.bp-top-line {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 2px dashed rgba(5, 20, 41, 0.18);
+  border-bottom: 1px solid var(--border-light);
   padding-bottom: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
-.bp-brand {
+.bp-airline-meta {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 900;
   font-size: 13px;
-  letter-spacing: 0.5px;
+  font-weight: 900;
+  color: var(--senair-navy);
 }
 
-.bp-logo {
-  width: 22px;
-  height: 22px;
+.bp-logo-tiny {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
-.bp-flight-code {
+.bp-code-label {
   font-family: monospace;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  color: var(--aero-blue);
+  color: var(--senair-blue);
 }
 
-.bp-grid-telemetry {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px 18px;
+.bp-passenger-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 14px;
 }
 
-.bp-item {
+.bp-pass-col {
   display: flex;
   flex-direction: column;
 }
 
-.bp-item.full {
-  grid-column: 1 / -1;
-}
-
-.bp-item.highlight {
-  background: rgba(8, 102, 198, 0.08);
-  padding: 6px 10px;
-  border-radius: 6px;
-  border-left: 3px solid var(--aero-blue);
-}
-
-.bp-label {
+.bp-meta-label {
   font-family: monospace;
   font-size: 10px;
   font-weight: 700;
-  color: var(--txt-dim);
-  letter-spacing: 0.5px;
+  color: var(--text-muted);
 }
 
-.bp-val {
-  font-size: 13px;
-  font-weight: 800;
-  color: #051429;
-}
-
-.bp-footer-strip {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(5, 20, 41, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.bp-barcode-sim {
-  display: flex;
-  gap: 3px;
-  height: 26px;
-  align-items: center;
-}
-
-.bp-barcode-sim span {
-  width: 2px;
-  height: 100%;
-  background: #051429;
-}
-
-.bp-barcode-sim span:nth-child(even) {
-  width: 4px;
-}
-
-.bp-barcode-sim span:nth-child(3n) {
-  width: 1px;
-}
-
-.bp-seat-tag {
-  font-family: monospace;
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--aero-blue);
-}
-
-/* Inputs de cierre */
-.closure-inputs-block {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-
-.input-field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.input-head-label {
-  font-family: monospace;
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--aero-sky);
-  letter-spacing: 1px;
-}
-
-.cockpit-textarea,
-.cockpit-input {
-  width: 100%;
-  background: rgba(2, 8, 19, 0.7);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  border-radius: 8px;
-  color: #ffffff;
-  padding: 12px 14px;
+.bp-meta-val {
   font-size: 14px;
-  outline: none;
-  transition: all 0.2s ease;
-  font-family: inherit;
+  font-weight: 800;
+  color: var(--senair-navy);
 }
 
-.cockpit-textarea:focus,
-.cockpit-input:focus {
-  border-color: var(--aero-sky);
-  box-shadow: 0 0 12px var(--aero-sky-glow);
+.bp-telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 16px;
+  background: #ffffff;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border-light);
 }
 
-.privacy-tiny {
-  font-size: 11px;
-  color: var(--txt-dim);
+.bp-telemetry-box {
+  display: flex;
+  flex-direction: column;
 }
 
-.error-banner-telemetry {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #fca5a5;
-  border-radius: 8px;
+.bp-telemetry-box.full {
+  grid-column: 1 / -1;
+}
+
+.bp-telemetry-box.highlight {
+  background: rgba(8, 102, 198, 0.06);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border-left: 3px solid var(--senair-blue);
+}
+
+.t-label {
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.t-val {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--senair-navy);
+}
+
+.error-banner-alert {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #b91c1c;
+  border-radius: 10px;
   padding: 12px 16px;
   font-size: 13px;
-  margin-bottom: 16px;
+  margin-top: 14px;
 }
 
-/* ── 12. ATERRIZAJE EXITOSO & BOTÓN REINICIO ── */
-.touchdown-visual {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 20px;
+/* ── 8. ETAPA FINAL: COMPLETION ── */
+.completion-card-shell {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 24px;
+  padding: 50px 36px;
+  box-shadow: var(--shadow-card);
+  max-width: 620px;
+  margin: 0 auto;
 }
 
-.landing-wings-badge {
+.completion-icon-wrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+}
+
+.wings-badge {
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #fbbf24, #d97706);
+  background: linear-gradient(135deg, var(--senair-blue), var(--senair-sky));
   display: grid;
   place-items: center;
-  font-size: 38px;
-  box-shadow: 0 0 30px rgba(251, 191, 36, 0.4);
-  animation: badgeBounce 2s infinite alternate;
+  font-size: 34px;
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(8, 102, 198, 0.35);
 }
 
-@keyframes badgeBounce {
-  from { transform: translateY(-4px); }
-  to { transform: translateY(4px); }
-}
-
-.runway-lights-pulse {
-  display: flex;
-  gap: 8px;
-}
-
-.runway-lights-pulse span {
-  width: 12px;
-  height: 4px;
-  background: var(--aero-sky);
-  border-radius: 2px;
-  box-shadow: 0 0 8px var(--aero-sky);
-  animation: strobeLight 1.2s infinite;
-}
-
-.runway-lights-pulse span:nth-child(2) { animation-delay: 0.2s; }
-.runway-lights-pulse span:nth-child(3) { animation-delay: 0.4s; }
-.runway-lights-pulse span:nth-child(4) { animation-delay: 0.6s; }
-.runway-lights-pulse span:nth-child(5) { animation-delay: 0.8s; }
-
-@keyframes strobeLight {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
-}
-
-.success-callout {
+.badge-success-tag {
   display: inline-block;
   font-family: monospace;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 2px;
-  color: var(--aero-green);
+  letter-spacing: 1.5px;
+  color: var(--senair-green);
+  background: rgba(16, 185, 129, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.completion-headline {
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 900;
+  color: var(--senair-navy);
   margin-bottom: 10px;
 }
 
-.post-landing-actions {
+.completion-lead {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.completion-summary-badge {
+  background: var(--senair-cream);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 14px 20px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 30px;
+}
+
+.cs-label {
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.cs-code {
+  font-family: monospace;
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--senair-blue);
+  letter-spacing: 1.5px;
+}
+
+.completion-buttons-row {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   justify-content: center;
-  margin-top: 28px;
 }
 
 .text-center {
   text-align: center;
 }
 
-/* ── 13. RESPONSIVE ADAPTATION (MOBILE FIRST) ── */
-@media (max-width: 680px) {
-  .hud-cockpit-bar {
-    height: 52px;
-    padding: 0 12px;
+/* ── 9. RESPONSIVE ADAPTATION (MOBILE FIRST) ── */
+@media (max-width: 768px) {
+  .hero-main-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
   }
-  .hud-waypoints-nav {
-    display: none; /* Ocultar stepper en pantallas ultra angostas para dar espacio */
+  .stage-card-shell,
+  .completion-card-shell {
+    padding: 28px 18px;
+    border-radius: 18px;
   }
-  .cockpit-stage-wrapper {
-    margin-top: 52px;
-    min-height: calc(100vh - 52px);
-    padding: 16px 10px;
+  .form-row-dual {
+    flex-direction: column;
+    gap: 14px;
   }
-  .card-glass-shell {
-    padding: 26px 18px;
-    border-radius: 16px;
-  }
-  .card-display-title {
-    font-size: 24px;
-  }
-  .question-core-title {
-    font-size: 19px;
-  }
-  .radar-options-grid,
-  .amenities-toggle-grid {
+  .technical-choice-grid,
+  .amenities-selection-grid,
+  .bp-telemetry-grid {
     grid-template-columns: 1fr;
   }
-  .thrust-buttons-row {
+  .nps-tiles-row {
     grid-template-columns: repeat(6, 1fr);
   }
-  .thrust-btn {
-    height: 42px;
+  .nps-tile-button {
+    height: 44px;
     font-size: 14px;
   }
-  .bp-grid-telemetry {
-    grid-template-columns: 1fr;
-  }
-  .flight-manifest-mini {
+  .completion-buttons-row {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
   }
-  .manifest-arrow {
-    display: none;
-  }
-  .post-landing-actions {
-    flex-direction: column;
+  .mini-progress-track {
+    width: 90px;
   }
 }
