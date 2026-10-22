@@ -1,663 +1,385 @@
 /**
  * ═════════════════════════════════════════════════════════════════════════
- * SENAIR — Encuesta Interactiva Feria de Software
- * Lógica Mobile-First, Estado Persistente y Comunicación con Backend
+ * SENAIR — Controlador de Estado, Validación y Envío de la Encuesta
+ * Gestión de Respuestas, Interacción de Controles y Comunicación con API
  * ═════════════════════════════════════════════════════════════════════════
  */
 
 (() => {
   "use strict";
 
-  const STORAGE_TOKEN_KEY = "senair_survey_token";
-  const STORAGE_NAME_KEY = "senair_survey_name";
-
-  // Definición de las 8 Preguntas de la Feria
-  const QUESTIONS = [
-    {
-      id: "q1_frequency",
-      category: "Hábitos de Viaje",
-      title: "¿Con qué frecuencia sueles viajar en avión?",
-      desc: "Selecciona la opción que mejor represente tus viajes habituales.",
-      type: "single",
-      options: [
-        { val: "Varias veces al mes", label: "Varias veces al mes", sub: "Viajero frecuente de negocios o turismo constante" },
-        { val: "Cada 2 o 3 meses", label: "Cada 2 o 3 meses", sub: "Vuelo con regularidad a lo largo del año" },
-        { val: "1 o 2 veces al año", label: "1 o 2 veces al año", sub: "Temporadas de vacaciones y visitas familiares" },
-        { val: "Rara vez o primera vez", label: "Rara vez o primera vez", sub: "Vuelo únicamente cuando es indispensable" }
-      ]
+  // Estado reactivo de la encuesta
+  const surveyState = {
+    answers: {
+      q1_satisfaction: null,
+      q2_ease: null,
+      q3_punctuality: null,
+      q4_improvements: [],
+      q5_nps: null,
+      q6_feedback: ""
     },
-    {
-      id: "q2_destination",
-      category: "Destinos & Experiencias",
-      title: "¿Qué tipo de destino prefieres al momento de vacacionar?",
-      desc: "Elige el entorno que más te inspira a tomar un vuelo.",
-      type: "single",
-      options: [
-        { val: "Playas y Caribe", label: "Playas y descanso paradisíaco", sub: "Cartagena, Santa Marta, San Andrés, Cancún" },
-        { val: "Grandes Metrópolis", label: "Grandes metrópolis cosmopolitas", sub: "Bogotá, Medellín, New York, Madrid, Barcelona" },
-        { val: "Aventura y Naturaleza", label: "Naturaleza, ecoturismo y aventura", sub: "Leticia, Patagonia, Eje Cafetero, Cusco" },
-        { val: "Cultura y Gastronomía", label: "Rutas culturales, historia y buena comida", sub: "Quito, Lima, Villa de Leyva, Oaxaca" }
-      ]
-    },
-    {
-      id: "q3_factor",
-      category: "Decisión de Compra",
-      title: "¿Cuál es el factor más determinante para ti al elegir una aerolínea?",
-      desc: "Identifica qué aspecto priorizas por encima de los demás.",
-      type: "single",
-      options: [
-        { val: "Precios y Promociones", label: "Precios competitivos y tarifas claras", sub: "Transparencia sin cobros ocultos ni sorpresas" },
-        { val: "Puntualidad y Confianza", label: "Puntualidad e itinerarios confiables", sub: "Llegar a tiempo y que cumplan la programación" },
-        { val: "Comodidad y Asientos", label: "Comodidad a bordo y elección de sillas", sub: "Espacio en cabina, clases ejecutivas y servicio" },
-        { val: "Plataforma Web Ágil", label: "Facilidad de compra y sitio web rápido", sub: "Reservar sin fricción, pagos sencillos y check-in" }
-      ]
-    },
-    {
-      id: "q4_web_rating",
-      category: "Experiencia Digital SENAIR",
-      title: "¿Cómo calificarías el diseño, agilidad y usabilidad del sitio web de SENAIR?",
-      desc: "Toca las estrellas para calificar del 1 al 5 tu experiencia navegando en la plataforma.",
-      type: "rating",
-      labels: {
-        1: "1 Estrella • Necesita mejoras importantes",
-        2: "2 Estrellas • Regular, puede ser más intuitiva",
-        3: "3 Estrellas • Buena experiencia y diseño agradable",
-        4: "4 Estrellas • Muy ágil, moderna y atractiva",
-        5: "5 Estrellas • ¡Excelente e innovadora!"
-      }
-    },
-    {
-      id: "q5_innovation",
-      category: "Innovación en la Feria",
-      title: "¿Qué innovación tecnológica de SENAIR te ha llamado más la atención?",
-      desc: "Evalúa las funciones desarrolladas por nuestro equipo para esta feria de software.",
-      type: "single",
-      options: [
-        { val: "Mapa Interactivo de Asientos", label: "Mapa interactivo de asientos en cabina", sub: "Selección gráfica en tiempo real por clases" },
-        { val: "Asistente Virtual con IA", label: "Asistente virtual de vuelos con Inteligencia Artificial", sub: "Respuestas y asesoría contextual personalizada" },
-        { val: "Modo Oscuro con Video Dinámico", label: "Modo Claro / Oscuro dinámico con video adaptativo", sub: "Transición visual sincronizada en pantalla de carga" },
-        { val: "Facturación y Reservas en Tiempo Real", label: "Factura electrónica y gestión de viajes", sub: "Generación de comprobantes DIAN y persistencia completa" }
-      ]
-    },
-    {
-      id: "q6_cabin",
-      category: "Experiencia a Bordo",
-      title: "Si viajaras hoy con SENAIR, ¿qué clase de cabina elegirías para tu vuelo?",
-      desc: "Considerando tu equilibrio preferido entre confort y presupuesto.",
-      type: "single",
-      options: [
-        { val: "Primera Clase", label: "Primera Clase Exclusiva", sub: "Máximo espacio personal, privacidad y servicio premium" },
-        { val: "Clase Ejecutiva", label: "Clase Ejecutiva", sub: "Espacio ergonómico ideal para trabajar o descansar" },
-        { val: "Clase Normal", label: "Clase Normal", sub: "Excelente relación calidad-precio y eficiencia garantizada" }
-      ]
-    },
-    {
-      id: "q7_probability",
-      category: "Recomendación",
-      title: "¿Qué tan probable es que elijas o recomiendes SENAIR para tu próximo viaje?",
-      desc: "Tu recomendación es clave para nuestro crecimiento y validación del proyecto.",
-      type: "single",
-      options: [
-        { val: "Totalmente Seguro (10/10)", label: "¡Totalmente seguro! (10 de 10)", sub: "Será mi primera opción al momento de volar" },
-        { val: "Muy Probable (8/10)", label: "Muy probable (8 de 10)", sub: "La consideraré firmemente entre mis opciones" },
-        { val: "Probable (6/10)", label: "Probable (6 de 10)", sub: "Dependerá de las rutas y promociones vigentes" },
-        { val: "Poco Probable", label: "Poco probable", sub: "Prefiero esperar a ver más rutas operando" }
-      ]
-    },
-    {
-      id: "q8_feedback",
-      category: "Comentarios & Sugerencias",
-      title: "¿Tienes algún comentario, felicitación o sugerencia para el equipo de SENAIR?",
-      desc: "Escribe libremente cualquier sugerencia o aporte que desees dejarnos (Opcional).",
-      type: "text",
-      placeholder: "Escribe aquí tu opinión sobre la presentación, ideas para la plataforma o felicitaciones al equipo..."
-    }
-  ];
-
-  // Estado local
-  let surveyState = {
-    token: null,
-    participantName: "",
-    currentIndex: 0,
-    answers: {},
+    userEmail: "",
+    isSubmitting: false,
     isCompleted: false
   };
 
-  // Referencias DOM
-  const welcomeScreen = document.getElementById("welcomeScreen");
-  const registerScreen = document.getElementById("registerScreen");
-  const questionsScreen = document.getElementById("questionsScreen");
-  const resultScreen = document.getElementById("resultScreen");
-
-  const startSurveyBtn = document.getElementById("startSurveyBtn");
-  const backToWelcomeBtn = document.getElementById("backToWelcomeBtn");
-  const participantForm = document.getElementById("participantForm");
-  const formErrorBanner = document.getElementById("formErrorBanner");
-
-  const questionContainer = document.getElementById("questionContainer");
-  const progressStepText = document.getElementById("progressStepText");
-  const progressPctText = document.getElementById("progressPctText");
-  const progressFill = document.getElementById("progressFill");
-  const prevQuestionBtn = document.getElementById("prevQuestionBtn");
-  const nextQuestionBtn = document.getElementById("nextQuestionBtn");
-
-  // Modal Privacidad
-  const openPrivacyModal = document.getElementById("openPrivacyModal");
-  const closePrivacyModal = document.getElementById("closePrivacyModal");
-  const confirmPrivacyModalBtn = document.getElementById("confirmPrivacyModalBtn");
-  const privacyModalBackdrop = document.getElementById("privacyModalBackdrop");
-  const privacyCheckbox = document.getElementById("privacyConsent");
-
   // Inicialización
-  async function init() {
-    setupEventListeners();
-    await tryRestoreSession();
+  function init() {
+    bindInteractiveControls();
+    setupSubmissionFlow();
+
+    // Inicializar animaciones de GSAP si están disponibles
+    if (window.FlightAnimator) {
+      window.FlightAnimator.init();
+    }
   }
 
-  function setupEventListeners() {
-    startSurveyBtn?.addEventListener("click", () => {
-      showScreen("register");
+  // ── 1. Vinculación de Controles Interactivos ───────────────────────
+  function bindInteractiveControls() {
+    // Botón de despegue en el Hero
+    const takeoffBtn = document.getElementById("takeoffBtn");
+    takeoffBtn?.addEventListener("click", () => {
+      window.FlightAnimator?.scrollToStage(1);
     });
 
-    backToWelcomeBtn?.addEventListener("click", () => {
-      showScreen("welcome");
+    // Q1 & Q2: Estrellas de Calificación
+    setupStarRating("q1_satisfaction", "starsRowQ1", "starBadgeQ1", 2);
+    setupStarRating("q2_ease", "starsRowQ2", "starBadgeQ2", 3);
+
+    // Q3: Opción Única (Puntualidad)
+    const q3Cards = document.querySelectorAll('.choice-card-item[data-qid="q3_punctuality"]');
+    q3Cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        const val = card.getAttribute("data-val");
+        q3Cards.forEach((c) => c.classList.remove("selected"));
+        card.classList.add("selected");
+        surveyState.answers.q3_punctuality = val;
+
+        // Auto-avance suave hacia la siguiente etapa
+        setTimeout(() => {
+          window.FlightAnimator?.scrollToStage(4);
+        }, 360);
+      });
     });
 
-    participantForm?.addEventListener("submit", handleRegisterSubmit);
+    // Q4: Selección Múltiple (Mejoras)
+    const q4Cards = document.querySelectorAll('.multi-tag-card[data-qid="q4_improvements"]');
+    q4Cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        const val = card.getAttribute("data-val");
+        card.classList.toggle("selected");
 
-    prevQuestionBtn?.addEventListener("click", () => {
-      if (surveyState.currentIndex > 0) {
-        surveyState.currentIndex--;
-        renderCurrentQuestion();
-      }
+        const index = surveyState.answers.q4_improvements.indexOf(val);
+        if (index > -1) {
+          surveyState.answers.q4_improvements.splice(index, 1);
+        } else {
+          surveyState.answers.q4_improvements.push(val);
+        }
+      });
     });
 
-    nextQuestionBtn?.addEventListener("click", handleNextOrFinish);
+    // Q5: Escala NPS 0 a 10
+    const npsBtns = document.querySelectorAll(".nps-tile-btn");
+    npsBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const val = parseInt(btn.getAttribute("data-nps"), 10);
+        npsBtns.forEach((b) => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        surveyState.answers.q5_nps = val;
 
-    // Modal Privacidad
-    openPrivacyModal?.addEventListener("click", () => {
-      if (privacyModalBackdrop) {
-        privacyModalBackdrop.style.display = "flex";
-        privacyModalBackdrop.setAttribute("aria-hidden", "false");
-      }
+        // Auto-avance suave hacia el aterrizaje
+        setTimeout(() => {
+          window.FlightAnimator?.scrollToStage(6);
+        }, 400);
+      });
     });
 
-    const hidePrivacy = () => {
-      if (privacyModalBackdrop) {
-        privacyModalBackdrop.style.display = "none";
-        privacyModalBackdrop.setAttribute("aria-hidden", "true");
-      }
-    };
-
-    closePrivacyModal?.addEventListener("click", hidePrivacy);
-    confirmPrivacyModalBtn?.addEventListener("click", () => {
-      hidePrivacy();
-      if (privacyCheckbox) privacyCheckbox.checked = true;
+    // Q6: Textarea y Correo
+    const feedbackTextarea = document.getElementById("feedbackTextarea");
+    feedbackTextarea?.addEventListener("input", (e) => {
+      surveyState.answers.q6_feedback = e.target.value;
     });
 
-    privacyModalBackdrop?.addEventListener("click", (e) => {
-      if (e.target === privacyModalBackdrop) hidePrivacy();
+    const contactEmailInput = document.getElementById("contactEmailInput");
+    contactEmailInput?.addEventListener("input", (e) => {
+      surveyState.userEmail = e.target.value.trim();
     });
 
+    // Botón reiniciar encuesta para otro visitante
     const restartSurveyBtn = document.getElementById("restartSurveyBtn");
-    restartSurveyBtn?.addEventListener("click", () => {
-      sessionStorage.removeItem(STORAGE_TOKEN_KEY);
-      localStorage.removeItem(STORAGE_TOKEN_KEY);
-      sessionStorage.removeItem(STORAGE_NAME_KEY);
-      surveyState.token = null;
-      surveyState.participantName = "";
-      surveyState.currentIndex = 0;
-      surveyState.answers = {};
-      surveyState.isCompleted = false;
-      participantForm?.reset();
-      showScreen("welcome");
-    });
+    restartSurveyBtn?.addEventListener("click", resetSurveyExperience);
+  }
 
-    // Soporte para teclas de navegación en escritorio
-    document.addEventListener("keydown", (e) => {
-      if (questionsScreen.style.display === "block") {
-        if (e.key === "ArrowRight" && !e.target.matches("textarea, input")) {
-          nextQuestionBtn?.click();
-        } else if (e.key === "ArrowLeft" && !e.target.matches("textarea, input")) {
-          prevQuestionBtn?.click();
+  // Helper para Calificación de Estrellas
+  function setupStarRating(qid, rowId, badgeId, nextStageIndex) {
+    const row = document.getElementById(rowId);
+    const badge = document.getElementById(badgeId);
+    if (!row) return;
+
+    const qConfig = window.SURVEY_CONFIG?.QUESTIONS.find((q) => q.id === qid);
+    const buttons = row.querySelectorAll(".star-interactive-btn");
+
+    buttons.forEach((btn) => {
+      const val = parseInt(btn.getAttribute("data-star"), 10);
+
+      btn.addEventListener("mouseenter", () => {
+        buttons.forEach((b) => {
+          const bVal = parseInt(b.getAttribute("data-star"), 10);
+          b.classList.toggle("hover", bVal <= val);
+        });
+        if (badge && qConfig?.labels[val]) {
+          badge.textContent = qConfig.labels[val];
         }
-      }
+      });
+
+      btn.addEventListener("mouseleave", () => {
+        buttons.forEach((b) => b.classList.remove("hover"));
+        const current = surveyState.answers[qid];
+        if (badge) {
+          badge.textContent = current ? qConfig?.labels[current] : "Toca una estrella para calificar";
+        }
+      });
+
+      btn.addEventListener("click", () => {
+        surveyState.answers[qid] = val;
+        buttons.forEach((b) => {
+          const bVal = parseInt(b.getAttribute("data-star"), 10);
+          b.classList.toggle("active", bVal <= val);
+        });
+        if (badge && qConfig?.labels[val]) {
+          badge.textContent = qConfig.labels[val];
+        }
+
+        // Auto-avance suave
+        setTimeout(() => {
+          window.FlightAnimator?.scrollToStage(nextStageIndex);
+        }, 380);
+      });
     });
   }
 
-  function showScreen(screen) {
-    if (welcomeScreen) welcomeScreen.style.display = screen === "welcome" ? "block" : "none";
-    if (registerScreen) registerScreen.style.display = screen === "register" ? "block" : "none";
-    if (questionsScreen) questionsScreen.style.display = screen === "questions" ? "block" : "none";
-    if (resultScreen) resultScreen.style.display = screen === "result" ? "block" : "none";
+  // ── 2. Validación y Envío de la Encuesta ──────────────────────────
+  function setupSubmissionFlow() {
+    const submitBtn = document.getElementById("submitFlightSurveyBtn");
+    const toastBox = document.getElementById("validationToast");
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+    submitBtn?.addEventListener("click", async () => {
+      if (surveyState.isSubmitting) return;
 
-  async function tryRestoreSession() {
-    const savedToken = sessionStorage.getItem(STORAGE_TOKEN_KEY) || localStorage.getItem(STORAGE_TOKEN_KEY);
-    if (!savedToken) {
-      showScreen("welcome");
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/survey/state?token=${encodeURIComponent(savedToken)}`);
-      if (!res.ok) {
-        showScreen("welcome");
+      // Validación de preguntas obligatorias
+      const validation = validateRequiredAnswers();
+      if (!validation.valid) {
+        showValidationMessage(validation.message, toastBox);
+        window.FlightAnimator?.scrollToStage(validation.missingStageIndex);
+        highlightMissingCard(validation.missingStageIndex);
         return;
       }
-      const data = await res.json();
-      if (data.success && data.participant) {
-        surveyState.token = savedToken;
-        surveyState.participantName = data.participant.name;
-        surveyState.answers = data.answers || {};
 
-        if (data.participant.status === "completed") {
-          surveyState.isCompleted = true;
-          renderResults(data.participant);
-          showScreen("result");
-          return;
-        }
+      if (toastBox) toastBox.style.display = "none";
+      surveyState.isSubmitting = true;
 
-        // Buscar la primera pregunta sin responder
-        let firstUnanswered = QUESTIONS.findIndex((q) => !surveyState.answers[q.id]);
-        surveyState.currentIndex = firstUnanswered !== -1 ? firstUnanswered : 0;
-
-        showScreen("questions");
-        renderCurrentQuestion();
-      } else {
-        showScreen("welcome");
-      }
-    } catch (e) {
-      console.warn("No se pudo restaurar estado de encuesta previa:", e);
-      showScreen("welcome");
-    }
-  }
-
-  async function handleRegisterSubmit(e) {
-    e.preventDefault();
-    if (formErrorBanner) formErrorBanner.style.display = "none";
-
-    const nameInput = document.getElementById("pName");
-    const emailInput = document.getElementById("pEmail");
-    const ageSelect = document.getElementById("pAge");
-    const cityInput = document.getElementById("pCity");
-    const privacyCheck = document.getElementById("privacyConsent");
-
-    const name = nameInput?.value.trim() || "";
-    const email = emailInput?.value.trim() || "";
-    const age_range = ageSelect?.value || "";
-    const city = cityInput?.value.trim() || "";
-    const privacy_accepted = privacyCheck?.checked;
-
-    if (!name || name.length < 2) {
-      showError("Por favor ingresa tu nombre completo (mínimo 2 caracteres).");
-      nameInput?.focus();
-      return;
-    }
-
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showError("El formato del correo electrónico no es válido.");
-      emailInput?.focus();
-      return;
-    }
-
-    if (!privacy_accepted) {
-      showError("Debes aceptar el aviso de privacidad y tratamiento de datos personales conforme a la Ley 1581 de 2012 para participar.");
-      return;
-    }
-
-    const submitBtn = document.getElementById("submitRegisterBtn");
-    if (submitBtn) {
+      // Estado de carga en el botón
+      const originalText = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.textContent = "Registrando...";
-    }
+      submitBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="spin-icon">
+          <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-linecap="round"></circle>
+        </svg>
+        Aterrizando y registrando respuestas...
+      `;
 
-    try {
-      const res = await fetch("/api/survey/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, age_range, city, privacy_accepted: 1 })
-      });
-      const data = await res.json();
+      // Calcular Perfil de Viajero
+      const profile = calculateTravelerProfile(surveyState.answers);
 
-      if (!res.ok || !data.success) {
-        showError(data.message || "No se pudo registrar la participación. Intenta de nuevo.");
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Iniciar Preguntas";
+      // Payload JSON a enviar
+      const payload = {
+        name: "Viajero SENAIR",
+        email: surveyState.userEmail || null,
+        answers: surveyState.answers,
+        traveler_profile: profile.badge
+      };
+
+      try {
+        const endpoint = window.SURVEY_CONFIG?.SURVEY_ENDPOINT || "/api/survey/submit";
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok && !data.success) {
+          throw new Error(data.message || "Error al registrar");
         }
-        return;
-      }
-
-      surveyState.token = data.token;
-      surveyState.participantName = data.name;
-      surveyState.currentIndex = 0;
-      surveyState.answers = {};
-
-      sessionStorage.setItem(STORAGE_TOKEN_KEY, data.token);
-      localStorage.setItem(STORAGE_TOKEN_KEY, data.token);
-      sessionStorage.setItem(STORAGE_NAME_KEY, data.name);
-
-      showScreen("questions");
-      renderCurrentQuestion();
-    } catch (err) {
-      showError("Error de conexión al registrar. Verifica tu red e inténtalo de nuevo.");
-      if (submitBtn) {
+      } catch (err) {
+        console.warn("Conexión con servidor no disponible, guardando en persistencia local:", err);
+        // Fallback local seguro (Stub solicitado)
+        try {
+          const stored = JSON.parse(localStorage.getItem("senair_survey_offline") || "[]");
+          stored.push({ timestamp: new Date().toISOString(), payload });
+          localStorage.setItem("senair_survey_offline", JSON.stringify(stored));
+        } catch (_) {}
+      } finally {
+        surveyState.isSubmitting = false;
+        surveyState.isCompleted = true;
+        submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
-        submitBtn.textContent = "Iniciar Preguntas";
+
+        // Renderizar Boarding Pass Final
+        renderFinalBoardingPass(profile);
+
+        // Desplazar suavemente a la etapa de agradecimiento
+        window.FlightAnimator?.scrollToStage(7);
+
+        // Disparar confeti sutil de aterrizaje
+        triggerLandingConfetti();
       }
-    }
+    });
   }
 
-  function showError(msg) {
-    if (!formErrorBanner) return;
-    formErrorBanner.textContent = msg;
-    formErrorBanner.style.display = "block";
-    formErrorBanner.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  // Validación de respuestas requeridas
+  function validateRequiredAnswers() {
+    const a = surveyState.answers;
+
+    if (!a.q1_satisfaction) {
+      return { valid: false, message: "Por favor califica tu experiencia en la etapa de Despegue (Pregunta 1).", missingStageIndex: 1 };
+    }
+    if (!a.q2_ease) {
+      return { valid: false, message: "Por favor indica qué tan fácil fue comprar tu reserva en Ascenso (Pregunta 2).", missingStageIndex: 2 };
+    }
+    if (!a.q3_punctuality) {
+      return { valid: false, message: "Por favor califica la puntualidad de los vuelos en Crucero (Pregunta 3).", missingStageIndex: 3 };
+    }
+    if (!a.q4_improvements || a.q4_improvements.length === 0) {
+      return { valid: false, message: "Por favor selecciona al menos un aspecto a mejorar en Crucero (Pregunta 4).", missingStageIndex: 4 };
+    }
+    if (a.q5_nps === null || a.q5_nps === undefined) {
+      return { valid: false, message: "Por favor califica tu probabilidad de recomendación en Descenso (Pregunta 5).", missingStageIndex: 5 };
+    }
+
+    return { valid: true };
   }
 
-  function renderCurrentQuestion() {
-    const q = QUESTIONS[surveyState.currentIndex];
-    if (!q) return;
-
-    // Actualizar Progreso
-    const total = QUESTIONS.length;
-    const currentStep = surveyState.currentIndex + 1;
-    const pct = Math.round((currentStep / total) * 100);
-
-    if (progressStepText) progressStepText.textContent = `Pregunta ${currentStep} de ${total}`;
-    if (progressPctText) progressPctText.textContent = `${pct}%`;
-    if (progressFill) progressFill.style.width = `${pct}%`;
-
-    // Botones Nav
-    if (prevQuestionBtn) {
-      prevQuestionBtn.style.visibility = surveyState.currentIndex === 0 ? "hidden" : "visible";
-    }
-
-    if (nextQuestionBtn) {
-      if (surveyState.currentIndex === total - 1) {
-        nextQuestionBtn.innerHTML = `Finalizar Encuesta <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
-      } else {
-        nextQuestionBtn.innerHTML = `Siguiente <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
-      }
-    }
-
-    // Renderizado según tipo
-    const currentAnswer = surveyState.answers[q.id] || "";
-    let html = `
-      <span class="q-category-tag">${escapeHtml(q.category)}</span>
-      <h3 class="q-title">${escapeHtml(q.title)}</h3>
-      <p class="q-desc">${escapeHtml(q.desc)}</p>
-    `;
-
-    if (q.type === "single") {
-      html += `<div class="options-grid">`;
-      q.options.forEach((opt) => {
-        const isSelected = currentAnswer === opt.val;
-        html += `
-          <div class="option-card ${isSelected ? "selected" : ""}" data-val="${escapeHtml(opt.val)}">
-            <div class="option-indicator"></div>
-            <div class="option-text-wrap">
-              <span class="option-main-text">${escapeHtml(opt.label)}</span>
-              ${opt.sub ? `<span class="option-sub-text">${escapeHtml(opt.sub)}</span>` : ""}
-            </div>
-          </div>
-        `;
-      });
-      html += `</div>`;
-    } else if (q.type === "rating") {
-      const selectedRating = parseInt(currentAnswer, 10) || 0;
-      html += `
-        <div class="rating-stars-wrap">
-          <div class="stars-row" id="starsRow">
-            ${[1, 2, 3, 4, 5].map((star) => `
-              <button type="button" class="star-btn ${star <= selectedRating ? "active" : ""}" data-star="${star}" aria-label="${star} estrellas">★</button>
-            `).join("")}
-          </div>
-          <div class="star-label-badge" id="starLabelBadge">
-            ${selectedRating > 0 ? (q.labels[selectedRating] || "") : "Selecciona tu calificación"}
-          </div>
-        </div>
-      `;
-    } else if (q.type === "text") {
-      html += `
-        <div class="form-group" style="margin-top: 10px;">
-          <textarea id="feedbackTextarea" class="survey-textarea" rows="4" placeholder="${escapeHtml(q.placeholder)}" maxlength="500">${escapeHtml(currentAnswer)}</textarea>
-        </div>
-      `;
-    }
-
-    questionContainer.innerHTML = html;
-
-    // Vincular Eventos de selección
-    if (q.type === "single") {
-      const cards = questionContainer.querySelectorAll(".option-card");
-      cards.forEach((card) => {
-        card.addEventListener("click", () => {
-          const val = card.getAttribute("data-val");
-          cards.forEach((c) => c.classList.remove("selected"));
-          card.classList.add("selected");
-          saveAnswer(q.id, q.title, val);
-
-          // Auto-avance suave después de 300ms
-          setTimeout(() => {
-            if (surveyState.currentIndex < QUESTIONS.length - 1) {
-              surveyState.currentIndex++;
-              renderCurrentQuestion();
-            }
-          }, 320);
-        });
-      });
-    } else if (q.type === "rating") {
-      const starBtns = questionContainer.querySelectorAll(".star-btn");
-      const labelBadge = document.getElementById("starLabelBadge");
-
-      starBtns.forEach((btn) => {
-        const starVal = parseInt(btn.getAttribute("data-star"), 10);
-
-        btn.addEventListener("mouseenter", () => {
-          starBtns.forEach((b) => {
-            const bVal = parseInt(b.getAttribute("data-star"), 10);
-            b.classList.toggle("hover", bVal <= starVal);
-          });
-          if (labelBadge && q.labels[starVal]) {
-            labelBadge.textContent = q.labels[starVal];
-          }
-        });
-
-        btn.addEventListener("mouseleave", () => {
-          starBtns.forEach((b) => b.classList.remove("hover"));
-          const current = parseInt(surveyState.answers[q.id], 10) || 0;
-          if (labelBadge) {
-            labelBadge.textContent = current > 0 ? q.labels[current] : "Selecciona tu calificación";
-          }
-        });
-
-        btn.addEventListener("click", () => {
-          starBtns.forEach((b) => {
-            const bVal = parseInt(b.getAttribute("data-star"), 10);
-            b.classList.toggle("active", bVal <= starVal);
-          });
-          saveAnswer(q.id, q.title, String(starVal));
-          if (labelBadge && q.labels[starVal]) {
-            labelBadge.textContent = q.labels[starVal];
-          }
-
-          setTimeout(() => {
-            if (surveyState.currentIndex < QUESTIONS.length - 1) {
-              surveyState.currentIndex++;
-              renderCurrentQuestion();
-            }
-          }, 350);
-        });
-      });
-    } else if (q.type === "text") {
-      const tx = document.getElementById("feedbackTextarea");
-      tx?.addEventListener("input", () => {
-        surveyState.answers[q.id] = tx.value;
-      });
-    }
+  function showValidationMessage(msg, toastEl) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.style.display = "block";
+    toastEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
-  async function saveAnswer(question_id, question_text, answer) {
-    surveyState.answers[question_id] = answer;
-    if (!surveyState.token) return;
-
-    try {
-      await fetch("/api/survey/answer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token: surveyState.token,
-          question_id,
-          question_text,
-          answer
-        })
-      });
-    } catch (e) {
-      console.warn("No se pudo persistir respuesta en backend:", e);
-    }
+  function highlightMissingCard(stageIndex) {
+    const stage = document.getElementById(`stage-${stageIndex}`);
+    const card = stage?.querySelector(".stage-card");
+    if (!card) return;
+    card.style.borderColor = "#e87562";
+    card.style.boxShadow = "0 0 0 4px rgba(232, 117, 98, 0.25)";
+    setTimeout(() => {
+      card.style.borderColor = "";
+      card.style.boxShadow = "";
+    }, 2000);
   }
 
-  async function handleNextOrFinish() {
-    const q = QUESTIONS[surveyState.currentIndex];
-    if (q.type === "text") {
-      const tx = document.getElementById("feedbackTextarea");
-      const val = tx?.value.trim() || "";
-      await saveAnswer(q.id, q.title, val);
+  // ── 3. Lógica del Perfil de Viajero SENAIR ─────────────────────────
+  function calculateTravelerProfile(answers) {
+    const q1 = Number(answers.q1_satisfaction || 0);
+    const nps = Number(answers.q5_nps || 0);
+    const punctuality = answers.q3_punctuality;
+    const improvements = answers.q4_improvements || [];
+
+    if (q1 === 5 && nps >= 9) {
+      return {
+        badge: "Viajero Embajador SENAIR",
+        icon: "🌟",
+        desc: "Tu confianza e ilusión por volar con nosotros nos inspira a mantener la más alta excelencia en cada despegue."
+      };
     }
 
-    // Validar si la pregunta obligatoria fue respondida
-    if (q.type !== "text" && !surveyState.answers[q.id]) {
-      if (typeof window.senairAlert === "function") {
-        window.senairAlert({
-          type: "info",
-          title: "Pregunta pendiente",
-          message: "Por favor selecciona una respuesta para continuar."
-        });
-      } else {
-        alert("Por favor selecciona una respuesta para continuar.");
-      }
-      return;
+    if (punctuality === "Excelente" || q1 >= 4) {
+      return {
+        badge: "Viajero Confort & Puntualidad",
+        icon: "👑",
+        desc: "Valoras el cumplimiento riguroso de los tiempos, la comodidad a bordo y una atención de primer nivel."
+      };
     }
 
-    if (surveyState.currentIndex < QUESTIONS.length - 1) {
-      surveyState.currentIndex++;
-      renderCurrentQuestion();
-    } else {
-      await completeSurvey();
+    if (improvements.some((item) => item.includes("Check-in") || item.includes("app") || item.includes("Precios"))) {
+      return {
+        badge: "Viajero Visionario Digital",
+        icon: "🚀",
+        desc: "Aprovechas la innovación tecnológica, el mapa interactivo 3D y la rapidez de autogestión en línea."
+      };
     }
+
+    return {
+      badge: "Explorador Frecuente",
+      icon: "✈️",
+      desc: "Volar es para ti una oportunidad de conectar con nuevos horizontes, culturas y personas inolvidables."
+    };
   }
 
-  async function completeSurvey() {
-    if (nextQuestionBtn) {
-      nextQuestionBtn.disabled = true;
-      nextQuestionBtn.textContent = "Procesando resultados...";
-    }
+  // ── 4. Renderizado del Pase de Abordar Final ───────────────────────
+  function renderFinalBoardingPass(profile) {
+    const profileNameEl = document.getElementById("ticketProfileName");
+    const profileDescEl = document.getElementById("ticketProfileDesc");
+    const profileIconEl = document.getElementById("ticketProfileIcon");
+    const ticketDateEl = document.getElementById("ticketDate");
+    const ticketCodeEl = document.getElementById("ticketCode");
 
-    // Calcular Perfil de Viajero
-    const answers = surveyState.answers;
-    let profile = "Viajero Visionario Digital";
-    let icon = "🚀";
-    let desc = "Valoras la agilidad tecnológica, el diseño interactivo y la facilidad de reservar desde cualquier dispositivo.";
-
-    if (answers.q6_cabin === "Primera Clase" || answers.q1_frequency === "Varias veces al mes") {
-      profile = "Viajero Ejecutivo Premier";
-      icon = "👑";
-      desc = "Buscas excelencia a bordo, comodidad sin límites y una experiencia de alto nivel en cada trayecto.";
-    } else if (answers.q2_destination === "Playas y Caribe") {
-      profile = "Explorador de Playas & Paraísos";
-      icon = "🏖️";
-      desc = "Disfrutas el sol, el descanso en la costa y desconectar de la rutina en los mejores destinos del Caribe.";
-    } else if (answers.q2_destination === "Aventura y Naturaleza" || answers.q2_destination === "Cultura y Gastronomía") {
-      profile = "Nómada de Cultura & Aventura";
-      icon = "🧭";
-      desc = "Te apasiona descubrir paisajes naturales impresionantes, tradiciones locales y gastronomía inolvidable.";
-    }
-
-    try {
-      const res = await fetch("/api/survey/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token: surveyState.token,
-          traveler_profile: profile
-        })
-      });
-      const data = await res.json();
-      surveyState.isCompleted = true;
-
-      renderResults({
-        name: surveyState.participantName,
-        traveler_profile: profile,
-        profile_icon: icon,
-        profile_desc: desc
-      });
-
-      showScreen("result");
-    } catch (e) {
-      console.error("Error al completar encuesta:", e);
-      renderResults({
-        name: surveyState.participantName,
-        traveler_profile: profile,
-        profile_icon: icon,
-        profile_desc: desc
-      });
-      showScreen("result");
-    }
-  }
-
-  function renderResults(info) {
-    const pName = document.getElementById("bpPassengerName");
-    const pTitle = document.getElementById("bpProfileTitle");
-    const pDesc = document.getElementById("bpProfileDesc");
-    const pIcon = document.getElementById("bpProfileIcon");
-    const bpDate = document.getElementById("bpDate");
-    const bpCode = document.getElementById("bpCode");
-
-    if (pName) pName.textContent = info.name || surveyState.participantName || "Visitante SENAIR";
-    if (pTitle) pTitle.textContent = info.traveler_profile || "Viajero Visionario Digital";
-
-    if (pIcon) {
-      if (info.traveler_profile?.includes("Ejecutivo")) pIcon.textContent = "👑";
-      else if (info.traveler_profile?.includes("Playas")) pIcon.textContent = "🏖️";
-      else if (info.traveler_profile?.includes("Cultura") || info.traveler_profile?.includes("Aventura")) pIcon.textContent = "🧭";
-      else pIcon.textContent = "🚀";
-    }
-
-    if (pDesc) {
-      if (info.traveler_profile?.includes("Ejecutivo")) {
-        pDesc.textContent = "Buscas excelencia a bordo, comodidad sin límites y una experiencia de alto nivel en cada trayecto.";
-      } else if (info.traveler_profile?.includes("Playas")) {
-        pDesc.textContent = "Disfrutas el sol, el descanso en la costa y desconectar de la rutina en los mejores destinos del Caribe.";
-      } else if (info.traveler_profile?.includes("Cultura") || info.traveler_profile?.includes("Aventura")) {
-        pDesc.textContent = "Te apasiona descubrir paisajes naturales impresionantes, tradiciones locales y gastronomía inolvidable.";
-      } else {
-        pDesc.textContent = "Valoras la agilidad tecnológica, el diseño interactivo y la facilidad de reservar desde cualquier dispositivo.";
-      }
-    }
+    if (profileNameEl) profileNameEl.textContent = profile.badge;
+    if (profileDescEl) profileDescEl.textContent = profile.desc;
+    if (profileIconEl) profileIconEl.textContent = profile.icon;
 
     const now = new Date();
     const months = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
-    const formattedDate = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-    if (bpDate) bpDate.textContent = formattedDate;
+    if (ticketDateEl) {
+      ticketDateEl.textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    }
 
-    if (bpCode) {
-      const codeNum = Math.floor(1000 + Math.random() * 9000);
-      bpCode.textContent = `SEN-${codeNum}-OK`;
+    if (ticketCodeEl) {
+      const randomCode = Math.floor(1000 + Math.random() * 9000);
+      ticketCodeEl.textContent = `SEN-VUELO-${randomCode}`;
     }
   }
 
-  function escapeHtml(str) {
-    if (!str) return "";
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+  // Confeti sutil con canvas-confetti
+  function triggerLandingConfetti() {
+    if (typeof confetti === "function") {
+      try {
+        confetti({
+          particleCount: 70,
+          spread: 60,
+          origin: { y: 0.65 },
+          colors: ["#0866c6", "#38bdf8", "#fbbf24", "#10b981", "#ffffff"]
+        });
+      } catch (_) {}
+    }
+  }
+
+  // Reiniciar experiencia en limpio
+  function resetSurveyExperience() {
+    surveyState.answers = {
+      q1_satisfaction: null,
+      q2_ease: null,
+      q3_punctuality: null,
+      q4_improvements: [],
+      q5_nps: null,
+      q6_feedback: ""
+    };
+    surveyState.userEmail = "";
+    surveyState.isCompleted = false;
+
+    // Resetear clases visuales
+    document.querySelectorAll(".star-interactive-btn").forEach((b) => b.classList.remove("active", "hover"));
+    document.querySelectorAll(".choice-card-item").forEach((b) => b.classList.remove("selected"));
+    document.querySelectorAll(".multi-tag-card").forEach((b) => b.classList.remove("selected"));
+    document.querySelectorAll(".nps-tile-btn").forEach((b) => b.classList.remove("selected"));
+
+    const fb = document.getElementById("feedbackTextarea");
+    if (fb) fb.value = "";
+    const em = document.getElementById("contactEmailInput");
+    if (em) em.value = "";
+
+    window.FlightAnimator?.scrollToStage(0);
   }
 
   if (document.readyState === "loading") {
@@ -666,4 +388,3 @@
     init();
   }
 })();
-

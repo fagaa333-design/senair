@@ -1050,6 +1050,43 @@ app.post("/api/survey/complete", async (request, response) => {
   }
 });
 
+app.post("/api/survey/submit", async (request, response) => {
+  const { name, email, answers, traveler_profile } = request.body || {};
+  const cleanName = typeof name === "string" && name.trim().length > 0 ? name.trim() : "Viajero SENAIR";
+  const cleanEmail = typeof email === "string" && email.trim().length > 0 ? email.trim().toLowerCase() : null;
+  const sessionToken = crypto.randomBytes(24).toString("hex");
+
+  try {
+    const pResult = await db.execute({
+      sql: `INSERT INTO survey_participants (session_token, name, email, status, traveler_profile, privacy_accepted, privacy_version)
+            VALUES (?, ?, ?, 'completed', ?, 1, 'v1.0')`,
+      args: [sessionToken, cleanName, cleanEmail, traveler_profile || "Viajero SENAIR"],
+    });
+    const participantId = Number(pResult.lastInsertRowid);
+
+    if (answers && typeof answers === "object") {
+      for (const [qid, ans] of Object.entries(answers)) {
+        const answerText = Array.isArray(ans) ? ans.join(", ") : String(ans);
+        await db.execute({
+          sql: `INSERT OR REPLACE INTO survey_responses (participant_id, question_id, question_text, answer)
+                VALUES (?, ?, ?, ?)`,
+          args: [participantId, qid, qid, answerText],
+        });
+      }
+    }
+
+    response.json({
+      success: true,
+      message: "Encuesta guardada con éxito",
+      token: sessionToken,
+      participantId,
+    });
+  } catch (error) {
+    console.error("Error en submit encuesta:", error);
+    response.status(500).json({ success: false, message: "Error al guardar encuesta." });
+  }
+});
+
 app.get("/api/survey/qr", async (request, response) => {
   try {
     let targetUrl = request.query.url;
